@@ -2,4 +2,4 @@
 
 ## HOW TO RUN
 
-`flask -app flaskr --debug run`
+`flask --app flaskr --debug run`
