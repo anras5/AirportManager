@@ -1,2 +1,4 @@
 .idea/
 venv
+instantclient_21_7/
+.env
