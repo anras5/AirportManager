@@ -5,7 +5,7 @@ import os
 
 def get_db():
     if 'db' not in g:
-        cx_Oracle.init_oracle_client(lib_dir=r"N:\AirportManager\instantclient_21_7")
+        cx_Oracle.init_oracle_client(lib_dir=os.environ.get('PATH_TO_INSTANTCLIENT'))
         g.db = cx_Oracle.connect(user=os.environ.get('ORACLE_USER'),
                                  password=os.environ.get('ORACLE_PASSWD'),
                                  dsn='oracleclouddb_high')
