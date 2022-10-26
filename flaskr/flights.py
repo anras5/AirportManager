@@ -13,6 +13,6 @@ def world_map():
 def sql_check():
     db = get_db()
     cr = db.cursor()
-    cr.execute("SELECT * FROM CUSTOMERS")
+    cr.execute("SELECT * FROM PRODUCENT")
     x = cr.fetchall()
     return f"{x}"
