@@ -1,6 +1,9 @@
 import os
 from flask import Flask
 from dotenv import load_dotenv
+from flask_bootstrap import Bootstrap
+
+bootstrap = Bootstrap()
 
 
 def create_app(test_config=None):
@@ -17,8 +20,14 @@ def create_app(test_config=None):
     else:
         app.config.from_mapping(test_config)
 
-    from . import flights
+    bootstrap.init_app(app)  # initialize bootstrap
 
-    app.register_blueprint(flights.bp)
+    from . import flights  # import blueprint
+    app.register_blueprint(flights.bp)  # register blueprint
+
+    from flaskr.auth import authentication  # import blueprint
+    app.register_blueprint(authentication)  # register blueprint
+
+
 
     return app

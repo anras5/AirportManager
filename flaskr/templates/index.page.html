@@ -1,12 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-    <!-- Load plotly.js into the DOM -->
-    <script src='https://cdn.plot.ly/plotly-2.14.0.min.js'></script>
-</head>
-<body>
+{% extends 'layout.html' %}
+
+{% block content %}
+
 <div id="myDiv"></div>
 <script>
     var data = [{
@@ -50,5 +45,4 @@
     Plotly.newPlot('myDiv', data, layout);
 
 </script>
-</body>
-</html>
+{% endblock content %}
