@@ -17,8 +17,10 @@ def create_app(test_config=None):
     else:
         app.config.from_mapping(test_config)
 
-    from . import flights
+    from . import authentication
+    app.register_blueprint(authentication.at_bp)
 
-    app.register_blueprint(flights.bp)
+    from . import flights
+    app.register_blueprint(flights.flights_bp)
 
     return app
