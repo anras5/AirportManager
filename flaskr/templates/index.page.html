@@ -1,54 +1,56 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+{% extends "base.layout.html" %}
+{% block head %}
     <!-- Load plotly.js into the DOM -->
     <script src='https://cdn.plot.ly/plotly-2.14.0.min.js'></script>
-</head>
-<body>
-<div id="myDiv"></div>
-<script>
-    var data = [{
-        type: 'scattergeo',
-        lat: [52.4, -37.81],
-        lon: [16.93, 144.97],
-        mode: 'lines',
-        line: {
-            width: 3,
-            color: 'green'
-        }
-    }];
+{% endblock head %}
 
-    var layout = {
-        title: 'Poznań to Melbourne',
-        showlegend: false,
-        width: 1900,
-        height: 800,
-        geo: {
-            // resolution: 5,
-            projection: {
-                type: 'orthographic'
-            },
-            showcountries: true
-            // scope: "europe"
-            // lataxis: {
-            //     range: [20, 60],
-            //     showgrid: true,
-            //     tickmode: 'linear',
-            //     dtick: 10
-            // },
-            // lonaxis: {
-            //     range: [-100, 20],
-            //     showgrid: true,
-            //     tickmode: 'linear',
-            //     dtick: 20
-            // }
-        }
-    };
+{% block content %}
+    <div id="myDiv"></div>
+{% endblock content %}
 
-    Plotly.newPlot('myDiv', data, layout);
+{% block js %}
 
-</script>
-</body>
-</html>
+    <script>
+        var data = [{
+            type: 'scattergeo',
+            lat: [52.4, -37.81],
+            lon: [16.93, 144.97],
+            mode: 'lines',
+            line: {
+                width: 3,
+                color: 'green'
+            }
+        }];
+
+        var layout = {
+            title: 'Poznań to Melbourne',
+            showlegend: false,
+            width: 1900,
+            height: 800,
+            geo: {
+
+                // resolution: 5,
+                projection: {
+                    type: 'orthographic'
+                },
+                showcountries: true
+                // scope: "europe"
+                // lataxis: {
+                //     range: [20, 60],
+                //     showgrid: true,
+                //     tickmode: 'linear',
+                //     dtick: 10
+                // },
+                // lonaxis: {
+                //     range: [-100, 20],
+                //     showgrid: true,
+                //     tickmode: 'linear',
+                //     dtick: 20
+                // }
+            }
+        };
+
+        Plotly.newPlot('myDiv', data, layout);
+
+    </script>
+{% endblock js %}
