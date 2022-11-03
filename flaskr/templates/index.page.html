@@ -8,31 +8,39 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-lg-6">
-                    <div class="main-button">
-                        <i class="icon fa-sharp fa-solid fa-plane-departure fa-4x"></i>
-                        <h3>Flights</h3>
-                    </div>
+
+                    <a href="{{ url_for('flights.world_map') }}" class="main-button-click">
+                        <div class="main-button">
+                            <i class="icon fa-sharp fa-solid fa-plane-departure fa-4x"></i>
+                            <h3>Flights</h3>
+                        </div>
+                    </a>
                 </div>
                 <div class="col-lg-6">
-                    <div class="main-button">
-                        <i class="icon fas fa-solid fa-earth-americas fa-4x"></i>
-                        <h3>Map</h3>
-                    </div>
+                    <a href="{{ url_for('flights.world_map') }}" class="main-button-click">
+                        <div class="main-button">
+                            <i class="icon fas fa-solid fa-earth-americas fa-4x"></i>
+                            <h3>Map</h3>
+                        </div>
+                    </a>
                 </div>
             </div>
             <div class="row">
                 <div class="col-lg-6">
-                    <div class="main-button">
-                        <i class="icon fa-solid fa-person fa-4x"></i>
-                        <h3>Personnel</h3>
-                    </div>
+                    <a href="{{ url_for('home') }}" class="main-button-click">
+                        <div class="main-button">
+                            <i class="icon fa-solid fa-person fa-4x"></i>
+                            <h3>Personnel</h3>
+                        </div>
+                    </a>
                 </div>
                 <div class="col-lg-6">
-                    <div class="main-button">
-                        <i class="icon fa-sharp fa-solid fa-plane fa-4x"></i>
-                        <h3>Airplanes</h3>
-                    </div>
-
+                    <a href="{{ url_for('home') }}" class="main-button-click">
+                        <div class="main-button">
+                            <i class="icon fa-sharp fa-solid fa-plane fa-4x"></i>
+                            <h3>Airplanes</h3>
+                        </div>
+                    </a>
                 </div>
 
             </div>
