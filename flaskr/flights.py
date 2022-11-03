@@ -6,7 +6,7 @@ flights_bp = Blueprint('flights', __name__, url_prefix='/flights')
 
 @flights_bp.route('/')
 def world_map():
-    return render_template('index.page.html')
+    return render_template('flights-worldmap.page.html')
 
 
 @flights_bp.route('/sql-check')
