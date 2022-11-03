@@ -26,3 +26,7 @@ h1, h2, h3, h4, h5, h6 {
     text-decoration: none;
     color: #000000;
 }
+
+.main-button-click:hover{
+    color: #000000;
+}
