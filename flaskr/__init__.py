@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask, render_template
 from dotenv import load_dotenv
 
 
@@ -22,5 +22,9 @@ def create_app(test_config=None):
 
     from . import flights
     app.register_blueprint(flights.flights_bp)
+
+    @app.route('/')
+    def home():
+        return render_template('index.page.html')
 
     return app

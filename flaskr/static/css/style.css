@@ -1,0 +1,23 @@
+body {
+    text-align: center;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Montserrat', sans-serif;
+}
+
+#main-buttons {
+    padding: 5% 10%;
+    position: relative;
+}
+
+.main-button {
+    border: thin darkgray groove;
+    border-radius: 10px;
+    padding: 5% 5%;
+    margin: 2%;
+}
+
+.icon{
+    padding: 2%;
+}

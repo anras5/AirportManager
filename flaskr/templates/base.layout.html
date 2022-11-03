@@ -5,10 +5,24 @@
 <head>
     <title> AirportManager </title>
     <meta charset="UTF-8">
+
+    {#Google Fonts#}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+            href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+            rel="stylesheet">
+
+
+    {#Bootstrap#}
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    {#Font Awesome#}
+    <script src="https://kit.fontawesome.com/bd9dc0e408.js" crossorigin="anonymous"></script>
+
     {% block head %}
     {% endblock head %}
 </head>
@@ -69,7 +83,7 @@
         <footer>
             <div class="container ftr">
                 <hr>
-                <p class="text-center small"> Very cool footer &copy; | 2022 </p>
+                <p class="text-center small"> AirportManager &copy; | 2022 </p>
             </div>
         </footer>
     {% endblock footer %}
