@@ -1,0 +1,53 @@
+{% extends "base.layout.html" %}
+
+{% block head %}
+    {#datatables css#}
+    {#    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.12.1/datatables.min.css"/>#}
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.12.1/datatables.min.css"/>
+    <script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
+
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid">
+    <div class="row">
+        <div class="col table-header">
+            <h3>Airports Table</h3>
+        </div>
+    </div>
+    </div>
+    <hr>
+    <div class="container-fluid table-padding">
+    <table id="example" class="display" style="width:100%">
+
+        <thead>
+        <tr>
+            {% for header in airports_headers %}
+                <th>{{ header }}</th>
+            {% endfor %}
+        </tr>
+        </thead>
+        <tbody>
+        {% for airport in airports_data %}
+            <tr>
+                {% for value in airport %}
+                    <td>{{ value }}</td>
+                {% endfor %}
+            </tr>
+
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+
+{% endblock %}
+
+{% block js %}
+    {#datatables js#}
+    <script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.12.1/datatables.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#example').DataTable();
+        });
+    </script>
+{% endblock %}

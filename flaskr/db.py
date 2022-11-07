@@ -4,11 +4,13 @@ import os
 
 
 def get_db():
-    if 'db' not in g:
+    try:
         cx_Oracle.init_oracle_client(lib_dir=os.environ.get('PATH_TO_INSTANTCLIENT'))
-        g.db = cx_Oracle.connect(user=os.environ.get('ORACLE_USER'),
-                                 password=os.environ.get('ORACLE_PASSWD'),
-                                 dsn='oracleclouddb_high')
+    except:
+        print("Error cx_Oracle")
+    g.db = cx_Oracle.connect(user=os.environ.get('ORACLE_USER'),
+                             password=os.environ.get('ORACLE_PASSWD'),
+                             dsn='oracleclouddb_high')
 
     return g.db
 
