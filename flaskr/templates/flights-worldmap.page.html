@@ -5,7 +5,9 @@
 {% endblock head %}
 
 {% block content %}
-    <div id="myDiv"></div>
+    <div class="container-fluid map-container">
+        <div id="map"></div>
+    </div>
 {% endblock content %}
 
 {% block js %}
@@ -25,8 +27,9 @@
         var layout = {
             title: 'Poznań to Melbourne',
             showlegend: false,
-            width: 1900,
-            height: 800,
+            {#width: 1900,#}
+            {#height: 800,#}
+            autosize: true,
             geo: {
 
                 // resolution: 5,
@@ -50,7 +53,9 @@
             }
         };
 
-        Plotly.newPlot('myDiv', data, layout);
+        var config = {responsive: true}
+
+        Plotly.newPlot('map', data, layout, config);
 
     </script>
 {% endblock js %}

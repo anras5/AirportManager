@@ -11,6 +11,11 @@ h1, h2, h3, h4, h5, h6 {
     position: relative;
 }
 
+#map {
+    width: 100%;
+    height: 100%;
+}
+
 .main-button {
     border: thin darkgray groove;
     border-radius: 10px;
@@ -30,3 +35,9 @@ h1, h2, h3, h4, h5, h6 {
 .main-button-click:hover{
     color: #000000;
 }
+
+.map-container{
+    height: 80vh;
+}
+
+
