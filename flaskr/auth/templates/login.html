@@ -1,28 +1,23 @@
-{% extends 'base.layout.html' %}
+{% extends 'layout.html' %}
 
 {% block content %}
 
-    <p class="text-center">Registration Panel</p>
+    <p class="text-center">Login Panel</p>
 
     <div class="container form">
         <hr>
         <br>
-        <form action="/register" method="post">
+        <form action="/login" method="post">
             {{ form.hidden_tag() }}
 
             <div class="form-group">
                 {{ form.login.label }}
                 {{ form.login }}
             </div>
-            <br>
+
             <div class="form-group">
                 {{ form.password.label }}
                 {{ form.password }}
-            </div>
-            <br>
-            <div class="form-group">
-                {{ form.confirm.label }}
-                {{ form.confirm }}
             </div>
             <br>
 
@@ -30,6 +25,8 @@
                 {{ form.submit(class='btn btn-primary') }}
             </div>
 
+
+
         </form>
     </div>
-{% endblock content %}
+{% endblock %}
