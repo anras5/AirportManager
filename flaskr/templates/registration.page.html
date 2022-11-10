@@ -1,35 +1,15 @@
 {% extends 'base.layout.html' %}
 
+{% import "bootstrap/wtf.html" as wtf %}
+
 {% block content %}
 
     <p class="text-center">Registration Panel</p>
 
     <div class="container form">
-        <hr>
-        <br>
-        <form action="/register" method="post">
-            {{ form.hidden_tag() }}
+        <hr><br>
+        {{ form.hidden_tag() }}
+        {{ wtf.quick_form(form) }}
 
-            <div class="form-group">
-                {{ form.login.label }}
-                {{ form.login }}
-            </div>
-            <br>
-            <div class="form-group">
-                {{ form.password.label }}
-                {{ form.password }}
-            </div>
-            <br>
-            <div class="form-group">
-                {{ form.confirm.label }}
-                {{ form.confirm }}
-            </div>
-            <br>
-
-            <div class="form-group">
-                {{ form.submit(class='btn btn-primary') }}
-            </div>
-
-        </form>
     </div>
 {% endblock content %}

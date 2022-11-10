@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -25,6 +26,8 @@
 
     {% block head %}
     {% endblock head %}
+
+
 </head>
 
 
@@ -75,18 +78,25 @@
         </nav>
     {% endblock navbar %}
 
+    {# flash messaging #}
+    {% for message in get_flashed_messages() %}
+        <div class="container alert alert-info">
+            {{ message }}
+        </div>
+    {% endfor %}
+
     {# empty block for custom content #}
     {% block content %} {% endblock content %}
 
     {# footer #}
-    {% block footer %}
-        <footer>
-            <div class="container ftr">
-                <hr>
-                <p class="text-center small"> AirportManager &copy; | 2022 </p>
-            </div>
-        </footer>
-    {% endblock footer %}
+    <div class="page-container">
+  <div class="content-wrap">
+    <!-- all of your cool html goes here -->
+  </div>
+  <footer>
+    AirportManager &copy; | 2022
+  </footer>
+</div>
 
 </div>
 
