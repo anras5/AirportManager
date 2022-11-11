@@ -2,12 +2,8 @@ import os
 from flask import Flask, render_template
 from dotenv import load_dotenv
 from flask_bootstrap import Bootstrap
-from flask_login import LoginManager
 
 bootstrap = Bootstrap()
-login_manager = LoginManager()
-login_manager.login_view = 'authentication.do_login_user'
-isLoggedIn = False
 
 def create_app(test_config=None):
     """Create and configure an instance of the Flask application."""
@@ -16,8 +12,6 @@ def create_app(test_config=None):
         SECRET_KEY='dev',
     )
     bootstrap.init_app(app)
-    login_manager.init_app(app)
-
 
     load_dotenv('./../.env')
 

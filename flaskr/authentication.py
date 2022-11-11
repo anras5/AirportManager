@@ -1,10 +1,8 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 from flaskr.db import get_db
 from flaskr.forms import RegistrationForm, LoginForm
-from flaskr import login_manager
 
 at_bp = Blueprint('authentication', __name__)
-
 
 isLoggedIn = False
 
@@ -47,7 +45,6 @@ def do_login_user():
             flash('Invalid Credentials, Please try again')
             return redirect(url_for('authentication.do_login_user'))
         if tmp:
-            #login_user(form.login.data, form.stay_loggedin)
             # TODO
             isLoggedIn = True
             print(isLoggedIn)
@@ -55,12 +52,3 @@ def do_login_user():
 
     return render_template('login.page.html', form=form)
 
-
-@login_manager.user_loader
-def load_user(id):
-    db = get_db()
-    cr = db.cursor()
-    cr.execute("SELECT USER_ID FROM USERS WHERE Login = :login", [id])
-    x = cr.fetchall()
-    print(x[0])
-    return int(x[0])
