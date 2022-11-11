@@ -1,10 +1,9 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for
+from flask import Blueprint, render_template, request, flash, redirect, url_for, session
 from flaskr.db import get_db
 from flaskr.forms import RegistrationForm, LoginForm
 
 at_bp = Blueprint('authentication', __name__)
 
-isLoggedIn = False
 
 @at_bp.route('/register', methods=['GET', 'POST'])
 def register_user():
@@ -31,6 +30,7 @@ def do_login_user():
     form = LoginForm()
 
     if form.validate_on_submit():
+        admin = False
         tmp = False
         db = get_db()
         cr = db.cursor()
@@ -39,15 +39,17 @@ def do_login_user():
         for user in x:
             if user[0] == form.login.data and user[1] == form.password.data:
                 tmp = True
+                if user[0] == 'admin':
+                    admin = True
                 break
 
         if not tmp:
             flash('Invalid Credentials, Please try again')
             return redirect(url_for('authentication.do_login_user'))
         if tmp:
-            # TODO
-            isLoggedIn = True
-            print(isLoggedIn)
+            if admin:
+                session["admin"] = True
+            session["user"] = True
             return redirect(url_for('flights.airports'))
 
     return render_template('login.page.html', form=form)

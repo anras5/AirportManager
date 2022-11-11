@@ -1,6 +1,4 @@
-from flask import Blueprint, render_template
-from flaskr.authentication import isLoggedIn
-
+from flask import Blueprint, render_template, session
 from flaskr.db import get_db
 
 flights_bp = Blueprint('flights', __name__, url_prefix='/flights')
@@ -29,5 +27,9 @@ def airports():
     data = airports_cursor.fetchall()
     print(headers)
     print(data)
-    print(isLoggedIn)
+    if "user" in session:
+        print(session["user"])
+    if "admin" in session:
+        print(session["admin"])
+
     return render_template('flights-airports.page.html', airports_data=data, airports_headers=headers)
