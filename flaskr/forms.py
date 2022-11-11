@@ -1,7 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 from wtforms.validators import  DataRequired, EqualTo, ValidationError
-from wtforms import validators
 from flaskr.db import get_db
 
 
