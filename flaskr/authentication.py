@@ -1,17 +1,12 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for
-from flask_login import UserMixin, login_user, logout_user
 from flaskr.db import get_db
 from flaskr.forms import RegistrationForm, LoginForm
 from flaskr import login_manager
-from . import db
 
 at_bp = Blueprint('authentication', __name__)
 
 
-class User(UserMixin):
-    pass
-
-
+isLoggedIn = False
 
 @at_bp.route('/register', methods=['GET', 'POST'])
 def register_user():
@@ -38,34 +33,31 @@ def do_login_user():
     form = LoginForm()
 
     if form.validate_on_submit():
-        user = User.query.filter_by(LOGIN=form.login.data).first()
-        if not user:
+        tmp = False
+        db = get_db()
+        cr = db.cursor()
+        cr.execute("SELECT LOGIN, PASSWORD FROM USERS")
+        x = cr.fetchall()
+        for user in x:
+            if user[0] == form.login.data and user[1] == form.password.data:
+                tmp = True
+                break
+
+        if not tmp:
             flash('Invalid Credentials, Please try again')
             return redirect(url_for('authentication.do_login_user'))
-        login_user(user, form.stay_loggedin)
-        return redirect(url_for('flights.airports'))
-        # tmp = False
-        # db = get_db()
-        # cr = db.cursor()
-        # cr.execute("SELECT LOGIN, PASSWORD FROM USERS")
-        # x = cr.fetchall()
-        # for user in x:
-        #     if user[0] == form.login.data and user[1] == form.password.data:
-        #         tmp = True
-        #         break
-        #
-        # if not tmp:
-        #     flash('Invalid Credentials, Please try again')
-        #     return redirect(url_for('authentication.do_login_user'))
-        # if tmp:
-        #     login_user(form.login.data, form.stay_loggedin)
-        #     return redirect(url_for('flights.airports'))
+        if tmp:
+            #login_user(form.login.data, form.stay_loggedin)
+            # TODO
+            isLoggedIn = True
+            print(isLoggedIn)
+            return redirect(url_for('flights.airports'))
 
     return render_template('login.page.html', form=form)
 
 
 @login_manager.user_loader
-def load_user(login):
+def load_user(id):
     db = get_db()
     cr = db.cursor()
     cr.execute("SELECT USER_ID FROM USERS WHERE Login = :login", [id])

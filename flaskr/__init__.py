@@ -7,6 +7,7 @@ from flask_login import LoginManager
 bootstrap = Bootstrap()
 login_manager = LoginManager()
 login_manager.login_view = 'authentication.do_login_user'
+isLoggedIn = False
 
 def create_app(test_config=None):
     """Create and configure an instance of the Flask application."""
