@@ -1,6 +1,16 @@
 {% extends 'base.layout.html' %}
 
+{% import "bootstrap/wtf.html" as wtf %}
+
 {% block content %}
 
+    <p class="text-center">Login Panel</p>
+
+    <div class="container form">
+        <hr><br>
+        {{ form.hidden_tag() }}
+        {{ wtf.quick_form(form) }}
+
+    </div>
 
 {% endblock content %}

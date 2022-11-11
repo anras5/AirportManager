@@ -1,9 +1,9 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField
+from wtforms import StringField, SubmitField, BooleanField
 from wtforms.validators import  DataRequired, EqualTo, ValidationError
 from flaskr.db import get_db
 
-
+# Custom validator
 def user_exists(form, field):
     db = get_db()
     cr = db.cursor()
@@ -21,3 +21,10 @@ class RegistrationForm(FlaskForm):
     password = StringField("Enter your password", validators=[DataRequired(message='Password can not be empty')])
     confirm = StringField("Confirm your password", validators=[DataRequired(message='Please confirm password'), EqualTo('password', message='Passwords must match')])
     submit = SubmitField("Register")
+
+
+class LoginForm(FlaskForm):
+    login = StringField("Enter your login", validators=[DataRequired()])
+    password = StringField("Enter your password", validators=[DataRequired()])
+    stay_loggedin = BooleanField('stay logged-in')
+    submit = SubmitField('LogIn')
