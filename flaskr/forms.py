@@ -1,25 +1,32 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, BooleanField
-from wtforms.validators import  DataRequired, EqualTo, ValidationError
+from wtforms import StringField, SubmitField, BooleanField, DateField
+from wtforms.validators import  DataRequired, EqualTo, ValidationError, Length
 from flaskr.db import get_db
 
-# Custom validator
+# Custom validators
 def user_exists(form, field):
     db = get_db()
     cr = db.cursor()
-    cr.execute("SELECT LOGIN FROM USERS")
+    cr.execute("SELECT LOGIN FROM Pasażer")
     x = cr.fetchall()
     for user in x:
-        print("Field data: ", field.data)
-        print('user: ', user[0])
         if user[0] == field.data:
             raise ValidationError("User Already Exists")
 
+def pesel_incorrect(form, field):
+    for c in field.data:
+        if c not in ['0','1','2','3','4','5','6','7','8','9']:
+            raise ValidationError("Wrong pesel")
+
 
 class RegistrationForm(FlaskForm):
-    login = StringField("Enter your login", validators=[DataRequired(message='Login can not be empty'), user_exists])
-    password = StringField("Enter your password", validators=[DataRequired(message='Password can not be empty')])
+    login = StringField("Enter your login", validators=[DataRequired(message='Login can not be empty'), user_exists, Length(max=25, message='Must be shorter than 25 characters')])
+    password = StringField("Enter your password", validators=[DataRequired(message='Password can not be empty'), Length(max=25, message='Must be shorter than 25 characters')])
     confirm = StringField("Confirm your password", validators=[DataRequired(message='Please confirm password'), EqualTo('password', message='Passwords must match')])
+    imie = StringField("Enter your first name", validators=[DataRequired(), Length(max=25, message='Must be shorter than 25 characters')])
+    nazwisko = StringField("Enter your last name", validators=[DataRequired(), Length(max=25, message='Must be shorter than 25 characters')])
+    pesel = StringField("Enter your pesel", validators=[pesel_incorrect, Length(min=11, max=11, message='Must be 11 characters long')])
+    dataurodzenia = DateField("Enter your birth date", format='%Y-%m-%d', validators=[DataRequired()])
     submit = SubmitField("Register")
 
 
