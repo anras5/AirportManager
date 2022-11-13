@@ -64,7 +64,7 @@ def do_login_user():
                 session["admin"] = True
             session["user"] = True
             session["name"] = form.login.data
-            return redirect(url_for('flights.world_map'))
+            return redirect(url_for('home'))
 
     return render_template('login.page.html', form=form)
 
