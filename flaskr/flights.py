@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, session
+from flask import Blueprint, render_template, session, redirect, url_for
 from flaskr.db import get_db
 
 flights_bp = Blueprint('flights', __name__, url_prefix='/flights')
@@ -6,6 +6,11 @@ flights_bp = Blueprint('flights', __name__, url_prefix='/flights')
 
 @flights_bp.route('/')
 def world_map():
+    try:
+        if not session["user"] or not session["admin"]:
+            return redirect(url_for('authentication.do_login_user'))
+    except:
+        pass
     return render_template('flights-worldmap.page.html')
 
 
@@ -13,7 +18,7 @@ def world_map():
 def sql_check():
     db = get_db()
     cr = db.cursor()
-    cr.execute("SELECT * FROM LOTNISKO")
+    cr.execute("SELECT * FROM PASAŻER")
     x = cr.fetchall()
     return f"{x}"
 
@@ -27,9 +32,5 @@ def airports():
     data = airports_cursor.fetchall()
     print(headers)
     print(data)
-    if "user" in session:
-        print(session["user"])
-    if "admin" in session:
-        print(session["admin"])
 
     return render_template('flights-airports.page.html', airports_data=data, airports_headers=headers)

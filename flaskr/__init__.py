@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template
+from flask import Flask, render_template, session, url_for, redirect
 from dotenv import load_dotenv
 from flask_bootstrap import Bootstrap
 
@@ -28,6 +28,12 @@ def create_app(test_config=None):
 
     @app.route('/')
     def home():
+        print('XDDD')
+        try:
+            if not session["user"] or not session["admin"]:
+                return redirect(url_for('authentication.do_login_user'))
+        except:
+            pass
         return render_template('index.page.html')
 
     return app
