@@ -28,7 +28,6 @@ def create_app(test_config=None):
 
     @app.route('/')
     def home():
-        print('XDDD')
         try:
             if not session["user"] or not session["admin"]:
                 return redirect(url_for('authentication.do_login_user'))

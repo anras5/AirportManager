@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for, session
+from flask import Blueprint, render_template, flash, redirect, url_for, session
 from flaskr.db import get_db
 from flaskr.forms import RegistrationForm, LoginForm
 
@@ -7,13 +7,6 @@ at_bp = Blueprint('authentication', __name__)
 
 @at_bp.route('/register', methods=['GET', 'POST'])
 def register_user():
-    if "user" in session:
-        print("user in session")
-    elif "admin" in session:
-        print("admin in session")
-    else:
-        print('XD NIE')
-
     form = RegistrationForm()
 
     if form.validate_on_submit(): # This also checks if the request method is POST
@@ -75,13 +68,13 @@ def do_login_user():
 
     return render_template('login.page.html', form=form)
 
+
 @at_bp.route('/logout')
 def logout():
-    print('in logout')
-
     session["user"] = False
     session["admin"] = False
     session["name"] = ""
+
     return redirect(url_for('authentication.do_login_user'))
 
 
