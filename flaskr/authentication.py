@@ -59,8 +59,8 @@ def do_login_user():
                 tmp = True
                 if user[0] == 'admin':
                     admin = True
-                if form.stay_loggedin.data:
-                    print("stay logged in")
+                #if form.stay_loggedin.data:
+                    #print("stay logged in")
                 break
 
         if not tmp:
@@ -70,6 +70,7 @@ def do_login_user():
             if admin:
                 session["admin"] = True
             session["user"] = True
+            session["name"] = form.login.data
             return redirect(url_for('flights.world_map'))
 
     return render_template('login.page.html', form=form)
@@ -80,6 +81,7 @@ def logout():
 
     session["user"] = False
     session["admin"] = False
+    session["name"] = ""
     return redirect(url_for('authentication.do_login_user'))
 
 

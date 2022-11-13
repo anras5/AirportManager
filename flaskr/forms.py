@@ -33,5 +33,5 @@ class RegistrationForm(FlaskForm):
 class LoginForm(FlaskForm):
     login = StringField("Enter your login", validators=[DataRequired()])
     password = StringField("Enter your password", validators=[DataRequired()])
-    stay_loggedin = BooleanField('stay logged-in')
+    #stay_loggedin = BooleanField('stay logged-in')
     submit = SubmitField('LogIn')
