@@ -7,6 +7,11 @@ at_bp = Blueprint('authentication', __name__)
 
 @at_bp.route('/register', methods=['GET', 'POST'])
 def register_user():
+    try:
+        if session["user"] or session["admin"]:
+            return redirect(url_for('home'))
+    except:
+        pass
     form = RegistrationForm()
 
     if form.validate_on_submit(): # This also checks if the request method is POST
@@ -34,7 +39,7 @@ def register_user():
 def do_login_user():
     try:
         if session["user"] or session["admin"]:
-            return redirect(url_for('flights.world_map'))
+            return redirect(url_for('home'))
     except:
         pass
 
