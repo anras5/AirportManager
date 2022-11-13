@@ -34,3 +34,4 @@ def airports():
     print(data)
 
     return render_template('flights-airports.page.html', airports_data=data, airports_headers=headers)
+

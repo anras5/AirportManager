@@ -35,4 +35,8 @@ def create_app(test_config=None):
             pass
         return render_template('index.page.html')
 
+    @app.errorhandler(404)
+    def page_not_found(error):
+        return redirect(url_for('home'))
+
     return app
