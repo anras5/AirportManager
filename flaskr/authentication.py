@@ -14,7 +14,7 @@ def register_user():
         pass
     form = RegistrationForm()
 
-    if form.validate_on_submit(): # This also checks if the request method is POST
+    if form.validate_on_submit():  # This also checks if the request method is POST
         login = form.login.data
         password = form.password.data
         imie = form.imie.data
@@ -26,8 +26,15 @@ def register_user():
         cr = db.cursor()
         cr.execute("""INSERT INTO Pasażer
                       VALUES
-                      ((SELECT MAX(PASAŻER_ID) FROM Pasażer)+1, :login, :password, :imie, :nazwisko, :pesel, :dataurodzenia)
-                    """, login=login, password=password, imie=imie, nazwisko=nazwisko, pesel=pesel, dataurodzenia=dataurodzenia)
+                      ((SELECT MAX(PASAŻER_ID) FROM Pasażer)+1,
+                       :login, :password, :imie, :nazwisko, :pesel, :dataurodzenia)
+                    """,
+                   login=login,
+                   password=password,
+                   imie=imie,
+                   nazwisko=nazwisko,
+                   pesel=pesel,
+                   dataurodzenia=dataurodzenia)
         db.commit()
         cr.close()
         flash('Registration Succesful')

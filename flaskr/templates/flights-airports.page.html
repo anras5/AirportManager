@@ -10,34 +10,39 @@
 
 {% block content %}
     <div class="container-fluid">
-    <div class="row">
-        <div class="col table-header">
-            <h3>Airports Table</h3>
+        <div class="row">
+            <div class="col table-header">
+                <h3>Airports Table</h3>
+            </div>
         </div>
-    </div>
     </div>
     <hr>
     <div class="container-fluid table-padding">
-    <table id="example" class="display" style="width:100%">
+        <table id="example" class="display" style="width:100%">
 
-        <thead>
-        <tr>
-            {% for header in airports_headers %}
-                <th>{{ header }}</th>
-            {% endfor %}
-        </tr>
-        </thead>
-        <tbody>
-        {% for airport in airports_data %}
+            <thead>
             <tr>
-                {% for value in airport %}
-                    <td>{{ value }}</td>
+                {% for header in airports_headers %}
+                    <th>{{ header }}</th>
                 {% endfor %}
+                <th>Options</th>
             </tr>
-
-        {% endfor %}
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+            {% for airport in airports_data %}
+                <tr>
+                    {% for value in airport %}
+                        <td>{{ value }}</td>
+                    {% endfor %}
+                    <td>
+                        <a href="{{ url_for('flights.delete_airport', airport_id=airport[0]) }}">
+                            <i class="fa-solid fa-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
     </div>
 
 {% endblock %}
