@@ -6,6 +6,13 @@ h1, h2, h3, h4, h5, h6 {
     font-family: 'Montserrat', sans-serif;
 }
 
+footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+/ / height of footer height: 2.5 rem;
+}
+
 #main-buttons {
     padding: 5% 10%;
     position: relative;
@@ -32,34 +39,52 @@ h1, h2, h3, h4, h5, h6 {
     color: #000000;
 }
 
-.main-button-click:hover{
+.main-button-click:hover {
     color: #000000;
 }
 
-.map-container{
+.icon-edit-table {
+    text-decoration: none;
+    background: transparent;
+    border: none !important;
+    color: yellowgreen;
+    margin: 6%;
+}
+
+.icon-edit-table:hover {
+    color: yellowgreen;
+}
+
+.icon-delete-table {
+    text-decoration: none;
+    background: transparent;
+    border: none !important;
+    color: red;
+    margin: 6%;
+}
+
+.icon-delete-table:hover {
+    color: red;
+}
+
+.map-container {
     height: 80vh;
 }
 
-.table-header{
+.table-header {
     padding: 2%;
 }
 
-.table-padding{
+.table-padding {
     padding: 3%;
 }
 
-  .page-container {
+.page-container {
     position: relative;
     min-height: 100vh;
-  }
-  .content-wrap {
-    // height of footer
-  	padding-bottom: 2.5rem;
-  }
-  footer {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    // height of footer
-    height: 2.5rem;
-  }
+}
+
+.content-wrap {
+/ / height of footer padding-bottom: 2.5 rem;
+}
+

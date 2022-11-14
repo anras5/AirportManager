@@ -35,9 +35,12 @@
                         <td>{{ value }}</td>
                     {% endfor %}
                     <td>
-                        <a href="{{ url_for('flights.delete_airport', airport_id=airport[0]) }}">
+                        <button id="{{ 'edit'+airport[0]|string }}" class="icon-edit-table">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button id="{{ 'delete'+airport[0]|string }}" class="icon-delete-table">
                             <i class="fa-solid fa-trash"></i>
-                        </a>
+                        </button>
                     </td>
                 </tr>
             {% endfor %}
@@ -54,5 +57,34 @@
         $(document).ready(function () {
             $('#example').DataTable();
         });
+
+        {% for airport in airports_data %}
+
+            document.getElementById("delete{{ airport[0] }}").addEventListener("click", function () {
+            Swal.fire({
+                title: 'Are you sure you want to delete {{ airport[1] }}?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire(
+                        'Deleted!',
+                        'Airport has been deleted.',
+                        'success'
+                    ).then(function () {
+                        window.location.href = "{{ url_for('flights.delete_airport', airport_id=airport[0]) }}"
+                    })
+                }
+            })
+        })
+
+        {% endfor %}
+
+
+
     </script>
 {% endblock %}
