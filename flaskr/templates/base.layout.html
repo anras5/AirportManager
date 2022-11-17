@@ -60,6 +60,8 @@
 {#                            TODO: Change url_for route#}
                             <a class="nav-link" href="{{ url_for('home') }}">Runways</a>
                         </li>
+                    </ul>
+                    <ul class="navbar-nav ms-auto">
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('authentication.register_user') }}">Register</a>
                         </li>
@@ -73,6 +75,7 @@
                             <a class="nav-link">Logged in as: {{ session["name"] }}</a>
                         </li>
                     </ul>
+
                 </div>
             </div>
         </nav>
