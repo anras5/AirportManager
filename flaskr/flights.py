@@ -5,6 +5,11 @@ flights_bp = Blueprint('flights', __name__, url_prefix='/flights')
 
 
 @flights_bp.route('/')
+def main():
+    return render_template('flights-index.page.html')
+
+
+@flights_bp.route('/map')
 def world_map():
     try:
         if not session["user"] or not session["admin"]:
@@ -12,16 +17,6 @@ def world_map():
     except:
         pass
     return render_template('flights-worldmap.page.html')
-
-
-@flights_bp.route('/sql-check')
-def sql_check():
-    db = get_db()
-    cr = db.cursor()
-    cr.execute("SELECT * FROM PASAŻER")
-    x = cr.fetchall()
-    cr.close()
-    return f"{x}"
 
 
 @flights_bp.route('/airports')

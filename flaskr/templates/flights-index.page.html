@@ -1,0 +1,69 @@
+{% extends "base.layout.html" %}
+
+{% block content %}
+
+    <div id="main-buttons">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-6">
+                    {# TODO: zmienic na flights.departures#}
+                    <a href="{{ url_for('flights.main') }}" class="main-button-click">
+                        <div class="main-button">
+                            <i class="icon fa-sharp fa-solid fa-plane-departure fa-4x"></i>
+                            <h3>Departures</h3>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-lg-6">
+                    {# TODO: zmienic na flights.arrivals#}
+                    <a href="{{ url_for('flights.main') }}" class="main-button-click">
+                        <div class="main-button">
+                            <i class="icon fa-solid fa-plane-arrival fa-4x"></i>
+                            <h3>Arrivals</h3>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-6">
+                    <a href="{{ url_for('flights.airports') }}" class="main-button-click">
+                        <div class="main-button">
+                            <i class="icon fa-sharp fa-solid fa-city fa-4x"></i>
+                            <h3>Airports</h3>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-lg-6">
+                    {# TODO zmienic na flights.airplanes#}
+                    <a href="{{ url_for('flights.main') }}" class="main-button-click">
+                        <div class="main-button">
+                            <i class="icon fa-sharp fa-solid fa-plane fa-4x"></i>
+                            <h3>Airplanes</h3>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-6">
+                    {# TODO: zmienic na flights.airlines, zmienic ikonke?#}
+                    <a href="{{ url_for('flights.main') }}" class="main-button-click">
+                        <div class="main-button">
+                            <i class="icon fa-solid fa-globe fa-4x"></i>
+                            <h3>Airlines</h3>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-lg-6">
+                    {# TODO zmienic na flights.manufacturers#}
+                    <a href="{{ url_for('flights.main') }}" class="main-button-click">
+                        <div class="main-button">
+                            <i class="icon fa-solid fa-industry fa-4x"></i>
+                            <h3>Manufacturers</h3>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
