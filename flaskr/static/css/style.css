@@ -40,6 +40,12 @@ footer .copyright {
 
 .icon {
     padding: 2%;
+    transition: transform 0.5s ease 0s;
+    color: #11bee9;
+}
+
+.icon-hover {
+    transform: rotateY(180deg);
 }
 
 .main-button-click {
