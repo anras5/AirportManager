@@ -53,11 +53,11 @@
                             <a class="nav-link" href="{{ url_for('flights.world_map') }}">Map</a>
                         </li>
                         <li class="nav-item">
-{#                            TODO: Change url_for route#}
+                            {#                            TODO: Change url_for route#}
                             <a class="nav-link" href="{{ url_for('home') }}">Passengers</a>
                         </li>
                         <li class="nav-item">
-{#                            TODO: Change url_for route#}
+                            {#                            TODO: Change url_for route#}
                             <a class="nav-link" href="{{ url_for('home') }}">Runways</a>
                         </li>
                     </ul>
@@ -92,42 +92,24 @@
     {% block content %} {% endblock content %}
 
     {# footer #}
-    <footer>
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-8 col-md-10 mx-auto">
-                    <ul class="list-inline text-center">
-                        <li class="list-inline-item">
-                            <a href="#">
-                <span class="fa-stack fa-lg">
-                  <i class="fas fa-circle fa-stack-2x"></i>
-                  <i class="fab fa-twitter fa-stack-1x fa-inverse"></i>
-                </span>
-                            </a>
-                        </li>
-                        <li class="list-inline-item">
-                            <a href="#">
-                <span class="fa-stack fa-lg">
-                  <i class="fas fa-circle fa-stack-2x"></i>
-                  <i class="fab fa-facebook-f fa-stack-1x fa-inverse"></i>
-                </span>
-                            </a>
-                        </li>
-                        <li class="list-inline-item">
-                            <a href="#">
-                <span class="fa-stack fa-lg">
-                  <i class="fas fa-circle fa-stack-2x"></i>
-                  <i class="fab fa-github fa-stack-1x fa-inverse"></i>
-                </span>
-                            </a>
-                        </li>
-                    </ul>
-                    <p class="copyright text-muted">Copyright &copy; Airport Manager 2022</p>
-                </div>
-            </div>
-        </div>
-    </footer>
 
+    <div class="container">
+        <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
+            <div class="col-md-4 d-flex align-items-center">
+                <a href="/" class="mb-3 me-2 mb-md-0 text-muted text-decoration-none lh-1">
+                    <svg class="bi" width="30" height="24"></svg>
+                </a>
+                <span class="mb-3 mb-md-0 text-muted">© 2022 Airport Manager</span>
+            </div>
+
+            <ul class="nav col-md-4 justify-content-end list-unstyled d-flex">
+                {#TODO add hrefs#}
+                <li class="ms-3"><a class="text-muted" href="#"><i class="fa-brands fa-github fa-2x"></i></a></li>
+                <li class="ms-3"><a class="text-muted" href="#"><i class="fa-brands fa-facebook fa-2x"></i></a></li>
+                <li class="ms-3"><a class="text-muted" href="#"><i class="fa-brands fa-telegram fa-2x"></i></a></li>
+            </ul>
+        </footer>
+    </div>
 
 </div>
 

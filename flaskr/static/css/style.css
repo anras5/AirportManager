@@ -6,21 +6,6 @@ h1, h2, h3, h4, h5, h6 {
     font-family: 'Montserrat', sans-serif;
 }
 
-footer {
-  padding: 50px 0 65px;
-}
-
-footer .list-inline {
-  margin: 0;
-  padding: 0;
-}
-
-footer .copyright {
-  font-size: 14px;
-  margin-bottom: 0;
-  text-align: center;
-}
-
 #main-buttons {
     padding: 2% 10%;
     position: relative;
@@ -39,7 +24,7 @@ footer .copyright {
 .main-button {
     border: thin darkgray groove;
     border-radius: 10px;
-    padding: 5% 0%;
+    padding: 5% 0;
     margin: 2%;
 }
 
@@ -97,8 +82,3 @@ footer .copyright {
     position: relative;
     min-height: 100vh;
 }
-
-.content-wrap {
-/ / height of footer padding-bottom: 2.5 rem;
-}
-
