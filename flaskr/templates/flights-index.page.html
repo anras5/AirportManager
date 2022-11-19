@@ -13,8 +13,8 @@
                 <div class="col-lg-6">
                     {# TODO: zmienic na flights.departures#}
                     <a href="{{ url_for('flights.main') }}" class="main-button-click">
-                        <div class="main-button">
-                            <i class="icon fa-sharp fa-solid fa-plane-departure fa-4x"></i>
+                        <div id="departures-button" class="main-button">
+                            <i id="departures-icon" class="icon fa-sharp fa-solid fa-plane-departure fa-4x"></i>
                             <h3>Departures</h3>
                         </div>
                     </a>
@@ -22,8 +22,8 @@
                 <div class="col-lg-6">
                     {# TODO: zmienic na flights.arrivals#}
                     <a href="{{ url_for('flights.main') }}" class="main-button-click">
-                        <div class="main-button">
-                            <i class="icon fa-solid fa-plane-arrival fa-4x"></i>
+                        <div id="arrivals-button" class="main-button">
+                            <i id="arrivals-icon" class="icon fa-solid fa-plane-arrival fa-4x"></i>
                             <h3>Arrivals</h3>
                         </div>
                     </a>
@@ -32,8 +32,8 @@
             <div class="row">
                 <div class="col-lg-6">
                     <a href="{{ url_for('flights.airports') }}" class="main-button-click">
-                        <div class="main-button">
-                            <i class="icon fa-sharp fa-solid fa-city fa-4x"></i>
+                        <div id="airports-button" class="main-button">
+                            <i id="airports-icon" class="icon fa-sharp fa-solid fa-city fa-4x"></i>
                             <h3>Airports</h3>
                         </div>
                     </a>
@@ -41,8 +41,8 @@
                 <div class="col-lg-6">
                     {# TODO zmienic na flights.airplanes#}
                     <a href="{{ url_for('flights.main') }}" class="main-button-click">
-                        <div class="main-button">
-                            <i class="icon fa-sharp fa-solid fa-plane fa-4x"></i>
+                        <div id="airplanes-button" class="main-button">
+                            <i id="airplanes-icon" class="icon fa-sharp fa-solid fa-plane fa-4x"></i>
                             <h3>Airplanes</h3>
                         </div>
                     </a>
@@ -52,8 +52,8 @@
                 <div class="col-lg-6">
                     {# TODO: zmienic na flights.airlines, zmienic ikonke?#}
                     <a href="{{ url_for('flights.main') }}" class="main-button-click">
-                        <div class="main-button">
-                            <i class="icon fa-solid fa-globe fa-4x"></i>
+                        <div id="airlines-button" class="main-button">
+                            <i id="airlines-icon" class="icon fa-solid fa-globe fa-4x"></i>
                             <h3>Airlines</h3>
                         </div>
                     </a>
@@ -61,8 +61,8 @@
                 <div class="col-lg-6">
                     {# TODO zmienic na flights.manufacturers#}
                     <a href="{{ url_for('flights.main') }}" class="main-button-click">
-                        <div class="main-button">
-                            <i class="icon fa-solid fa-industry fa-4x"></i>
+                        <div id="manufacturers-button" class="main-button">
+                            <i id="manufacturers-icon" class="icon fa-solid fa-industry fa-4x"></i>
                             <h3>Manufacturers</h3>
                         </div>
                     </a>
@@ -71,4 +71,36 @@
         </div>
     </div>
 
+{% endblock %}
+
+{% block js %}
+    <script>
+        buttons = [
+            document.getElementById("departures-button"),
+            document.getElementById("arrivals-button"),
+            document.getElementById("airports-button"),
+            document.getElementById("airplanes-button"),
+            document.getElementById("airlines-button"),
+            document.getElementById("manufacturers-button")
+        ]
+        icons = [
+            document.getElementById("departures-icon"),
+            document.getElementById("arrivals-icon"),
+            document.getElementById("airports-icon"),
+            document.getElementById("airplanes-icon"),
+            document.getElementById("airlines-icon"),
+            document.getElementById("manufacturers-icon")
+        ]
+
+        classToAdd = "fa-beat"
+        for (let i = 0; i < buttons.length; i++) {
+            buttons[i].onmouseover = function () {
+                icons[i].classList.add(classToAdd);
+            }
+            buttons[i].onmouseleave = function () {
+                icons[i].classList.remove(classToAdd);
+            }
+        }
+
+    </script>
 {% endblock %}
