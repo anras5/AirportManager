@@ -18,9 +18,7 @@
     </div>
     <hr>
     <div class="container-fluid create-new-container">
-        <a href="{{ url_for('flights.new_airport') }}">
-            <button type="button" class="btn btn-success">Create new airport</button>
-        </a>
+        <button id="add-new-airport" type="button" class="btn btn-success">Create new airport</button>
     </div>
 
 
@@ -61,6 +59,25 @@
     {#datatables js#}
     <script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.12.1/datatables.min.js"></script>
     <script>
+
+        document.getElementById("add-new-airport").addEventListener("click", function () {
+            Swal.fire({
+                title: "Submit the Airport's\nICAO code",
+                input: 'text',
+                inputAttributes: {
+                    autocapitalize: 'off'
+                },
+                showCancelButton: true,
+                confirmButtonText: 'Submit',
+                showLoaderOnConfirm: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    {#redirect to flights.new_airport with icaocode as a parameter#}
+                    window.location.href = "{{ url_for('flights.new_airport') }}?icaocode=" + result.value
+                }
+            })
+        })
+
         $(document).ready(function () {
             $('#example').DataTable();
         });
