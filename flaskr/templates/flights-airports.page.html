@@ -62,7 +62,7 @@
 
         document.getElementById("add-new-airport").addEventListener("click", function () {
             Swal.fire({
-                title: "Submit the Airport's\nICAO code",
+                title: "Submit the Airport's\nIATA code",
                 input: 'text',
                 inputAttributes: {
                     autocapitalize: 'off'
@@ -73,7 +73,7 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     {#redirect to flights.new_airport with icaocode as a parameter#}
-                    window.location.href = "{{ url_for('flights.new_airport') }}?icaocode=" + result.value
+                    window.location.href = "{{ url_for('flights.new_airport') }}?iatacode=" + result.value
                 }
             })
         })

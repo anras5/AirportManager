@@ -1,6 +1,9 @@
-from flask import Blueprint, render_template, redirect, url_for
+from flask import Blueprint, render_template, redirect, url_for, request
 from flaskr.forms import NewAirportForm
 from flaskr import pool
+import requests
+import os
+import json
 
 flights_bp = Blueprint('flights', __name__, url_prefix='/flights')
 
@@ -34,19 +37,27 @@ def airports():
 
 @flights_bp.route('/airports/new', methods=['GET', 'POST'])
 def new_airport():
+    api_key = os.environ.get('AIRLABS_API_KEY')
+    iatacode = request.args.get('iatacode')
+    if iatacode:
+        response = requests.get(
+            f'https://airlabs.co/api/v9/airports?iata_code={iatacode}&api_key={api_key}').text
+        api_data = json.loads(response)["response"][0]
+    else:
+        api_data = {}
     form = NewAirportForm()
     if form.validate_on_submit():
         db = pool.acquire()
         cr = db.cursor()
         cr.execute("""INSERT INTO LOTNISKO
-VALUES ((SELECT MAX(LOTNISKO_ID) FROM LOTNISKO)+1,
-        :nazwa,
-        :miasto,
-        :kraj,
-        :iatacode,
-        :icaocode,
-        :longitude,
-        :latitude)""",
+                      VALUES ((SELECT MAX(LOTNISKO_ID) FROM LOTNISKO)+1,
+                              :nazwa,
+                              :miasto,
+                              :kraj,
+                              :iatacode,
+                              :icaocode,
+                              :longitude,
+                              :latitude)""",
                    nazwa=form.nazwa.data,
                    miasto=form.miasto.data,
                    kraj=form.kraj.data,
@@ -57,7 +68,10 @@ VALUES ((SELECT MAX(LOTNISKO_ID) FROM LOTNISKO)+1,
         db.commit()
         cr.close()
         return redirect(url_for('flights.airports'))
-    return render_template('flights-airports-new.page.html', form=form)
+
+    return render_template('flights-airports-new.page.html',
+                           form=form,
+                           api_data=api_data)
 
 
 @flights_bp.route('/airports/delete/<int:airport_id>')
