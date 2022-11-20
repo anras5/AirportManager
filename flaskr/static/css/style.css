@@ -70,15 +70,25 @@ h1, h2, h3, h4, h5, h6 {
     height: 80vh;
 }
 
+.create-new-container {
+    padding: 0 7%;
+}
+
 .table-header {
     padding: 2%;
 }
 
-.table-padding {
-    padding: 3%;
+.table-container {
+    padding: 3% 7%;
 }
 
 .page-container {
     position: relative;
     min-height: 100vh;
+}
+
+.form-field-description {
+    font-family: 'Montserrat', sans-serif;
+    text-align: left;
+    padding: 1%;
 }

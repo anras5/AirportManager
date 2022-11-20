@@ -29,11 +29,11 @@ def create_app(test_config=None):
 
     @app.route('/')
     def home():
-        try:
-            if not session["user"] or not session["admin"]:
-                return redirect(url_for('authentication.do_login_user'))
-        except:
-            pass
+        # try:
+        #     if not session["user"] or not session["admin"]:
+        #         return redirect(url_for('authentication.do_login_user'))
+        # except:
+        #     pass
         return render_template('index.page.html')
 
     @app.errorhandler(404)

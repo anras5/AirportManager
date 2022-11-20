@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, session, redirect, url_for, request
 from flaskr.db import get_db
+from flaskr.forms import NewAirportForm
 
 flights_bp = Blueprint('flights', __name__, url_prefix='/flights')
 
@@ -31,7 +32,15 @@ def airports():
     return render_template('flights-airports.page.html', airports_data=data, airports_headers=headers)
 
 
-@flights_bp.route('/delete-airport/<int:airport_id>')
+@flights_bp.route('/airports/new', methods=['GET', 'POST'])
+def new_airport():
+    form = NewAirportForm()
+    if form.validate_on_submit():
+        pass
+    return render_template('flights-airports-new.page.html', form=form)
+
+
+@flights_bp.route('/airports/delete/<int:airport_id>')
 def delete_airport(airport_id):
     db = get_db()
     airports_delete_cursor = db.cursor()

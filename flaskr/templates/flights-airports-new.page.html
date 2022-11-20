@@ -1,0 +1,18 @@
+{% extends "base.layout.html" %}
+
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col table-header">
+                <h3>Airports - add new airport</h3>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <div class="container form">
+        {{ wtf.quick_form(form) }}
+    </div>
+
+{% endblock %}
