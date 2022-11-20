@@ -12,7 +12,40 @@
     </div>
     <hr>
     <div class="container form">
-        {{ wtf.quick_form(form) }}
+        <form method="post" class="row g-3">
+            {{ form.hidden_tag() }}
+            <div class="col-12">
+                {{ form.nazwa.label(class_='form-label') }}
+                {{ form.nazwa(class_='form-control', placeholder='') }}
+            </div>
+            <div class="col-md-6">
+                {{ form.miasto.label(class_='form-label') }}
+                {{ form.miasto(class_='form-control') }}
+            </div>
+            <div class="col-md-6">
+                {{ form.kraj.label(class_='form-label') }}
+                {{ form.kraj(class_='form-control') }}
+            </div>
+            <div class="col-md-6">
+                {{ form.iatacode.label(class_='form-label') }}
+                {{ form.iatacode(class_='form-control') }}
+            </div>
+            <div class="col-md-6">
+                {{ form.icaocode.label(class_='form-label') }}
+                {{ form.icaocode(class_='form-control') }}
+            </div>
+            <div class="col-md-6">
+                {{ form.longitude.label(class_='form-label') }}
+                {{ form.longitude(class_='form-control') }}
+            </div>
+            <div class="col-md-6">
+                {{ form.latitude.label(class_='form-label') }}
+                {{ form.latitude(class_='form-control') }}
+            </div>
+            <div class="col-12">
+                {{ form.submit(class_='btn btn-primary') }}
+            </div>
+        </form>
     </div>
 
 {% endblock %}

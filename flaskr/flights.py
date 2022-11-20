@@ -36,7 +36,30 @@ def airports():
 def new_airport():
     form = NewAirportForm()
     if form.validate_on_submit():
-        pass
+        db = get_db()
+        cr = db.cursor()
+        print('insert')
+        cr.execute("""
+        INSERT INTO LOTNISKO
+        VALUES ((SELECT MAX(LOTNISKO_ID) FROM LOTNISKO)+1,
+                :nazwa,
+                :miasto,
+                :kraj,
+                :iatacode,
+                :icaocode,
+                :longitude,
+                :latitude)""",
+                   nazwa=form.nazwa.data,
+                   miasto=form.miasto.data,
+                   kraj=form.kraj.data,
+                   iatacode=form.iatacode.data,
+                   icaocode=form.icaocode.data,
+                   longitude=form.longitude.data,
+                   latitude=form.latitude.data)
+        db.commit()
+        cr.close()
+        print('commit')
+        return redirect(url_for('flights.airports'))
     return render_template('flights-airports-new.page.html', form=form)
 
 
