@@ -1,13 +1,12 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, BooleanField, DateField, FloatField
+from wtforms import StringField, SubmitField, DateField, FloatField
 from wtforms.validators import DataRequired, EqualTo, ValidationError, Length
-from flaskr.db import get_db
-from flask import Markup
+from flaskr import pool
 
 
 # Custom validators
 def user_exists(form, field):
-    db = get_db()
+    db = pool.acquire()
     cr = db.cursor()
     cr.execute("SELECT LOGIN FROM Pasażer")
     x = cr.fetchall()

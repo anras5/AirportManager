@@ -1,9 +1,10 @@
-import os
-from flask import Flask, render_template, session, url_for, redirect
+from flask import Flask, render_template, url_for, redirect
 from dotenv import load_dotenv
 from flask_bootstrap import Bootstrap
+from flaskr.db import start_pool
 
 bootstrap = Bootstrap()
+pool = start_pool()
 
 
 def create_app(test_config=None):
@@ -14,19 +15,23 @@ def create_app(test_config=None):
     )
     bootstrap.init_app(app)
 
+    # dotenv file
     load_dotenv('./../.env')
 
+    # test config
     if test_config is None:
         app.config.from_pyfile('config.py', silent=True)
     else:
         app.config.from_mapping(test_config)
 
+    # modules
     from . import authentication
     app.register_blueprint(authentication.at_bp)
 
     from . import flights
     app.register_blueprint(flights.flights_bp)
 
+    # general routes
     @app.route('/')
     def home():
         # try:

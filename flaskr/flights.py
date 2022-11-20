@@ -1,6 +1,6 @@
-from flask import Blueprint, render_template, session, redirect, url_for, request
-from flaskr.db import get_db
+from flask import Blueprint, render_template, redirect, url_for
 from flaskr.forms import NewAirportForm
+from flaskr import pool
 
 flights_bp = Blueprint('flights', __name__, url_prefix='/flights')
 
@@ -12,17 +12,17 @@ def main():
 
 @flights_bp.route('/map')
 def world_map():
-    try:
-        if not session["user"] or not session["admin"]:
-            return redirect(url_for('authentication.do_login_user'))
-    except:
-        pass
+    # try:
+    #     if not session["user"] or not session["admin"]:
+    #         return redirect(url_for('authentication.do_login_user'))
+    # except:
+    #     pass
     return render_template('flights-worldmap.page.html')
 
 
 @flights_bp.route('/airports')
 def airports():
-    db = get_db()
+    db = pool.acquire()
     airports_cursor = db.cursor()
     airports_cursor.execute("SELECT * FROM LOTNISKO")
     headers = [header[0] for header in airports_cursor.description]
@@ -36,19 +36,17 @@ def airports():
 def new_airport():
     form = NewAirportForm()
     if form.validate_on_submit():
-        db = get_db()
+        db = pool.acquire()
         cr = db.cursor()
-        print('insert')
-        cr.execute("""
-        INSERT INTO LOTNISKO
-        VALUES ((SELECT MAX(LOTNISKO_ID) FROM LOTNISKO)+1,
-                :nazwa,
-                :miasto,
-                :kraj,
-                :iatacode,
-                :icaocode,
-                :longitude,
-                :latitude)""",
+        cr.execute("""INSERT INTO LOTNISKO
+VALUES ((SELECT MAX(LOTNISKO_ID) FROM LOTNISKO)+1,
+        :nazwa,
+        :miasto,
+        :kraj,
+        :iatacode,
+        :icaocode,
+        :longitude,
+        :latitude)""",
                    nazwa=form.nazwa.data,
                    miasto=form.miasto.data,
                    kraj=form.kraj.data,
@@ -58,14 +56,13 @@ def new_airport():
                    latitude=form.latitude.data)
         db.commit()
         cr.close()
-        print('commit')
         return redirect(url_for('flights.airports'))
     return render_template('flights-airports-new.page.html', form=form)
 
 
 @flights_bp.route('/airports/delete/<int:airport_id>')
 def delete_airport(airport_id):
-    db = get_db()
+    db = pool.acquire()
     airports_delete_cursor = db.cursor()
     airports_delete_cursor.execute("DELETE FROM LOTNISKO WHERE LOTNISKO_ID = :id", id=airport_id)
     db.commit()

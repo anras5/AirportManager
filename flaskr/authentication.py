@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, flash, redirect, url_for, session
-from flaskr.db import get_db
 from flaskr.forms import RegistrationForm, LoginForm
+from flaskr import pool
 
 at_bp = Blueprint('authentication', __name__)
 
@@ -22,7 +22,7 @@ def register_user():
         pesel = form.pesel.data
         dataurodzenia = form.dataurodzenia.data
 
-        db = get_db()
+        db = pool.acquire()
         cr = db.cursor()
         cr.execute("""INSERT INTO Pasażer
                       VALUES
@@ -55,7 +55,7 @@ def do_login_user():
     if form.validate_on_submit():
         admin = False
         tmp = False
-        db = get_db()
+        db = pool.acquire()
         cr = db.cursor()
         cr.execute("SELECT LOGIN, HASłO FROM Pasażer")
         x = cr.fetchall()
