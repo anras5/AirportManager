@@ -1,9 +1,11 @@
 from flask import Blueprint, render_template, redirect, url_for, request
-from flaskr.forms import NewAirportForm
+from flaskr.forms import AirportForm
 from flaskr import pool
-import requests
+
 import os
 import json
+
+import requests
 
 flights_bp = Blueprint('flights', __name__, url_prefix='/flights')
 
@@ -32,12 +34,12 @@ def airports():
     data = airports_cursor.fetchall()
     airports_cursor.close()
 
-    return render_template('flights-airports.page.html', airports_data=data, airports_headers=headers)
+    return render_template('flights-airports/flights-airports.page.html', airports_data=data, airports_headers=headers)
 
 
 @flights_bp.route('/airports/new', methods=['GET', 'POST'])
 def new_airport():
-    form = NewAirportForm()
+    form = AirportForm()
     if form.validate_on_submit():
         # POST
         db = pool.acquire()
@@ -80,9 +82,9 @@ def new_airport():
         # send request only if iatacode provided in url parameter
         if iatacode:
             # send request
-            response = requests.get(f'https://airport-info.p.rapidapi.com/airport', headers=headers, params=querystring).text
+            response = requests.get(f'https://airport-info.p.rapidapi.com/airport', headers=headers,
+                                    params=querystring).text
             api_data = json.loads(response)
-            print(api_data)
 
             # handle case when wrong iatacode is provided in the url parameter
             if 'error' in api_data:
@@ -92,9 +94,58 @@ def new_airport():
 
         else:
             api_data = {}
-        return render_template('flights-airports-new.page.html',
+        return render_template('flights-airports/flights-airports-new.page.html',
                                form=form,
                                api_data=api_data)
+
+
+@flights_bp.route('/airports/update/<int:airport_id>', methods=['GET', 'POST'])
+def update_airport(airport_id: int):
+    form = AirportForm()
+    if form.validate_on_submit():
+        # POST
+        db = pool.acquire()
+        cr = db.cursor()
+        cr.execute("""UPDATE LOTNISKO
+                      SET NAZWA = :nazwa,
+                          MIASTO = :miasto,
+                          KRAJ = :kraj,
+                          IATACODE = :iatacode,
+                          ICAOCODE = :icaocode,
+                          LONGITUDE = :longitude,
+                          LATITUDE = :latitude
+                      WHERE LOTNISKO_ID = :id""",
+                   nazwa=form.nazwa.data,
+                   miasto=form.miasto.data,
+                   kraj=form.kraj.data,
+                   iatacode=form.iatacode.data,
+                   icaocode=form.icaocode.data,
+                   longitude=form.longitude.data,
+                   latitude=form.latitude.data,
+                   id=airport_id)
+        db.commit()
+        cr.close()
+        return redirect(url_for('flights.airports'))
+
+    db = pool.acquire()
+    airports_update_cursor = db.cursor()
+    airports_update_cursor.execute("""SELECT NAZWA, MIASTO, KRAJ, IATACODE, ICAOCODE, LONGITUDE, LATITUDE
+                                      FROM LOTNISKO
+                                      WHERE LOTNISKO_ID = :id""",
+                                   id=airport_id)
+    data = airports_update_cursor.fetchone()
+    airport_data = {
+        'name': data[0],
+        'city': data[1],
+        'country': data[2],
+        'iata': data[3],
+        'icao': data[4],
+        'longitude': data[5],
+        'latitude': data[6]
+    }
+    return render_template('flights-airports/flights-airports-update.page.html',
+                           form=form,
+                           airport_data=airport_data)
 
 
 @flights_bp.route('/airports/delete/<int:airport_id>')

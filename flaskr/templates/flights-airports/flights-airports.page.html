@@ -40,10 +40,10 @@
                         <td>{{ value }}</td>
                     {% endfor %}
                     <td>
-                        <button id="{{ 'edit'+airport[0]|string }}" class="icon-edit-table">
+                        <a href="{{ url_for('flights.update_airport', airport_id=airport[0]) }}" class="icon-edit-table">
                             <i class="fa-solid fa-pen"></i>
-                        </button>
-                        <button id="{{ 'delete'+airport[0]|string }}" class="icon-delete-table">
+                        </a>
+                        <button id="delete{{ airport[0] }}" class="icon-delete-table">
                             <i class="fa-solid fa-trash"></i>
                         </button>
                     </td>

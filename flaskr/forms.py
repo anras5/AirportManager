@@ -59,7 +59,7 @@ class LoginForm(FlaskForm):
 # ------------------------------------------------------------------------------------------------------------------- #
 # FLIGHTS.AIRPORTS FORMS
 
-class NewAirportForm(FlaskForm):
+class AirportForm(FlaskForm):
     nazwa = StringField("Enter airport's name")
     miasto = StringField("Enter airport's city")
     kraj = StringField("Enter airport's country")
@@ -67,4 +67,4 @@ class NewAirportForm(FlaskForm):
     icaocode = StringField("Enter ICAO code")
     longitude = FloatField("Enter airport's longitude")
     latitude = FloatField("Enter airport's latitude")
-    submit = SubmitField("Add",)
+    submit = SubmitField("Submit")
