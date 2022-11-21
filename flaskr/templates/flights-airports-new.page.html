@@ -10,40 +10,46 @@
             </div>
         </div>
     </div>
+    <div class="container-fluid create-new-container">
+        <a href="{{ url_for('flights.airports') }}">
+            <button type="button" class="btn btn-secondary">Go back</button>
+        </a>
+    </div>
     <hr>
+
     <div class="container form">
         <form method="post" class="row g-3">
             {{ form.hidden_tag() }}
             <div class="col-12">
                 {{ form.nazwa.label(class_='form-label') }}
-                {{ form.nazwa(class_='form-control', placeholder='Name', value=api_data.get('name')) }}
+                {{ form.nazwa(class_='form-control', placeholder='Name', value=api_data.get('name', '')) }}
             </div>
             <div class="col-md-6">
                 {{ form.miasto.label(class_='form-label') }}
-                {{ form.miasto(class_='form-control', placeholder='City', value=api_data.get('city')) }}
+                {{ form.miasto(class_='form-control', placeholder='City', value=api_data.get('city', '')) }}
             </div>
             <div class="col-md-6">
                 {{ form.kraj.label(class_='form-label') }}
-                {{ form.kraj(class_='form-control', placeholder='Country', value=api_data.get('country')) }}
+                {{ form.kraj(class_='form-control', placeholder='Country', value=api_data.get('country', '')) }}
             </div>
             <div class="col-md-6">
                 {{ form.iatacode.label(class_='form-label') }}
-                {{ form.iatacode(class_='form-control', placeholder='IATA', value=api_data.get('iata')) }}
+                {{ form.iatacode(class_='form-control', placeholder='IATA', value=api_data.get('iata', '')) }}
             </div>
             <div class="col-md-6">
                 {{ form.icaocode.label(class_='form-label') }}
-                {{ form.icaocode(class_='form-control', placeholder='ICAO', value=api_data.get('icao')) }}
+                {{ form.icaocode(class_='form-control', placeholder='ICAO', value=api_data.get('icao', '')) }}
             </div>
             <div class="col-md-6">
                 {{ form.longitude.label(class_='form-label') }}
-                {{ form.longitude(class_='form-control', placeholder='Longitude', value=api_data.get('longitude')) }}
+                {{ form.longitude(class_='form-control', placeholder='Longitude', value=api_data.get('longitude', '')) }}
             </div>
             <div class="col-md-6">
                 {{ form.latitude.label(class_='form-label') }}
-                {{ form.latitude(class_='form-control', placeholder='Latitude', value=api_data.get('latitude')) }}
+                {{ form.latitude(class_='form-control', placeholder='Latitude', value=api_data.get('latitude', '')) }}
             </div>
             <div class="col-12">
-                {{ form.submit(class_='btn btn-primary') }}
+                {{ form.submit(class_='btn btn-success') }}
             </div>
         </form>
     </div>

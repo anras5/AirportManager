@@ -66,22 +66,35 @@ def new_airport():
 
         # get data from https://airport-info.p.rapidapi.com/airport into api_data dictionary
         api_key = os.environ.get('RAPID_API_AIRPORT_INFO_KEY')
-        iatacode = request.args.get('iatacode')
+
+        # prepare headers for request
         headers = {
             "X-RapidAPI-Key": api_key,
             "X-RapidAPI-Host": "airport-info.p.rapidapi.com"
         }
+
+        # get iatacode from url parameter
+        iatacode = request.args.get('iatacode')
         querystring = {"iata": iatacode}
+
+        # send request only if iatacode provided in url parameter
         if iatacode:
-            response = requests.get(
-                f'https://airport-info.p.rapidapi.com/airport', headers=headers, params=querystring).text
+            # send request
+            response = requests.get(f'https://airport-info.p.rapidapi.com/airport', headers=headers, params=querystring).text
             api_data = json.loads(response)
+            print(api_data)
+
+            # handle case when wrong iatacode is provided in the url parameter
+            if 'error' in api_data:
+                error = api_data.get('error').get('text')
+                if error == 'No airport found':
+                    api_data = {}
+
         else:
             api_data = {}
-
-    return render_template('flights-airports-new.page.html',
-                           form=form,
-                           api_data=api_data)
+        return render_template('flights-airports-new.page.html',
+                               form=form,
+                               api_data=api_data)
 
 
 @flights_bp.route('/airports/delete/<int:airport_id>')
