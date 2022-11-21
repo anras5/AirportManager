@@ -37,16 +37,9 @@ def airports():
 
 @flights_bp.route('/airports/new', methods=['GET', 'POST'])
 def new_airport():
-    api_key = os.environ.get('AIRLABS_API_KEY')
-    iatacode = request.args.get('iatacode')
-    if iatacode:
-        response = requests.get(
-            f'https://airlabs.co/api/v9/airports?iata_code={iatacode}&api_key={api_key}').text
-        api_data = json.loads(response)["response"][0]
-    else:
-        api_data = {}
     form = NewAirportForm()
     if form.validate_on_submit():
+        # POST
         db = pool.acquire()
         cr = db.cursor()
         cr.execute("""INSERT INTO LOTNISKO
@@ -68,6 +61,23 @@ def new_airport():
         db.commit()
         cr.close()
         return redirect(url_for('flights.airports'))
+    else:
+        # GET
+
+        # get data from https://airport-info.p.rapidapi.com/airport into api_data dictionary
+        api_key = os.environ.get('RAPID_API_AIRPORT_INFO_KEY')
+        iatacode = request.args.get('iatacode')
+        headers = {
+            "X-RapidAPI-Key": api_key,
+            "X-RapidAPI-Host": "airport-info.p.rapidapi.com"
+        }
+        querystring = {"iata": iatacode}
+        if iatacode:
+            response = requests.get(
+                f'https://airport-info.p.rapidapi.com/airport', headers=headers, params=querystring).text
+            api_data = json.loads(response)
+        else:
+            api_data = {}
 
     return render_template('flights-airports-new.page.html',
                            form=form,
