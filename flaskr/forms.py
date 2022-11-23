@@ -8,7 +8,7 @@ from flaskr import pool
 def user_exists(form, field):
     db = pool.acquire()
     cr = db.cursor()
-    cr.execute("SELECT LOGIN FROM Pasażer")
+    cr.execute("SELECT LOGIN FROM Pasazer")
     x = cr.fetchall()
     for user in x:
         if user[0] == field.data:
