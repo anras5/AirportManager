@@ -31,6 +31,9 @@ def create_app(test_config=None):
     from . import flights
     app.register_blueprint(flights.flights_bp)
 
+    from . import passengers
+    app.register_blueprint(passengers.ps_bp)
+
     # general routes
     @app.route('/')
     def home():
