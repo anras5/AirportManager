@@ -24,9 +24,9 @@ def register_user():
 
         db = pool.acquire()
         cr = db.cursor()
-        cr.execute("""INSERT INTO Pasażer
+        cr.execute("""INSERT INTO Pasazer
                       VALUES
-                      ((SELECT MAX(PASAŻER_ID) FROM Pasażer)+1,
+                      ((SELECT MAX(PASAZER_ID) FROM Pasazer)+1,
                        :login, :password, :imie, :nazwisko, :pesel, :dataurodzenia)
                     """,
                    login=login,
@@ -57,7 +57,7 @@ def do_login_user():
         tmp = False
         db = pool.acquire()
         cr = db.cursor()
-        cr.execute("SELECT LOGIN, HASłO FROM Pasażer")
+        cr.execute("SELECT LOGIN, HASłO FROM Pasazer")
         x = cr.fetchall()
         for user in x:
             if user[0] == form.login.data and user[1] == form.password.data:
