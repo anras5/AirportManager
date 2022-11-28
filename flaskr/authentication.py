@@ -37,7 +37,7 @@ def register_user():
                    dataurodzenia=dataurodzenia)
         db.commit()
         cr.close()
-        flash('Registration Succesful')
+        flash('Pomyślnie zarejestrowano!')
         return redirect(url_for('authentication.do_login_user'))
     return render_template('registration.page.html', form=form)
 
@@ -69,7 +69,7 @@ def do_login_user():
                 break
 
         if not tmp:
-            flash('Invalid Credentials, Please try again')
+            flash('Niepoprawne dane, spróbuj ponownie!')
             return redirect(url_for('authentication.do_login_user'))
         if tmp:
             if admin:

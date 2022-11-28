@@ -3,7 +3,7 @@
 
 {# head #}
 <head>
-    <title> AirportManager </title>
+    <title> Airport Manager </title>
     <meta charset="UTF-8">
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='icon/plane-departure-solid.png') }}">
 
@@ -47,32 +47,32 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('flights.main') }}">Flights</a>
+                            <a class="nav-link" href="{{ url_for('flights.main') }}">LOTY</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('flights.world_map') }}">Map</a>
-                        </li>
-                        <li class="nav-item">
-                            {#                            TODO: Change url_for route#}
-                            <a class="nav-link" href="{{ url_for('home') }}">Passengers</a>
+                            <a class="nav-link" href="{{ url_for('flights.world_map') }}">MAPA</a>
                         </li>
                         <li class="nav-item">
                             {#                            TODO: Change url_for route#}
-                            <a class="nav-link" href="{{ url_for('home') }}">Runways</a>
+                            <a class="nav-link" href="{{ url_for('home') }}">PASAŻEROWIE</a>
+                        </li>
+                        <li class="nav-item">
+                            {#                            TODO: Change url_for route#}
+                            <a class="nav-link" href="{{ url_for('home') }}">PASY STARTOWE</a>
                         </li>
                     </ul>
                     <ul class="navbar-nav ms-auto">
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('authentication.register_user') }}">Register</a>
+                            <a class="nav-link" href="{{ url_for('authentication.register_user') }}">Rejestracja</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('authentication.do_login_user') }}">Log in</a>
+                            <a class="nav-link" href="{{ url_for('authentication.do_login_user') }}">Zaloguj się</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('authentication.logout') }}">Log out</a>
+                            <a class="nav-link" href="{{ url_for('authentication.logout') }}">Wyloguj</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link">Logged in as: {{ session["name"] }}</a>
+                            <a class="nav-link">Zalogowano: {{ session["name"] }}</a>
                         </li>
                     </ul>
 

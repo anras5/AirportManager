@@ -12,25 +12,26 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col table-header">
-                <h3>Airports Table</h3>
+                <h3>LOTNISKA</h3>
             </div>
         </div>
     </div>
     <hr>
     <div class="container-fluid create-new-container">
-        <button id="add-new-airport" type="button" class="btn btn-success">Create new airport</button>
+        <button id="add-new-airport" type="button" class="btn btn-success">Nowe lotnisko</button>
     </div>
 
 
     <div class="container-fluid table-container">
         <table id="example" class="display" style="width:100%">
+        {# TODO: zmiana opisu tabelki (show entries, search, showing entries, previous, next ...) na język polski #}
 
             <thead>
             <tr>
                 {% for header in airports_headers %}
                     <th>{{ header }}</th>
                 {% endfor %}
-                <th>Options</th>
+                <th>Opcje</th>
             </tr>
             </thead>
             <tbody>
@@ -62,13 +63,14 @@
 
         document.getElementById("add-new-airport").addEventListener("click", function () {
             Swal.fire({
-                title: "Submit the Airport's\nIATA code",
+                title: "Podaj kod IATA nowego lotniska",
                 input: 'text',
                 inputAttributes: {
-                    autocapitalize: 'off'
+                    autocapitalize: 'on'
                 },
                 showCancelButton: true,
-                confirmButtonText: 'Submit',
+                cancelButtonText: 'Powrót',
+                confirmButtonText: 'Dalej',
                 showLoaderOnConfirm: true
             }).then((result) => {
                 if (result.isConfirmed) {
@@ -86,18 +88,18 @@
 
             document.getElementById("delete{{ airport[0] }}").addEventListener("click", function () {
                 Swal.fire({
-                    title: 'Are you sure you want to delete {{ airport[1] }}?',
-                    text: "You won't be able to revert this!",
+                    title: 'Czy na pewno chcesz usunąć: {{ airport[1] }}?',
+                    text: "Nie będziesz mógł cofnąć tej dezycji!",
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#3085d6',
                     cancelButtonColor: '#d33',
-                    confirmButtonText: 'Yes, delete it!'
+                    confirmButtonText: 'Tak, usuń!'
                 }).then((result) => {
                     if (result.isConfirmed) {
                         Swal.fire(
-                            'Deleted!',
-                            'Airport has been deleted.',
+                            'Usunięto!',
+                            'Lotnisko zostało usunięte',
                             'success'
                         ).then(function () {
                             window.location.href = "{{ url_for('flights.delete_airport', airport_id=airport[0]) }}"
