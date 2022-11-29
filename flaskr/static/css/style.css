@@ -1,6 +1,6 @@
-body {
-    text-align: center;
-}
+/*body {*/
+/*    text-align: center;*/
+/*}*/
 
 h1, h2, h3, h4, h5, h6 {
     font-family: 'Montserrat', sans-serif;
@@ -9,6 +9,7 @@ h1, h2, h3, h4, h5, h6 {
 #main-buttons {
     padding: 2% 10%;
     position: relative;
+    text-align: center;
 }
 
 #map {
@@ -18,8 +19,8 @@ h1, h2, h3, h4, h5, h6 {
 
 .page-header {
     padding: 1%;
+    text-align: center;
 }
-
 
 .main-button {
     border: thin darkgray groove;
@@ -72,6 +73,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .create-new-container {
     padding: 0 7%;
+    text-align: center;
 }
 
 .table-header {
