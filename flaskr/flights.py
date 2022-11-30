@@ -66,12 +66,28 @@ def world_map():
 def airports():
     db = pool.acquire()
     airports_cursor = db.cursor()
-    airports_cursor.execute("SELECT * FROM LOTNISKO")
+    airports_cursor.execute(
+        "SELECT LOTNISKO_ID, NAZWA, MIASTO, KRAJ, IATACODE, ICAOCODE, LONGITUDE, LATITUDE  FROM LOTNISKO")
     headers = [header[0] for header in airports_cursor.description]
-    data = airports_cursor.fetchall()
+    airports_list = []
+    for airport in airports_cursor:
+        airports_list.append(
+            Lotnisko(
+                _id=airport[0],
+                nazwa=airport[1],
+                miasto=airport[2],
+                kraj=airport[3],
+                iatacode=airport[4],
+                icaocode=airport[5],
+                longitude=airport[6],
+                latitude=airport[7]
+            )
+        )
     airports_cursor.close()
 
-    return render_template('flights-airports/flights-airports.page.html', airports_data=data, airports_headers=headers)
+    return render_template('flights-airports/flights-airports.page.html',
+                           airports_data=airports_list,
+                           airports_headers=headers)
 
 
 @flights_bp.route('/airports/new', methods=['GET', 'POST'])

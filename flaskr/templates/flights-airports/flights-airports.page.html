@@ -36,15 +36,20 @@
             <tbody>
             {% for airport in airports_data %}
                 <tr>
-                    {% for value in airport %}
-                        <td>{{ value }}</td>
-                    {% endfor %}
+                    <td>{{ airport.id }}</td>
+                    <td>{{ airport.nazwa }}</td>
+                    <td>{{ airport.miasto }}</td>
+                    <td>{{ airport.kraj }}</td>
+                    <td>{{ airport.iatacode }}</td>
+                    <td>{{ airport.icaocode }}</td>
+                    <td>{{ airport.longitude }}</td>
+                    <td>{{ airport.latitude }}</td>
                     <td>
-                        <a href="{{ url_for('flights.update_airport', airport_id=airport[0]) }}"
+                        <a href="{{ url_for('flights.update_airport', airport_id=airport.id) }}"
                            class="icon-edit-table">
                             <i class="fa-solid fa-pen"></i>
                         </a>
-                        <button id="delete{{ airport[0] }}" class="icon-delete-table">
+                        <button id="delete{{ airport.id }}" class="icon-delete-table">
                             <i class="fa-solid fa-trash"></i>
                         </button>
                     </td>
@@ -65,11 +70,9 @@
     <script src="https://cdn.datatables.net/responsive/2.4.0/js/dataTables.responsive.min.js"></script>
     <script src="https://cdn.datatables.net/responsive/2.4.0/js/responsive.bootstrap5.min.js"></script>
 
-
-
-
     <script>
 
+        {# ADDING NEW AIRPORT BUTTON #}
         document.getElementById("add-new-airport").addEventListener("click", function () {
             Swal.fire({
                 title: "Podaj kod IATA nowego lotniska",
@@ -89,15 +92,17 @@
             })
         })
 
+        {# DATATABLE #}
         $(document).ready(function () {
             $('#example').DataTable();
         });
 
+        {# BUTTONS IN DATATABLE - DELETING AIRPORT #}
         {% for airport in airports_data %}
 
-            document.getElementById("delete{{ airport[0] }}").addEventListener("click", function () {
+            document.getElementById("delete{{ airport.id }}").addEventListener("click", function () {
                 Swal.fire({
-                    title: 'Czy na pewno chcesz usunąć: {{ airport[1] }}?',
+                    title: 'Czy na pewno chcesz usunąć: {{ airport.nazwa }}?',
                     text: "Nie będziesz mógł cofnąć tej dezycji!",
                     icon: 'warning',
                     showCancelButton: true,
@@ -106,7 +111,7 @@
                     confirmButtonText: 'Tak, usuń!'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        post("{{ url_for('flights.delete_airport') }}", {airport_id: {{ airport[0] }} })
+                        post("{{ url_for('flights.delete_airport') }}", {airport_id: {{ airport.id }} })
                     }
                 })
             })
