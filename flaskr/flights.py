@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flaskr.forms import AirportForm
-from flaskr.models import Lotnisko
+from flaskr.models import Lotnisko, LiniaLotnicza
 from flaskr import pool
 
 import os
@@ -87,7 +87,7 @@ def airports():
         )
     airports_cursor.close()
 
-    return render_template('flights-airports/flights-airports.page.html',
+    return render_template('flights-airports/flights-airports.html',
                            airports_data=airports_list,
                            airports_headers=headers)
 
@@ -198,3 +198,25 @@ def delete_airport():
     airports_delete_cursor.close()
     flash("Pomyślnie usunięto lotnisko", category='success')
     return redirect(url_for('flights.airports'))
+
+
+@flights_bp.route('/airlines')
+def airlines():
+    db = pool.acquire()
+    airlines_cursor = db.cursor()
+    airlines_cursor.execute("SELECT LINIALOTNICZA_ID, NAZWA, KRAJ FROM LINIALOTNICZA")
+    headers = [header[0] for header in airlines_cursor.description]
+    airlines_list = []
+    for airline in airlines_cursor:
+        airlines_list.append(
+            LiniaLotnicza(
+                _id=airline[0],
+                nazwa=airline[1],
+                kraj=airline[2]
+            )
+        )
+    airlines_cursor.close()
+
+    return render_template('flights-airlines/flights-airlines.page.html',
+                           airlines_data=airlines_list,
+                           airlines_headers=headers)

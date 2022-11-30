@@ -1,0 +1,80 @@
+{% extends "table.layout.html" %}
+
+
+{% block page_header %}
+
+    <h3>LINIE LOTNICZE</h3>
+
+{% endblock %}
+
+
+{% block button_add_new %}
+
+    <div class="container-fluid create-new-container">
+        {# TODO: change url_for('flights.new_airline') #}
+        <a href="{{ url_for('flights.airlines') }}">
+            <button type="button" class="btn btn-success">Nowa linia lotnicza</button>
+        </a>
+    </div>
+
+{% endblock %}
+
+
+{% block thead %}
+
+    {% for header in airlines_headers %}
+        <th>{{ header }}</th>
+    {% endfor %}
+    <th>Opcje</th>
+
+{% endblock %}
+
+
+{% block tbody %}
+
+    {% for airline in airlines_data %}
+        <tr>
+            <td>{{ airline.id }}</td>
+            <td>{{ airline.nazwa }}</td>
+            <td>{{ airline.kraj }}</td>
+            <td>
+                {# TODO: change url_for('flights.update_airline') #}
+                <a href="{{ url_for('flights.airlines') }}"
+                   class="icon-edit-table">
+                    <i class="fa-solid fa-pen"></i>
+                </a>
+                <button id="delete{{ airline.id }}" class="icon-delete-table">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </td>
+        </tr>
+    {% endfor %}
+
+{% endblock %}
+
+
+{% block custom_js %}
+    <script>
+
+        {# BUTTONS IN DATATABLE - DELETING AIRPORT #}
+        {% for airport in airports_data %}
+
+            document.getElementById("delete{{ airline.id }}").addEventListener("click", function () {
+                Swal.fire({
+                    title: 'Czy na pewno chcesz usunąć: {{ airline.nazwa }}?',
+                    text: "Nie będziesz mógł cofnąć tej dezycji!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Tak, usuń!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        {# TODO: change url_for('flights.delete_airline') #}
+                        {#post("{{ url_for('flights.airlines') }}", {airport_id: {{ airport.id }}})#}
+                    }
+                })
+            })
+        {% endfor %}
+    </script>
+{% endblock %}
