@@ -34,10 +34,12 @@ def get_airport_from_api(iatacode: str) -> Lotnisko:
     api_data = json.loads(response)
     # handle case when wrong iatacode is provided in the url parameter
     if 'error' in api_data:
-        error = api_data.get('error').get('text')
-        flash(error, category='error')
+        if api_data['error'] == "No airport found":
+            flash("Nie znaleziono takiego lotniska. Uzupełnij pola samodzielnie.", category='warning')
+        else:
+            error = api_data.get('error').get('text')
+            flash(error, category='error')
         return Lotnisko()
-    print(api_data)
     return Lotnisko(nazwa=api_data.get('name', ''),
                     miasto=api_data.get('city', ''),
                     kraj=api_data.get('country', ''),

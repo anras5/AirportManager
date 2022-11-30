@@ -60,11 +60,11 @@ class LoginForm(FlaskForm):
 # FLIGHTS.AIRPORTS FORMS
 
 class AirportForm(FlaskForm):
-    nazwa = StringField("Podaj nazwę lotniska")
-    miasto = StringField("Podaj miasto lotniska")
-    kraj = StringField("Podaj kraj lotniska")
-    iatacode = StringField("Podaj kod IATA")
-    icaocode = StringField("Podaj kod ICAO")
-    longitude = FloatField("Podaj długość geograficzną")
-    latitude = FloatField("Podaj szerokość geograficzną")
+    nazwa = StringField("Podaj nazwę lotniska", validators=[DataRequired()])
+    miasto = StringField("Podaj miasto lotniska", validators=[DataRequired()])
+    kraj = StringField("Podaj kraj lotniska", validators=[DataRequired()])
+    iatacode = StringField("Podaj kod IATA", validators=[DataRequired(), Length(min=3, max=3, message="Kody IATA mają 3 cyfry")])
+    icaocode = StringField("Podaj kod ICAO", validators=[DataRequired(), Length(min=4, max=4, message="Kody ICAO mają 4 cyfry")])
+    longitude = FloatField("Podaj długość geograficzną", validators=[DataRequired()])
+    latitude = FloatField("Podaj szerokość geograficzną", validators=[DataRequired()])
     submit = SubmitField("Dodaj lotnisko")
