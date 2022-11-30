@@ -106,13 +106,7 @@
                     confirmButtonText: 'Tak, usuń!'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        Swal.fire(
-                            'Usunięto!',
-                            'Lotnisko zostało usunięte',
-                            'success'
-                        ).then(function () {
-                            window.location.href = "{{ url_for('flights.delete_airport', airport_id=airport[0]) }}"
-                        })
+                        post("{{ url_for('flights.delete_airport') }}", {airport_id: {{ airport[0] }} })
                     }
                 })
             })

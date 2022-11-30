@@ -99,6 +99,7 @@ def new_airport():
                    latitude=form.latitude.data)
         db.commit()
         cr.close()
+        flash("Pomyślnie dodano nowe lotnisko", category='success')
         return redirect(url_for('flights.airports'))
     else:
         # GET
@@ -108,8 +109,6 @@ def new_airport():
             lotnisko = get_airport_from_api(iatacode)
         else:
             lotnisko = Lotnisko()
-
-        print(lotnisko.iatacode)
 
         return render_template('flights-airports/flights-airports-new.page.html',
                                form=form,
@@ -166,11 +165,18 @@ def update_airport(airport_id: int):
                            airport_data=airport_data)
 
 
-@flights_bp.route('/airports/delete/<int:airport_id>')
-def delete_airport(airport_id):
+@flights_bp.route('/airports/delete', methods=['POST'])
+def delete_airport():
+    # get airport id from parameters
+    parameters = request.form
+    airport_id = parameters.get('airport_id', '')
+    if not airport_id:
+        flash("Błąd - nie podano lotniska do usunięcia", category='error')
+        return redirect(url_for('flights.airports'))
     db = pool.acquire()
     airports_delete_cursor = db.cursor()
     airports_delete_cursor.execute("DELETE FROM LOTNISKO WHERE LOTNISKO_ID = :id", id=airport_id)
     db.commit()
     airports_delete_cursor.close()
+    flash("Pomyślnie usunięto lotnisko", category='success')
     return redirect(url_for('flights.airports'))
