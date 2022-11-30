@@ -1,0 +1,65 @@
+{% extends "base.layout.html" %}
+
+
+{% block head %}
+    {#datatables css#}
+    {#    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.2.0/css/bootstrap.min.css">#}
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.1/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.4.0/css/responsive.bootstrap5.min.css">
+{% endblock %}
+
+{% block page_header %}
+    {# here the header #}
+{% endblock %}
+
+{% block content %}
+
+    <div class="container-fluid create-new-container">
+        {% block button_add_new %}
+            {# here <button></button> #}
+        {% endblock %}
+    </div>
+
+
+    <div class="container-fluid table-container">
+        <table id="example" class="table table-striped dt-responsive nowrap" style="width:100%">
+            {# TODO: zmiana opisu tabelki (show entries, search, showing entries, previous, next ...) na język polski #}
+
+
+            <thead>
+            <tr>
+                {% block thead %}
+                    {# here <th></th> in header of table with <th>Opcje</th> #}
+                {% endblock %}
+            </tr>
+            </thead>
+            <tbody>
+            {% block tbody %}
+                {# here <td></td> in body of table #}
+            {% endblock %}
+            </tbody>
+        </table>
+    </div>
+
+{% endblock %}
+
+
+{% block js %}
+    {#datatables js#}
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.1/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.4.0/js/dataTables.responsive.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.4.0/js/responsive.bootstrap5.min.js"></script>
+
+    <script>
+        {# DATATABLE #}
+        $(document).ready(function () {
+            $('#example').DataTable();
+        });
+    </script>
+
+    {% block custom_js %}
+        {# here custom js - "adding new" button, buttons in datatable #}
+    {% endblock %}
+{% endblock %}

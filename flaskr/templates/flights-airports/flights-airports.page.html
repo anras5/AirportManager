@@ -1,77 +1,61 @@
-{% extends "base.layout.html" %}
+{% extends "table.layout.html" %}
 
-
-{% block head %}
-    {#datatables css#}
-
-    {#    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.2.0/css/bootstrap.min.css">#}
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.1/css/dataTables.bootstrap5.min.css">
-    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.4.0/css/responsive.bootstrap5.min.css">
-
-{% endblock %}
 
 {% block page_header %}
+
     <h3>LOTNISKA</h3>
+
 {% endblock %}
 
-{% block content %}
+
+{% block button_add_new %}
 
     <div class="container-fluid create-new-container">
         <button id="add-new-airport" type="button" class="btn btn-success">Nowe lotnisko</button>
     </div>
 
+{% endblock %}
 
-    <div class="container-fluid table-container">
-        <table id="example" class="table table-striped dt-responsive nowrap" style="width:100%">
-            {# TODO: zmiana opisu tabelki (show entries, search, showing entries, previous, next ...) na język polski #}
 
-            <thead>
-            <tr>
-                {% for header in airports_headers %}
-                    <th>{{ header }}</th>
-                {% endfor %}
-                <th>Opcje</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for airport in airports_data %}
-                <tr>
-                    <td>{{ airport.id }}</td>
-                    <td>{{ airport.nazwa }}</td>
-                    <td>{{ airport.miasto }}</td>
-                    <td>{{ airport.kraj }}</td>
-                    <td>{{ airport.iatacode }}</td>
-                    <td>{{ airport.icaocode }}</td>
-                    <td>{{ airport.longitude }}</td>
-                    <td>{{ airport.latitude }}</td>
-                    <td>
-                        <a href="{{ url_for('flights.update_airport', airport_id=airport.id) }}"
-                           class="icon-edit-table">
-                            <i class="fa-solid fa-pen"></i>
-                        </a>
-                        <button id="delete{{ airport.id }}" class="icon-delete-table">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
-                    </td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    </div>
+{% block thead %}
+
+    {% for header in airports_headers %}
+        <th>{{ header }}</th>
+    {% endfor %}
+    <th>Opcje</th>
 
 {% endblock %}
 
 
-{% block js %}
-    {#datatables js#}
-    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
-    <script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.1/js/dataTables.bootstrap5.min.js"></script>
-    <script src="https://cdn.datatables.net/responsive/2.4.0/js/dataTables.responsive.min.js"></script>
-    <script src="https://cdn.datatables.net/responsive/2.4.0/js/responsive.bootstrap5.min.js"></script>
+{% block tbody %}
 
+    {% for airport in airports_data %}
+        <tr>
+            <td>{{ airport.id }}</td>
+            <td>{{ airport.nazwa }}</td>
+            <td>{{ airport.miasto }}</td>
+            <td>{{ airport.kraj }}</td>
+            <td>{{ airport.iatacode }}</td>
+            <td>{{ airport.icaocode }}</td>
+            <td>{{ airport.longitude }}</td>
+            <td>{{ airport.latitude }}</td>
+            <td>
+                <a href="{{ url_for('flights.update_airport', airport_id=airport.id) }}"
+                   class="icon-edit-table">
+                    <i class="fa-solid fa-pen"></i>
+                </a>
+                <button id="delete{{ airport.id }}" class="icon-delete-table">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </td>
+        </tr>
+    {% endfor %}
+
+{% endblock %}
+
+
+{% block custom_js %}
     <script>
-
         {# ADDING NEW AIRPORT BUTTON #}
         document.getElementById("add-new-airport").addEventListener("click", function () {
             Swal.fire({
@@ -92,11 +76,6 @@
             })
         })
 
-        {# DATATABLE #}
-        $(document).ready(function () {
-            $('#example').DataTable();
-        });
-
         {# BUTTONS IN DATATABLE - DELETING AIRPORT #}
         {% for airport in airports_data %}
 
@@ -111,13 +90,10 @@
                     confirmButtonText: 'Tak, usuń!'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        post("{{ url_for('flights.delete_airport') }}", {airport_id: {{ airport.id }} })
+                        post("{{ url_for('flights.delete_airport') }}", {airport_id: {{ airport.id }}})
                     }
                 })
             })
-
         {% endfor %}
-
-
     </script>
 {% endblock %}
