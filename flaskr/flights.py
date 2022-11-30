@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flaskr.forms import AirportForm
+from flaskr.models import Lotnisko
 from flaskr import pool
 
 import os
@@ -8,6 +9,42 @@ import json
 import requests
 
 flights_bp = Blueprint('flights', __name__, url_prefix='/flights')
+
+
+def get_airport_from_api(iatacode: str) -> Lotnisko:
+    """
+    get_airport_from_api returns data about an airport from RapidApi
+    :param iatacode:
+    :return: Lotnisko
+    """
+    # get data from https://airport-info.p.rapidapi.com/airport into api_data dictionary
+    api_key = os.environ.get('RAPID_API_AIRPORT_INFO_KEY')
+    # prepare headers for request
+    headers = {
+        "X-RapidAPI-Key": api_key,
+        "X-RapidAPI-Host": "airport-info.p.rapidapi.com"
+    }
+    # prepare query dictionary
+    querystring = {"iata": iatacode}
+
+    # send request
+    response = requests.get(f'https://airport-info.p.rapidapi.com/airport',
+                            headers=headers,
+                            params=querystring).text
+    api_data = json.loads(response)
+    # handle case when wrong iatacode is provided in the url parameter
+    if 'error' in api_data:
+        error = api_data.get('error').get('text')
+        flash(error, category='error')
+        return Lotnisko()
+    print(api_data)
+    return Lotnisko(nazwa=api_data.get('name', ''),
+                    miasto=api_data.get('city', ''),
+                    kraj=api_data.get('country', ''),
+                    iatacode=api_data.get('iata', ''),
+                    icaocode=api_data.get('icao', ''),
+                    longitude=round(api_data.get('longitude', 1000.0), 4),
+                    latitude=round(api_data.get('latitude', 1000.0), 4))
 
 
 @flights_bp.route('/')
@@ -66,37 +103,17 @@ def new_airport():
     else:
         # GET
 
-        # get data from https://airport-info.p.rapidapi.com/airport into api_data dictionary
-        api_key = os.environ.get('RAPID_API_AIRPORT_INFO_KEY')
-
-        # prepare headers for request
-        headers = {
-            "X-RapidAPI-Key": api_key,
-            "X-RapidAPI-Host": "airport-info.p.rapidapi.com"
-        }
-
-        # get iatacode from url parameter
         iatacode = request.args.get('iatacode')
-        querystring = {"iata": iatacode}
-
-        # send request only if iatacode provided in url parameter
         if iatacode:
-            # send request
-            response = requests.get(f'https://airport-info.p.rapidapi.com/airport', headers=headers,
-                                    params=querystring).text
-            api_data = json.loads(response)
-
-            # handle case when wrong iatacode is provided in the url parameter
-            if 'error' in api_data:
-                error = api_data.get('error').get('text')
-                if error == 'No airport found':
-                    api_data = {}
-
+            lotnisko = get_airport_from_api(iatacode)
         else:
-            api_data = {}
+            lotnisko = Lotnisko()
+
+        print(lotnisko.iatacode)
+
         return render_template('flights-airports/flights-airports-new.page.html',
                                form=form,
-                               api_data=api_data)
+                               lotnisko=lotnisko)
 
 
 @flights_bp.route('/airports/update/<int:airport_id>', methods=['GET', 'POST'])
