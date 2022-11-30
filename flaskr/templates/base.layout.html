@@ -85,13 +85,6 @@
         </nav>
     {% endblock navbar %}
 
-    {# flash messaging #}
-    {% for message in get_flashed_messages() %}
-        <div class="container alert alert-info">
-            {{ message }}
-        </div>
-    {% endfor %}
-
 
     <div class="container-fluid page-header">
         {% block page_header %}
@@ -131,7 +124,29 @@
             integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3"
             crossorigin="anonymous"></script>
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    {# Notie #}
     <script src="https://unpkg.com/notie"></script>
+
+    <script>
+        {# Notie notifications #}
+        {# flash messaging #}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    notie.alert({
+                        type: '{{ category }}', // optional, default = 4, enum: [1, 2, 3, 4, 5, 'success', 'warning', 'error', 'info', 'neutral']
+                        text: '{{ message }}',
+                        stay: false, // optional, default = false
+                        time: 3, // optional, default = 3, minimum = 1,
+                        position: 'top' // optional, default = 'top', enum: ['top', 'bottom']
+                    })
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+    </script>
+
 {% endblock %}
 
 {% block js %}

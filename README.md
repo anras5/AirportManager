@@ -29,3 +29,11 @@ or
 10. Klasa - wszystko w module Loty
 11. Pasażer - wszystko w module Pasażer
 12. Bilet - wszystko w module Pasażer
+
+
+### Categories for flash notifications
+1. 'success' - kolor zielony
+2. 'warning' - kolor żółty
+3. 'error' - kolor czerwony
+4. 'info' - kolor niebieski
+5. 'neutral' - kolor szary

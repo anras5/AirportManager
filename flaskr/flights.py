@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, request
+from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flaskr.forms import AirportForm
 from flaskr import pool
 
@@ -125,6 +125,7 @@ def update_airport(airport_id: int):
                    id=airport_id)
         db.commit()
         cr.close()
+        flash("Pomyślna aktualizacja lotniska", category='neutral')
         return redirect(url_for('flights.airports'))
 
     db = pool.acquire()
