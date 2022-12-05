@@ -64,6 +64,9 @@ def world_map():
     return render_template('flights-worldmap.page.html')
 
 
+# -------------------------------------------------------------------------------------------------------------------- #
+# AIRPORTS
+
 @flights_bp.route('/airports')
 def airports():
     db = pool.acquire()
@@ -87,7 +90,7 @@ def airports():
         )
     airports_cursor.close()
 
-    return render_template('flights-airports/flights-airports.html',
+    return render_template('flights-airports/flights-airports.page.html',
                            airports_data=airports_list,
                            airports_headers=headers)
 
@@ -199,6 +202,9 @@ def delete_airport():
     flash("Pomyślnie usunięto lotnisko", category='success')
     return redirect(url_for('flights.airports'))
 
+
+# -------------------------------------------------------------------------------------------------------------------- #
+# AIRLINES
 
 @flights_bp.route('/airlines')
 def airlines():
