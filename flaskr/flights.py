@@ -242,3 +242,24 @@ def new_airline():
 
     return render_template('flights-airlines/flights-airlines-new.page.html',
                            form=form, )
+
+
+@flights_bp.route('/airlines/delete', methods=['POST'])
+def delete_airline():
+    # get airline id from parameters
+    parameters = request.form
+    airline_id = parameters.get('airline_id', '')
+    if not airline_id:
+        flash("Błąd - nie podano linii lotniczej do usunięcia", category='error')
+        return redirect(url_for('flights.airlines'))
+
+    # delete record from database
+    db = pool.acquire()
+    airlines_delete_cursor = db.cursor()
+    airlines_delete_cursor.execute("DELETE FROM LINIALOTNICZA WHERE LINIALOTNICZA_ID = :id", id=airline_id)
+    db.commit()
+    airlines_delete_cursor.close()
+
+    # flash and redirect to airlines page
+    flash("Pomyślnie usunięto linię lotniczą", category='success')
+    return redirect(url_for('flights.airlines'))

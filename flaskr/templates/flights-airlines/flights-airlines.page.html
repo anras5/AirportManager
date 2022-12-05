@@ -56,7 +56,7 @@
     <script>
 
         {# BUTTONS IN DATATABLE - DELETING AIRPORT #}
-        {% for airport in airports_data %}
+        {% for airline in airlines_data %}
 
             document.getElementById("delete{{ airline.id }}").addEventListener("click", function () {
                 Swal.fire({
@@ -69,8 +69,7 @@
                     confirmButtonText: 'Tak, usuń!'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        {# TODO: change url_for('flights.delete_airline') #}
-                        {#post("{{ url_for('flights.airlines') }}", {airport_id: {{ airport.id }}})#}
+                        post("{{ url_for('flights.delete_airline') }}", {airline_id: {{ airline.id }}})
                     }
                 })
             })
