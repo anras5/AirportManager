@@ -1,0 +1,38 @@
+{% extends "base.layout.html" %}
+
+{% block page_header %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col table-header">
+                <h3>Linie lotnicze - dodawanie nowej linii</h3>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid create-new-container">
+        <a href="{{ url_for('flights.airlines') }}">
+            <button type="button" class="btn btn-secondary">Powrót</button>
+        </a>
+    </div>
+
+{% endblock %}
+
+{% block content %}
+
+    <div class="container form">
+        <form method="post" class="row g-3">
+            {{ form.hidden_tag() }}
+            <div class="col-md-6">
+                {{ form.nazwa.label(class_='form-label') }}
+                {{ form.nazwa(class_='form-control', placeholder='Nazwa') }}
+            </div>
+            <div class="col-md-6">
+                {{ form.kraj.label(class_='form-label') }}
+                {{ form.kraj(class_='form-control', placeholder='Kraj') }}
+            </div>
+            <div class="col-12">
+                {{ form.submit(class_='btn btn-success') }}
+            </div>
+        </form>
+    </div>
+
+{% endblock %}

@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
-from flaskr.forms import AirportForm
+from flaskr.forms import AirportForm, AirlineForm
 from flaskr.models import Lotnisko, LiniaLotnicza
 from flaskr import pool
 
@@ -220,3 +220,25 @@ def airlines():
     return render_template('flights-airlines/flights-airlines.page.html',
                            airlines_data=airlines_list,
                            airlines_headers=headers)
+
+
+@flights_bp.route('/airlines/new', methods=['GET', 'POST'])
+def new_airline():
+    form = AirlineForm()
+    if form.validate_on_submit():
+        # POST
+        db = pool.acquire()
+        cr = db.cursor()
+        cr.execute("""INSERT INTO LINIALOTNICZA
+                           VALUES ((SELECT MAX(LINIALOTNICZA_ID) FROM LINIALOTNICZA)+1,
+                                   :nazwa,
+                                   :kraj)""",
+                   nazwa=form.nazwa.data,
+                   kraj=form.kraj.data)
+        db.commit()
+        cr.close()
+        flash("Pomyślnie dodano nową linię lotniczą", category='success')
+        return redirect(url_for('flights.airlines'))
+
+    return render_template('flights-airlines/flights-airlines-new.page.html',
+                           form=form, )

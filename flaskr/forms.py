@@ -30,8 +30,8 @@ class RegistrationForm(FlaskForm):
                                     user_exists,
                                     Length(max=25, message='Must be shorter than 25 characters')])
     password = StringField("Podaj hasło", validators=[DataRequired(message='Password can not be empty'),
-                                                              Length(max=25,
-                                                                     message='Must be shorter than 25 characters')])
+                                                      Length(max=25,
+                                                             message='Must be shorter than 25 characters')])
     confirm = StringField("Potwierdź hasło",
                           validators=[DataRequired(message='Please confirm password'),
                                       EqualTo('password', message='Passwords must match')])
@@ -63,8 +63,19 @@ class AirportForm(FlaskForm):
     nazwa = StringField("Podaj nazwę lotniska", validators=[DataRequired()])
     miasto = StringField("Podaj miasto lotniska", validators=[DataRequired()])
     kraj = StringField("Podaj kraj lotniska", validators=[DataRequired()])
-    iatacode = StringField("Podaj kod IATA", validators=[DataRequired(), Length(min=3, max=3, message="Kody IATA mają 3 cyfry")])
-    icaocode = StringField("Podaj kod ICAO", validators=[DataRequired(), Length(min=4, max=4, message="Kody ICAO mają 4 cyfry")])
+    iatacode = StringField("Podaj kod IATA",
+                           validators=[DataRequired(), Length(min=3, max=3, message="Kody IATA mają 3 cyfry")])
+    icaocode = StringField("Podaj kod ICAO",
+                           validators=[DataRequired(), Length(min=4, max=4, message="Kody ICAO mają 4 cyfry")])
     longitude = FloatField("Podaj długość geograficzną", validators=[DataRequired()])
     latitude = FloatField("Podaj szerokość geograficzną", validators=[DataRequired()])
     submit = SubmitField("Dodaj lotnisko")
+
+
+# ------------------------------------------------------------------------------------------------------------------- #
+# FLIGHTS.AIRLINES FORMS
+
+class AirlineForm(FlaskForm):
+    nazwa = StringField("Podaj nazwę linii lotniczych", validators=[DataRequired()])
+    kraj = StringField("Podaj kraj lotniska", validators=[DataRequired()])
+    submit = SubmitField("Dodaj linię lotniczą")
