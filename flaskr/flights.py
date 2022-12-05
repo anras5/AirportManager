@@ -162,7 +162,7 @@ def update_airport(airport_id: int):
                    id=airport_id)
         db.commit()
         cr.close()
-        flash("Pomyślna aktualizacja lotniska", category='neutral')
+        flash("Pomyślna aktualizacja lotniska", category='success')
         return redirect(url_for('flights.airports'))
 
     db = pool.acquire()
@@ -172,18 +172,16 @@ def update_airport(airport_id: int):
                                       WHERE LOTNISKO_ID = :id""",
                                    id=airport_id)
     data = airports_update_cursor.fetchone()
-    airport_data = {
-        'name': data[0],
-        'city': data[1],
-        'country': data[2],
-        'iata': data[3],
-        'icao': data[4],
-        'longitude': data[5],
-        'latitude': data[6]
-    }
+    lotnisko = Lotnisko(nazwa=data[0],
+                        miasto=data[1],
+                        kraj=data[2],
+                        iatacode=data[3],
+                        icaocode=data[4],
+                        longitude=data[5],
+                        latitude=data[6])
     return render_template('flights-airports/flights-airports-update.page.html',
                            form=form,
-                           airport_data=airport_data)
+                           lotnisko=lotnisko)
 
 
 @flights_bp.route('/airports/delete', methods=['POST'])
