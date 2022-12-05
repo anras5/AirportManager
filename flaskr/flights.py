@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
-from flaskr.forms import AirportForm, AirlineForm
+from flaskr.forms import AirportForm, AirlinesForm
 from flaskr.models import Lotnisko, LiniaLotnicza
 from flaskr import pool
 
@@ -224,7 +224,7 @@ def airlines():
 
 @flights_bp.route('/airlines/new', methods=['GET', 'POST'])
 def new_airline():
-    form = AirlineForm()
+    form = AirlinesForm()
     if form.validate_on_submit():
         # POST
         db = pool.acquire()
@@ -241,7 +241,40 @@ def new_airline():
         return redirect(url_for('flights.airlines'))
 
     return render_template('flights-airlines/flights-airlines-new.page.html',
-                           form=form, )
+                           form=form)
+
+
+@flights_bp.route('/airlines/update/<int:airlines_id>', methods=['GET', 'POST'])
+def update_airline(airlines_id: int):
+    form = AirlinesForm()
+    if form.validate_on_submit():
+        # POST
+        db = pool.acquire()
+        cr = db.cursor()
+        cr.execute("""UPDATE LINIALOTNICZA
+                      SET NAZWA = :nazwa,
+                          KRAJ = :kraj
+                      WHERE LINIALOTNICZA_ID = :id""",
+                   nazwa=form.nazwa.data,
+                   kraj=form.kraj.data,
+                   id=airlines_id)
+        db.commit()
+        cr.close()
+        flash("Pomyślna aktualizacja linii lotniczej", category='success')
+        return redirect(url_for('flights.airlines'))
+
+    db = pool.acquire()
+    airports_update_cursor = db.cursor()
+    airports_update_cursor.execute("""SELECT NAZWA, KRAJ
+                                      FROM LINIALOTNICZA
+                                      WHERE LINIALOTNICZA_ID = :id""",
+                                   id=airlines_id)
+    data = airports_update_cursor.fetchone()
+    linialotnicza = LiniaLotnicza(nazwa=data[0],
+                                  kraj=data[1])
+    return render_template('flights-airlines/flights-airlines-update.page.html',
+                           form=form,
+                           linialotnicza=linialotnicza)
 
 
 @flights_bp.route('/airlines/delete', methods=['POST'])

@@ -37,8 +37,7 @@
             <td>{{ airline.nazwa }}</td>
             <td>{{ airline.kraj }}</td>
             <td>
-                {# TODO: change url_for('flights.update_airline') #}
-                <a href="{{ url_for('flights.airlines') }}"
+                <a href="{{ url_for('flights.update_airline', airlines_id=airline.id) }}"
                    class="icon-edit-table">
                     <i class="fa-solid fa-pen"></i>
                 </a>
