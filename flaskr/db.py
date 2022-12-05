@@ -11,7 +11,7 @@ def start_pool():
     cx_Oracle.init_oracle_client(lib_dir=os.environ.get('PATH_TO_INSTANTCLIENT'))
     db = cx_Oracle.SessionPool(user=os.environ.get('ORACLE_USER'),
                                password=os.environ.get('ORACLE_PASSWD'),
-                               dsn='oracleclouddb_high',
+                               dsn=f"{os.environ.get('ORACLE_HOSTNAME')}/{os.environ.get('ORACLE_SERVICENAME')}",
                                min=pool_min,
                                max=pool_max,
                                increment=pool_inc,
