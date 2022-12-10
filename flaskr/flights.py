@@ -300,3 +300,28 @@ def delete_airline():
     # flash and redirect to airlines page
     flash("Pomyślnie usunięto linię lotniczą", category='success')
     return redirect(url_for('flights.airlines'))
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+# AIRLINES
+
+@flights_bp.route('/manufacturers')
+def manufacturers():
+    db = pool.acquire()
+    manufacturers_cursor = db.cursor()
+    manufacturers_cursor.execute("SELECT PRODUCENT_ID, NAZWA, KRAJ FROM PRODUCENT")
+    headers = [header[0] for header in manufacturers_cursor.description]
+    manufacturers_list = []
+    for manufacturer in manufacturers_cursor:
+        manufacturers_list.append(
+            LiniaLotnicza(
+                _id=manufacturer[0],
+                nazwa=manufacturer[1],
+                kraj=manufacturer[2]
+            )
+        )
+    manufacturers_cursor.close()
+
+    return render_template('flights-manufacturers/flights-manufacturers.page.html',
+                           manufacturers_data=manufacturers_list,
+                           manufacturers_headers=headers)

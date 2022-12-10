@@ -1,0 +1,78 @@
+{% extends "table.layout.html" %}
+
+
+{% block page_header %}
+
+    <h3>PRODUCENCI</h3>
+
+{% endblock %}
+
+
+{% block button_add_new %}
+
+    <div class="container-fluid create-new-container">
+        <a href="{{ url_for('flights.manufacturers') }}">
+            <button id="add-new-manufacturer" type="button" class="btn btn-success">Nowy producent</button>
+        </a>
+    </div>
+
+{% endblock %}
+
+
+{% block thead %}
+
+    {% for header in manufacturers_headers %}
+        <th>{{ header }}</th>
+    {% endfor %}
+    <th>Opcje</th>
+
+{% endblock %}
+
+
+{% block tbody %}
+
+    {% for manufacturer in manufacturers_data %}
+        <tr>
+            <td>{{ manufacturer.id }}</td>
+            <td>{{ manufacturer.nazwa }}</td>
+            <td>{{ manufacturer.kraj }}</td>
+            <td>
+                {# TODO: change url_for to flights.update_manufacturer #}
+                <a href="{{ url_for('flights.manufacturers') }}"
+                   class="icon-edit-table">
+                    <i class="fa-solid fa-pen"></i>
+                </a>
+                <button id="delete{{ manufacturer.id }}" class="icon-delete-table">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </td>
+        </tr>
+    {% endfor %}
+
+{% endblock %}
+
+
+{% block custom_js %}
+    <script>
+        {# BUTTONS IN DATATABLE - DELETING MANUFACTURER #}
+        {% for manufacturer in manufacturers_data %}
+
+            document.getElementById("delete{{ manufacturer.id }}").addEventListener("click", function () {
+                Swal.fire({
+                    title: 'Czy na pewno chcesz usunąć: {{ manufacturer.nazwa }}?',
+                    text: "Nie będziesz mógł cofnąć tej dezycji!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Tak, usuń!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        {# TODO: change url_for to flights.delete_manufacturer #}
+                        post("{{ url_for('flights.manufacturers') }}", {manufacturer_id: {{ manufacturer.id }}})
+                    }
+                })
+            })
+        {% endfor %}
+    </script>
+{% endblock %}

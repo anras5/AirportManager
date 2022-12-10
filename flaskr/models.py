@@ -26,3 +26,13 @@ class LiniaLotnicza:
         self.id = _id
         self.nazwa = nazwa
         self.kraj = kraj
+
+
+class Producent:
+
+    def __init__(self,
+                 _id: int = None,
+                 nazwa: str = '', kraj: str = ''):
+        self.id = _id
+        self.nazwa = nazwa
+        self.kraj = kraj
