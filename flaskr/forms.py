@@ -79,3 +79,12 @@ class AirlinesForm(FlaskForm):
     nazwa = StringField("Podaj nazwę linii lotniczych", validators=[DataRequired()])
     kraj = StringField("Podaj kraj lotniska", validators=[DataRequired()])
     submit = SubmitField("Dodaj linię lotniczą")
+
+
+# ------------------------------------------------------------------------------------------------------------------- #
+# FLIGHTS.MANUFACTURERS FORMS
+
+class ManufacturersForm(FlaskForm):
+    nazwa = StringField("Podaj nazwę producenta", validators=[DataRequired()])
+    kraj = StringField("Podaj kraj lotniska", validators=[DataRequired()])
+    submit = SubmitField("Dodaj producenta")

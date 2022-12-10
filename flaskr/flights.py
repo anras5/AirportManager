@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
-from flaskr.forms import AirportForm, AirlinesForm
-from flaskr.models import Lotnisko, LiniaLotnicza
+from flaskr.forms import AirportForm, AirlinesForm, ManufacturersForm
+from flaskr.models import Lotnisko, LiniaLotnicza, Producent
 from flaskr import pool
 
 import os
@@ -314,7 +314,7 @@ def manufacturers():
     manufacturers_list = []
     for manufacturer in manufacturers_cursor:
         manufacturers_list.append(
-            LiniaLotnicza(
+            Producent(
                 _id=manufacturer[0],
                 nazwa=manufacturer[1],
                 kraj=manufacturer[2]
@@ -325,3 +325,25 @@ def manufacturers():
     return render_template('flights-manufacturers/flights-manufacturers.page.html',
                            manufacturers_data=manufacturers_list,
                            manufacturers_headers=headers)
+
+
+@flights_bp.route('/manufacturers/new', methods=['GET', 'POST'])
+def new_manufacturer():
+    form = ManufacturersForm()
+    if form.validate_on_submit():
+        # POST
+        db = pool.acquire()
+        cr = db.cursor()
+        cr.execute("""INSERT INTO PRODUCENT
+                           VALUES ((SELECT MAX(PRODUCENT_ID) FROM PRODUCENT)+1,
+                                   :nazwa,
+                                   :kraj)""",
+                   nazwa=form.nazwa.data,
+                   kraj=form.kraj.data)
+        db.commit()
+        cr.close()
+        flash("Pomyślnie dodano nowego producenta", category='success')
+        return redirect(url_for('flights.manufacturers'))
+
+    return render_template('flights-manufacturers/flights-manufacturers-new.page.html',
+                           form=form)
