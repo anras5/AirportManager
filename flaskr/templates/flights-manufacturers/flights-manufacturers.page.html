@@ -67,8 +67,7 @@
                     confirmButtonText: 'Tak, usuń!'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        {# TODO: change url_for to flights.delete_manufacturer #}
-                        post("{{ url_for('flights.manufacturers') }}", {manufacturer_id: {{ manufacturer.id }}})
+                        post("{{ url_for('flights.delete_manufacturer') }}", {manufacturer_id: {{ manufacturer.id }}})
                     }
                 })
             })

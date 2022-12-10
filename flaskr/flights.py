@@ -380,3 +380,24 @@ def update_manufacturer(manufacturer_id: int):
     return render_template('flights-manufacturers/flights-manufacturers-update.page.html',
                            form=form,
                            producent=producent)
+
+
+@flights_bp.route('/manufacturers/delete', methods=['POST'])
+def delete_manufacturer():
+    # get manufacturer id from parameters
+    parameters = request.form
+    man_id = parameters.get('manufacturer_id', '')
+    if not man_id:
+        flash("Błąd - nie podano producenta do usunięcia", category='error')
+        return redirect(url_for('flights.manufacturers'))
+
+    # delete record from database
+    db = pool.acquire()
+    cr = db.cursor()
+    cr.execute("DELETE FROM PRODUCENT WHERE PRODUCENT_ID = :id", id=man_id)
+    db.commit()
+    cr.close()
+
+    # flash and redirect to airlines page
+    flash("Pomyślnie usunięto producenta", category='success')
+    return redirect(url_for('flights.manufacturers'))
