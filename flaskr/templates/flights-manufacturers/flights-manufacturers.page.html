@@ -37,8 +37,7 @@
             <td>{{ manufacturer.nazwa }}</td>
             <td>{{ manufacturer.kraj }}</td>
             <td>
-                {# TODO: change url_for to flights.update_manufacturer #}
-                <a href="{{ url_for('flights.manufacturers') }}"
+                <a href="{{ url_for('flights.update_manufacturer', manufacturer_id=manufacturer.id) }}"
                    class="icon-edit-table">
                     <i class="fa-solid fa-pen"></i>
                 </a>

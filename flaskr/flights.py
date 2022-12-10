@@ -347,3 +347,36 @@ def new_manufacturer():
 
     return render_template('flights-manufacturers/flights-manufacturers-new.page.html',
                            form=form)
+
+
+@flights_bp.route('/manufacturers/update/<int:manufacturer_id>', methods=['GET', 'POST'])
+def update_manufacturer(manufacturer_id: int):
+    form = ManufacturersForm()
+    if form.validate_on_submit():
+        # POST
+        db = pool.acquire()
+        cr = db.cursor()
+        cr.execute("""UPDATE PRODUCENT
+                      SET NAZWA = :nazwa,
+                          KRAJ = :kraj
+                      WHERE PRODUCENT_ID = :id""",
+                   nazwa=form.nazwa.data,
+                   kraj=form.kraj.data,
+                   id=manufacturer_id)
+        db.commit()
+        cr.close()
+        flash("Pomyślna aktualizacja producenta", category='success')
+        return redirect(url_for('flights.manufacturers'))
+
+    db = pool.acquire()
+    cr = db.cursor()
+    cr.execute("""SELECT NAZWA, KRAJ
+                    FROM PRODUCENT
+                   WHERE PRODUCENT_ID = :id""",
+               id=manufacturer_id)
+    data = cr.fetchone()
+    producent = Producent(nazwa=data[0],
+                          kraj=data[1])
+    return render_template('flights-manufacturers/flights-manufacturers-update.page.html',
+                           form=form,
+                           producent=producent)
