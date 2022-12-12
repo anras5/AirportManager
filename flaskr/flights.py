@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flaskr.forms import AirportForm, AirlinesForm, ManufacturersForm
-from flaskr.models import Lotnisko, LiniaLotnicza, Producent
+from flaskr.models import Lotnisko, LiniaLotnicza, Producent, Model
 from flaskr import pool
 
 import os
@@ -401,3 +401,50 @@ def delete_manufacturer():
     # flash and redirect to airlines page
     flash("Pomyślnie usunięto producenta", category='success')
     return redirect(url_for('flights.manufacturers'))
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+# MODELS
+
+@flights_bp.route('/models')
+def models():
+    db = pool.acquire()
+    cr = db.cursor()
+    cr.execute("""SELECT m.MODEL_ID AS MODEL_ID,
+                         m.NAZWA AS NAZWA_MODELU,
+                         m.LICZBAMIEJSC AS LICZBA_MIEJSC,
+                         m.PREDKOSC AS PREDKOSC,
+                         p.NAZWA AS NAZWA_PRODUCENTA
+                  FROM MODEL m INNER JOIN PRODUCENT p ON m.PRODUCENT_ID = p.PRODUCENT_ID""")
+    headers = [header[0] for header in cr.description]
+    models_list = []
+    for model in cr:
+        models_list.append(
+            Model(
+                _id=model[0],
+                nazwa=model[1],
+                liczba_miejsc=model[2],
+                predkosc=model[3],
+                producent=Producent(nazwa=model[4])
+            )
+        )
+    cr.close()
+
+    return render_template('flights-models/flights-models.page.html',
+                           models_data=models_list,
+                           headers=headers)
+
+
+@flights_bp.route('/models/new', methods=['GET', 'POST'])
+def new_model():
+    return redirect(url_for('flights.model'))
+
+
+@flights_bp.route('/models/update/<int:model_id>', methods=['GET', 'POST'])
+def update_model(model_id):
+    return redirect(url_for('flights.model'))
+
+
+@flights_bp.route('/models/delete', methods=['POST'])
+def delete_model(model_id):
+    return redirect(url_for('flights.model'))

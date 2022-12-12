@@ -22,7 +22,8 @@ class LiniaLotnicza:
 
     def __init__(self,
                  _id: int = None,
-                 nazwa: str = '', kraj: str = ''):
+                 nazwa: str = '',
+                 kraj: str = ''):
         self.id = _id
         self.nazwa = nazwa
         self.kraj = kraj
@@ -32,7 +33,24 @@ class Producent:
 
     def __init__(self,
                  _id: int = None,
-                 nazwa: str = '', kraj: str = ''):
+                 nazwa: str = '',
+                 kraj: str = ''):
         self.id = _id
         self.nazwa = nazwa
         self.kraj = kraj
+
+
+class Model:
+
+    def __init__(self,
+                 _id: int = None,
+                 nazwa: str = '',
+                 liczba_miejsc: int = None,
+                 predkosc: float = None,
+                 producent: Producent = None
+                 ):
+        self._id = _id
+        self.nazwa = nazwa
+        self.liczba_miejsc = liczba_miejsc
+        self.predkosc = predkosc
+        self.producent = producent
