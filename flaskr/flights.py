@@ -1,6 +1,6 @@
 import cx_Oracle
 from flask import Blueprint, render_template, redirect, url_for, request, flash
-from flaskr.forms import AirportForm, AirlinesForm, ManufacturersForm
+from flaskr.forms import AirportForm, AirlinesForm, ManufacturersForm, ModelsForm
 from flaskr.models import Lotnisko, LiniaLotnicza, Producent, Model
 from flaskr import pool
 
@@ -444,7 +444,38 @@ def models():
 
 @flights_bp.route('/models/new', methods=['GET', 'POST'])
 def new_model():
-    return redirect(url_for('flights.model'))
+    form = ModelsForm()
+
+    # get all manufacturers from database
+    db = pool.acquire()
+    cr = db.cursor()
+    cr.execute("""SELECT PRODUCENT_ID, NAZWA FROM PRODUCENT ORDER BY NAZWA""")
+
+    # insert manufacturers into form.producent.choices
+    form.producent.choices = [(m[0], m[1]) for m in cr]
+    cr.close()
+
+    if form.validate_on_submit():
+        # POST
+        db = pool.acquire()
+        cr = db.cursor()
+        cr.execute("""INSERT INTO MODEL
+                           VALUES ((SELECT MAX(MODEL_ID) FROM MODEL)+1,
+                                   :nazwa,
+                                   :liczbamiejsc,
+                                   :predkosc,
+                                   :producent_id)""",
+                   nazwa=form.nazwa.data,
+                   liczbamiejsc=form.liczba_miejsc.data,
+                   predkosc=form.predkosc.data,
+                   producent_id=form.producent.data)
+        db.commit()
+        cr.close()
+        flash("Pomyślnie dodano nowy model samolotu", category='success')
+        return redirect(url_for('flights.models'))
+
+    return render_template('flights-models/flights-models-new.page.html',
+                           form=form)
 
 
 @flights_bp.route('/models/update/<int:model_id>', methods=['GET', 'POST'])

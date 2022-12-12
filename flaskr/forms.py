@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, DateField, FloatField
+from wtforms import StringField, SubmitField, DateField, FloatField, SelectField, IntegerField
 from wtforms.validators import DataRequired, EqualTo, ValidationError, Length
 from flaskr import pool
 
@@ -88,3 +88,14 @@ class ManufacturersForm(FlaskForm):
     nazwa = StringField("Podaj nazwę producenta", validators=[DataRequired()])
     kraj = StringField("Podaj kraj lotniska", validators=[DataRequired()])
     submit = SubmitField("Dodaj producenta")
+
+
+# ------------------------------------------------------------------------------------------------------------------- #
+# FLIGHTS.MODELS FORMS
+
+class ModelsForm(FlaskForm):
+    nazwa = StringField("Podaj nazwę modelu", validators=[DataRequired()])
+    liczba_miejsc = IntegerField("Podaj liczbę miejsc w samolocie", validators=[DataRequired()])
+    predkosc = FloatField("Podaj prędkość modelu", validators=[DataRequired()])
+    producent = SelectField("Wybierz producenta samolotu", validators=[DataRequired()])
+    submit = SubmitField("Dodaj model")
