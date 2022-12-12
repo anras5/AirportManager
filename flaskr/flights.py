@@ -1,3 +1,4 @@
+import cx_Oracle
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flaskr.forms import AirportForm, AirlinesForm, ManufacturersForm
 from flaskr.models import Lotnisko, LiniaLotnicza, Producent, Model
@@ -394,9 +395,15 @@ def delete_manufacturer():
     # delete record from database
     db = pool.acquire()
     cr = db.cursor()
-    cr.execute("DELETE FROM PRODUCENT WHERE PRODUCENT_ID = :id", id=man_id)
-    db.commit()
-    cr.close()
+    try:
+        cr.execute("DELETE FROM PRODUCENT WHERE PRODUCENT_ID = :id", id=man_id)
+    except cx_Oracle.IntegrityError:
+        flash("Błąd - nie można usunąć producenta, ponieważ posiada modele", category='error')
+        cr.close()
+        return redirect(url_for('flights.manufacturers'))
+    else:
+        db.commit()
+        cr.close()
 
     # flash and redirect to airlines page
     flash("Pomyślnie usunięto producenta", category='success')
