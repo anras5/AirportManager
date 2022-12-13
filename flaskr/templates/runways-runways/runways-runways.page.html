@@ -1,0 +1,76 @@
+{% extends "table.layout.html" %}
+
+
+{% block page_header %}
+
+    <h3>PASY STARTOWE</h3>
+
+{% endblock %}
+
+
+{% block button_add_new %}
+
+    <div class="container-fluid create-new-container">
+        <a href="{{ url_for('runways.new_runway') }}">
+            <button type="button" class="btn btn-success">Nowy pas startowy</button>
+        </a>
+    </div>
+
+{% endblock %}
+
+
+{% block thead %}
+
+    {% for header in headers %}
+        <th>{{ header }}</th>
+    {% endfor %}
+    <th>Opcje</th>
+
+{% endblock %}
+
+
+{% block tbody %}
+
+    {% for pas in data %}
+        <tr>
+            <td>{{ pas._id }}</td>
+            <td>{{ pas.dlugosc }}</td>
+            <td>{{ pas.opis }}</td>
+            <td>
+                <a href="{{ url_for('runways.update_runway', runway_id=pas._id) }}"
+                   class="icon-edit-table">
+                    <i class="fa-solid fa-pen"></i>
+                </a>
+                <button id="delete{{ pas._id }}" class="icon-delete-table">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </td>
+        </tr>
+    {% endfor %}
+
+{% endblock %}
+
+
+{% block custom_js %}
+    <script>
+        {# BUTTONS IN DATATABLE - DELETING #}
+        {% for pas in data %}
+
+            document.getElementById("delete{{ pas._id }}").addEventListener("click", function () {
+                Swal.fire({
+                    title: 'Czy na pewno chcesz usunąć pas startowy o numerze: {{ pas._id }}?',
+                    text: "Nie będziesz mógł cofnąć tej dezycji!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Tak, usuń!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        post("{{ url_for('runways.delete_runway') }}", {runway_id: {{ pas._id }}})
+                    }
+                })
+            })
+        {% endfor %}
+    </script>
+{% endblock %}

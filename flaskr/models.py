@@ -54,3 +54,13 @@ class Model:
         self.liczba_miejsc = liczba_miejsc
         self.predkosc = predkosc
         self.producent = producent
+
+class Pas:
+
+    def __init__(self,
+                 _id: int = None,
+                 dlugosc: float = None,
+                 opis: str = ''):
+        self._id = _id
+        self.dlugosc = dlugosc
+        self.opis = opis
