@@ -1,0 +1,63 @@
+{% extends "base.layout.html" %}
+
+
+{% block page_header %}
+
+    <div class="container-fluid">
+        <h1 class="page-header">PASY STARTOWE</h1>
+        <h3>Wybierz opcję</h3>
+    </div>
+{% endblock %}
+
+{% block content %}
+
+    <div id="main-buttons">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-6">
+                    {# TODO: zmienic na runways.runways#}
+                    <a href="{{ url_for('runways.main') }}" class="main-button-click">
+                        <div id="runways-button" class="main-button">
+                            <i id="runways-icon" class="icon fa-sharp fa-solid fa-road fa-4x"></i>
+                            <h3>Pasy startowe</h3>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-lg-6">
+                    {# TODO: zmienic na runways.reservations#}
+                    <a href="{{ url_for('runways.main') }}" class="main-button-click">
+                        <div id="reservations-button" class="main-button">
+                            <i id="reservations-icon" class="icon fa-regular fa-calendar fa-4x"></i>
+                            <h3>Rezerwacje</h3>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block js %}
+    <script>
+        buttons = [
+            document.getElementById("runways-button"),
+            document.getElementById("reservations-button"),
+        ]
+        icons = [
+            document.getElementById("runways-icon"),
+            document.getElementById("reservations-icon"),
+        ]
+
+        classToAdd = "fa-beat"
+        for (let i = 0; i < buttons.length; i++) {
+            buttons[i].onmouseover = function () {
+                icons[i].classList.add(classToAdd);
+            }
+            buttons[i].onmouseleave = function () {
+                icons[i].classList.remove(classToAdd);
+            }
+        }
+
+    </script>
+{% endblock %}
