@@ -34,8 +34,8 @@ ALTER TABLE linialotnicza ADD CONSTRAINT linialotnicza_un_nazwa UNIQUE ( nazwa )
 CREATE TABLE lot (
     lot_id               NUMBER(9) NOT NULL,
     linialotnicza_id     NUMBER(9) NOT NULL,
-    lotnisko_id          NUMBER(9) NOT NULL,
-    model_id             NUMBER(9) NOT NULL,
+    lotnisko_id NUMBER(9) NOT NULL,
+    model_id       NUMBER(9) NOT NULL,
     typ                  VARCHAR2(10) NOT NULL
 );
 
@@ -54,14 +54,14 @@ CREATE TABLE lotnisko (
 
 ALTER TABLE lotnisko ADD CONSTRAINT lotnisko_pk PRIMARY KEY ( lotnisko_id );
 
-ALTER TABLE lotnisko ADD CONSTRAINT lotnisko_un_iata UNIQUE ( iatacode );
+ALTER TABLE lotnisko ADD CONSTRAINT lotnisko_un_geo UNIQUE ( longitude,
+                                                             latitude );
 
-ALTER TABLE lotnisko ADD CONSTRAINT lotnisko_un_nazwa UNIQUE ( nazwa );
+ALTER TABLE lotnisko ADD CONSTRAINT lotnisko_un_iata UNIQUE ( iatacode );
 
 ALTER TABLE lotnisko ADD CONSTRAINT lotnisko_un_icao UNIQUE ( icaocode );
 
-ALTER TABLE lotnisko ADD CONSTRAINT lotnisko_un_geo UNIQUE ( longitude,
-                                                             latitude );
+ALTER TABLE lotnisko ADD CONSTRAINT lotnisko_un_nazwa UNIQUE ( nazwa );
 
 CREATE TABLE model (
     model_id     NUMBER(9) NOT NULL,
@@ -85,11 +85,14 @@ ALTER TABLE odlot ADD CONSTRAINT odlot_pk PRIMARY KEY ( lot_id );
 
 CREATE TABLE pas (
     pas_id  NUMBER(9) NOT NULL,
+    numer   NVARCHAR2(25) NOT NULL,
     dlugosc NUMBER(12, 6) NOT NULL,
     opis    NVARCHAR2(100)
 );
 
 ALTER TABLE pas ADD CONSTRAINT pas_pk PRIMARY KEY ( pas_id );
+
+ALTER TABLE pas ADD CONSTRAINT pas_un_numer UNIQUE ( numer );
 
 CREATE TABLE pasazer (
     pasazer_id    NUMBER(9) NOT NULL,
@@ -100,11 +103,6 @@ CREATE TABLE pasazer (
     pesel         NVARCHAR2(25) NOT NULL,
     dataurodzenia DATE NOT NULL
 );
-
-CREATE INDEX pasazer_idx_pesel ON
-    pasazer (
-        pesel
-    ASC );
 
 ALTER TABLE pasazer ADD CONSTRAINT pasazer_pk PRIMARY KEY ( pasazer_id );
 
@@ -120,8 +118,7 @@ CREATE TABLE producent (
 
 ALTER TABLE producent ADD CONSTRAINT producent_pk PRIMARY KEY ( producent_id );
 
-ALTER TABLE producent ADD CONSTRAINT producent__un UNIQUE ( nazwa );
-
+ALTER TABLE producent ADD CONSTRAINT producent_un_nazwa UNIQUE ( nazwa );
 CREATE TABLE przylot (
     lot_id          NUMBER(9) NOT NULL,
     dataprzylotu    DATE NOT NULL,
@@ -274,6 +271,16 @@ BEGIN
 END;
 /
 
+CREATE SEQUENCE linialotnicza_linialotnicza_id START WITH 1 NOCACHE ORDER;
+CREATE OR REPLACE TRIGGER linialotnicza_linialotnicza_id BEFORE
+    INSERT ON linialotnicza
+    FOR EACH ROW
+    WHEN ( new.linialotnicza_id IS NULL )
+BEGIN
+    :new.linialotnicza_id := linialotnicza_linialotnicza_id.nextval;
+END;
+/
+
 CREATE SEQUENCE lot_lot_id_seq START WITH 1 NOCACHE ORDER;
 
 CREATE OR REPLACE TRIGGER lot_lot_id_trg BEFORE
@@ -307,14 +314,12 @@ BEGIN
 END;
 /
 
-CREATE SEQUENCE odlot_lot_id_seq START WITH 1 NOCACHE ORDER;
-
 CREATE OR REPLACE TRIGGER odlot_lot_id_trg BEFORE
     INSERT ON odlot
     FOR EACH ROW
     WHEN ( new.lot_id IS NULL )
 BEGIN
-    :new.lot_id := odlot_lot_id_seq.nextval;
+    :new.lot_id := lot_lot_id_seq.currval;
 END;
 /
 
@@ -351,14 +356,12 @@ BEGIN
 END;
 /
 
-CREATE SEQUENCE przylot_lot_id_seq START WITH 1 NOCACHE ORDER;
-
 CREATE OR REPLACE TRIGGER przylot_lot_id_trg BEFORE
     INSERT ON przylot
     FOR EACH ROW
     WHEN ( new.lot_id IS NULL )
 BEGIN
-    :new.lot_id := przylot_lot_id_seq.nextval;
+    :new.lot_id := lot_lot_id_seq.currval;
 END;
 /
 
@@ -384,16 +387,15 @@ BEGIN
 END;
 /
 
-
---Funkcja: 
+--Funkcja:
 create or replace FUNCTION Obsluzeni (p1 DATE, p2 DATE)
         RETURN NUMBER IS
             v1 NUMBER := 0;
             v2 NUMBER := 0;
             wynik NUMBER;
         BEGIN
-            SELECT SUM(LICZBAPASAZEROW) INTO v1 
-            FROM PRZYLOT 
+            SELECT SUM(LICZBAPASAZEROW) INTO v1
+            FROM PRZYLOT
             WHERE DATAPRZYLOTU >= p1 AND DATAPRZYLOTU <= p2;
 
             SELECT SUM((p.ilewszystkichmiejsc-p.iledostepnychmiejsc)) INTO v2
@@ -415,4 +417,3 @@ create or replace PROCEDURE ZmianaCeny(p NUMBER, p2 VARCHAR2 ) AS
                             END;
             END;
         END ZmianaCeny;
-
