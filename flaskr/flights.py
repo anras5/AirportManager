@@ -103,9 +103,8 @@ def new_airport():
         # POST
         db = pool.acquire()
         cr = db.cursor()
-        cr.execute("""INSERT INTO LOTNISKO
-                      VALUES ((SELECT MAX(LOTNISKO_ID) FROM LOTNISKO)+1,
-                              :nazwa,
+        cr.execute("""INSERT INTO LOTNISKO (NAZWA, MIASTO, KRAJ, IATACODE, ICAOCODE, LONGITUDE, LATITUDE)
+                      VALUES (:nazwa,
                               :miasto,
                               :kraj,
                               :iatacode,
@@ -234,9 +233,8 @@ def new_airline():
         # POST
         db = pool.acquire()
         cr = db.cursor()
-        cr.execute("""INSERT INTO LINIALOTNICZA
-                           VALUES ((SELECT MAX(LINIALOTNICZA_ID) FROM LINIALOTNICZA)+1,
-                                   :nazwa,
+        cr.execute("""INSERT INTO LINIALOTNICZA (NAZWA, KRAJ)
+                           VALUES (:nazwa,
                                    :kraj)""",
                    nazwa=form.nazwa.data,
                    kraj=form.kraj.data)
@@ -335,9 +333,8 @@ def new_manufacturer():
         # POST
         db = pool.acquire()
         cr = db.cursor()
-        cr.execute("""INSERT INTO PRODUCENT
-                           VALUES ((SELECT MAX(PRODUCENT_ID) FROM PRODUCENT)+1,
-                                   :nazwa,
+        cr.execute("""INSERT INTO PRODUCENT (NAZWA, KRAJ)
+                           VALUES (:nazwa,
                                    :kraj)""",
                    nazwa=form.nazwa.data,
                    kraj=form.kraj.data)
@@ -459,9 +456,8 @@ def new_model():
         # POST
         db = pool.acquire()
         cr = db.cursor()
-        cr.execute("""INSERT INTO MODEL
-                           VALUES ((SELECT MAX(MODEL_ID) FROM MODEL)+1,
-                                   :nazwa,
+        cr.execute("""INSERT INTO MODEL (NAZWA, LICZBAMIEJSC, PREDKOSC, PRODUCENT_ID)
+                           VALUES (:nazwa,
                                    :liczbamiejsc,
                                    :predkosc,
                                    :producent_id)""",
