@@ -3,7 +3,7 @@
 
 {% block page_header %}
 
-    <h3>MODELE SAMOLOTOW</h3>
+    <h3>MODELE SAMOLOTÓW</h3>
 
 {% endblock %}
 
@@ -39,11 +39,11 @@
             <td>{{ model.predkosc }}</td>
             <td>{{ model.producent.nazwa }}</td>
             <td>
-                <a href="{{ url_for('flights.models', model_id=model.id) }}"
+                <a href="{{ url_for('flights.update_model', model_id=model._id) }}"
                    class="icon-edit-table">
                     <i class="fa-solid fa-pen"></i>
                 </a>
-                <button id="delete{{ model.id }}" class="icon-delete-table">
+                <button id="delete{{ model._id }}" class="icon-delete-table">
                     <i class="fa-solid fa-trash"></i>
                 </button>
             </td>

@@ -476,7 +476,55 @@ def new_model():
 
 @flights_bp.route('/models/update/<int:model_id>', methods=['GET', 'POST'])
 def update_model(model_id):
-    return redirect(url_for('flights.model'))
+    form = ModelsForm()
+
+    # get all manufacturers from database
+    db = pool.acquire()
+    cr = db.cursor()
+    cr.execute("""SELECT PRODUCENT_ID, NAZWA FROM PRODUCENT ORDER BY NAZWA""")
+
+    # insert manufacturers into form.producent.choices
+    form.producent.choices = [(m[0], m[1]) for m in cr]
+    cr.close()
+
+    if form.validate_on_submit():
+        # POST
+        db = pool.acquire()
+        cr = db.cursor()
+        cr.execute("""UPDATE MODEL
+                      SET NAZWA = :nazwa,
+                          LICZBAMIEJSC = :liczbamiejsc,
+                          PREDKOSC = :predkosc,
+                          PRODUCENT_ID = :producent_id
+                      WHERE MODEL_ID = :id""",
+                   nazwa=form.nazwa.data,
+                   liczbamiejsc=form.liczba_miejsc.data,
+                   predkosc=form.predkosc.data,
+                   producent_id=form.producent.data,
+                   id=model_id)
+        db.commit()
+        cr.close()
+        flash("Pomyślnie zaktualizowano model samolotu", category='success')
+        return redirect(url_for('flights.models'))
+
+    db = pool.acquire()
+    cr = db.cursor()
+    cr.execute("""SELECT m.NAZWA, m.LICZBAMIEJSC, m.PREDKOSC, p.PRODUCENT_ID, p.NAZWA
+                  FROM MODEL m INNER JOIN PRODUCENT p ON m.PRODUCENT_ID = p.PRODUCENT_ID
+                  WHERE MODEL_ID = :id""",
+               id=model_id)
+    data = cr.fetchone()
+    model = Model(
+        nazwa=data[0],
+        liczba_miejsc=data[1],
+        predkosc=data[2]
+    )
+    form.producent.default = data[3]
+    form.process()
+
+    return render_template('flights-models/flights-models-update.page.html',
+                           form=form,
+                           model=model)
 
 
 @flights_bp.route('/models/delete', methods=['POST'])

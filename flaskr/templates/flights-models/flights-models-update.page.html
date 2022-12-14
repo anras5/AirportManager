@@ -1,0 +1,46 @@
+{% extends "base.layout.html" %}
+
+{% block page_header %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col table-header">
+                <h3>Modele samolotów - aktualizacja modelu</h3>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid create-new-container">
+        <a href="{{ url_for('flights.models') }}">
+            <button type="button" class="btn btn-secondary">Powrót</button>
+        </a>
+    </div>
+
+{% endblock %}
+
+{% block content %}
+
+    <div class="container form">
+        <form method="post" class="row g-3">
+            {{ form.hidden_tag() }}
+            <div class="col-md-6">
+                {{ form.nazwa.label(class_='form-label') }}
+                {{ form.nazwa(class_='form-control', placeholder='Nazwa', value=model.nazwa) }}
+            </div>
+            <div class="col-md-6">
+                {{ form.liczba_miejsc.label(class_='form-label') }}
+                {{ form.liczba_miejsc(class_='form-control', placeholder='0', value=model.liczba_miejsc) }}
+            </div>
+            <div class="col-md-6">
+                {{ form.predkosc.label(class_='form-label') }}
+                {{ form.predkosc(class_='form-control', placeholder='0.0', value=model.predkosc) }}
+            </div>
+            <div class="col-md-6">
+                {{ form.producent.label(class_='form-label') }}
+                {{ form.producent(class_='form-control') }}
+            </div>
+            <div class="col-12">
+                {{ form.submit(class_='btn btn-warning') }}
+            </div>
+        </form>
+    </div>
+
+{% endblock %}
