@@ -528,5 +528,28 @@ def update_model(model_id):
 
 
 @flights_bp.route('/models/delete', methods=['POST'])
-def delete_model(model_id):
+def delete_model():
+    # get model id from parameters
+    parameters = request.form
+    model_id = parameters.get('model_id', '')
+    if not model_id:
+        flash("Błąd - nie podano modelu do usunięcia", category='error')
+        return redirect(url_for('flights.models'))
+
+    # delete model from database
+    db = pool.acquire()
+    cr = db.cursor()
+    try:
+        cr.execute("DELETE FROM MODEL WHERE MODEL_ID = :id", id=model_id)
+    except cx_Oracle.IntegrityError:
+        flash("Błąd - nie można usunąć modelu, ponieważ jest przypisany do lotów", category='error')
+        cr.close()
+        return redirect(url_for('flights.models'))
+    else:
+        db.commit()
+        cr.close()
+
+    flash("Pomyślnie usunięto model", category='success')
+    return redirect(url_for('flights.models'))
+
     return redirect(url_for('flights.model'))
