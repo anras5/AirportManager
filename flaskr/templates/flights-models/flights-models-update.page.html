@@ -23,15 +23,15 @@
             {{ form.hidden_tag() }}
             <div class="col-md-6">
                 {{ form.nazwa.label(class_='form-label') }}
-                {{ form.nazwa(class_='form-control', placeholder='Nazwa', value=model.nazwa) }}
+                {{ form.nazwa(class_='form-control', placeholder='Nazwa') }}
             </div>
             <div class="col-md-6">
                 {{ form.liczba_miejsc.label(class_='form-label') }}
-                {{ form.liczba_miejsc(class_='form-control', placeholder='0', value=model.liczba_miejsc) }}
+                {{ form.liczba_miejsc(class_='form-control', placeholder='0') }}
             </div>
             <div class="col-md-6">
                 {{ form.predkosc.label(class_='form-label') }}
-                {{ form.predkosc(class_='form-control', placeholder='0.0', value=model.predkosc) }}
+                {{ form.predkosc(class_='form-control', placeholder='0.0') }}
             </div>
             <div class="col-md-6">
                 {{ form.producent.label(class_='form-label') }}

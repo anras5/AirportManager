@@ -1,18 +1,18 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, DateField, FloatField, SelectField, IntegerField
 from wtforms.validators import DataRequired, EqualTo, ValidationError, Length
-from flaskr import pool
 
 
 # Custom validators
 def user_exists(form, field):
-    db = pool.acquire()
-    cr = db.cursor()
-    cr.execute("SELECT LOGIN FROM Pasazer")
-    x = cr.fetchall()
-    for user in x:
-        if user[0] == field.data:
-            raise ValidationError("User Already Exists")
+    # db = pool.acquire()
+    # cr = db.cursor()
+    # cr.execute("SELECT LOGIN FROM Pasazer")
+    # x = cr.fetchall()
+    # for user in x:
+    #     if user[0] == field.data:
+    #         raise ValidationError("User Already Exists")
+    pass
 
 
 def pesel_incorrect(form, field):

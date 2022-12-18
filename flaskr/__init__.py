@@ -1,10 +1,10 @@
 from flask import Flask, render_template, url_for, redirect
 from dotenv import load_dotenv
 from flask_bootstrap import Bootstrap
-from flaskr.db import start_pool
+from flaskr.db.OracleDB import OracleDB
 
 bootstrap = Bootstrap()
-pool = start_pool()
+oracle_db = OracleDB()
 
 
 def create_app(test_config=None):
