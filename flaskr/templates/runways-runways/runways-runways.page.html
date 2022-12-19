@@ -36,7 +36,7 @@
             <td>{{ pas.id }}</td>
             <td>{{ pas.nazwa }}</td>
             <td>{{ pas.dlugosc }}</td>
-            <td>{{ pas.opis }}</td>
+            <td>{{ pas.opis if pas.opis }}</td>
             <td>
                 <a href="{{ url_for('runways.update_runway', runway_id=pas.id) }}"
                    class="icon-edit-table">
