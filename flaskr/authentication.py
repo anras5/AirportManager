@@ -1,12 +1,14 @@
 from flask import Blueprint, render_template, flash, redirect, url_for, session
 from flaskr.forms import RegistrationForm, LoginForm
-from flaskr import pool
+from flaskr import oracle_db
 
 at_bp = Blueprint('authentication', __name__)
 
 
 @at_bp.route('/register', methods=['GET', 'POST'])
 def register_user():
+    # TODO: change
+    return redirect('/')
     try:
         if session["user"] or session["admin"]:
             return redirect(url_for('home'))

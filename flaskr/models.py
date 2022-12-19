@@ -49,11 +49,12 @@ class Model:
                  predkosc: float = None,
                  producent: Producent = None
                  ):
-        self._id = _id
+        self.id = _id
         self.nazwa = nazwa
         self.liczba_miejsc = liczba_miejsc
         self.predkosc = predkosc
         self.producent = producent
+
 
 class Pas:
 
@@ -61,6 +62,6 @@ class Pas:
                  _id: int = None,
                  dlugosc: float = None,
                  opis: str = ''):
-        self._id = _id
+        self.id = _id
         self.dlugosc = dlugosc
         self.opis = opis
