@@ -56,7 +56,7 @@
         {# BUTTONS IN DATATABLE - DELETING MANUFACTURER #}
         {% for manufacturer in manufacturers_data %}
 
-            document.getElementById("delete{{ manufacturer.id }}").addEventListener("click", function () {
+            $('#example tbody').on('click', '#delete{{ manufacturer.id }}', function () {
                 Swal.fire({
                     title: 'Czy na pewno chcesz usunąć: {{ manufacturer.nazwa }}?',
                     text: "Nie będziesz mógł cofnąć tej dezycji!",

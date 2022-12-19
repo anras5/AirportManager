@@ -79,7 +79,7 @@
         {# BUTTONS IN DATATABLE - DELETING AIRPORT #}
         {% for airport in airports_data %}
 
-            document.getElementById("delete{{ airport.id }}").addEventListener("click", function () {
+            $('#example tbody').on('click', '#delete{{ airport.id }}', function () {
                 Swal.fire({
                     title: 'Czy na pewno chcesz usunąć: {{ airport.nazwa }}?',
                     text: "Nie będziesz mógł cofnąć tej dezycji!",

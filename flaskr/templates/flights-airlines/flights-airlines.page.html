@@ -57,7 +57,7 @@
         {# BUTTONS IN DATATABLE - DELETING AIRPORT #}
         {% for airline in airlines_data %}
 
-            document.getElementById("delete{{ airline.id }}").addEventListener("click", function () {
+            $('#example tbody').on('click', '#delete{{ airline.id }}', function () {
                 Swal.fire({
                     title: 'Czy na pewno chcesz usunąć: {{ airline.nazwa }}?',
                     text: "Nie będziesz mógł cofnąć tej dezycji!",

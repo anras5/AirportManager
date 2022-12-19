@@ -56,9 +56,9 @@
         {# BUTTONS IN DATATABLE - DELETING #}
         {% for pas in data %}
 
-            document.getElementById("delete{{ pas._id }}").addEventListener("click", function () {
+            $('#example tbody').on('click', '#delete{{ pas.id }}', function () {
                 Swal.fire({
-                    title: 'Czy na pewno chcesz usunąć pas startowy o numerze: {{ pas._id }}?',
+                    title: 'Czy na pewno chcesz usunąć pas startowy o numerze: {{ pas.id }}?',
                     text: "Nie będziesz mógł cofnąć tej dezycji!",
                     icon: 'warning',
                     showCancelButton: true,
@@ -67,7 +67,7 @@
                     confirmButtonText: 'Tak, usuń!'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        post("{{ url_for('runways.delete_runway') }}", {runway_id: {{ pas._id }}})
+                        post("{{ url_for('runways.delete_runway') }}", {runway_id: {{ pas.id }}})
                     }
                 })
             })

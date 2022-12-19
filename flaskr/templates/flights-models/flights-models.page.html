@@ -58,7 +58,8 @@
         {# BUTTONS IN DATATABLE - DELETING MANUFACTURER #}
         {% for model in models_data %}
 
-            document.getElementById("delete{{ model.id }}").addEventListener("click", function () {
+
+            $('#example tbody').on('click', '#delete{{ model.id }}', function () {
                 Swal.fire({
                     title: 'Czy na pewno chcesz usunąć: {{ model.producent.nazwa }} {{ model.nazwa }}?',
                     text: "Nie będziesz mógł cofnąć tej dezycji!",
