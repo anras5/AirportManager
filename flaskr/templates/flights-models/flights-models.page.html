@@ -33,17 +33,17 @@
 
     {% for model in models_data %}
         <tr>
-            <td>{{ model._id }}</td>
+            <td>{{ model.id }}</td>
             <td>{{ model.nazwa }}</td>
             <td>{{ model.liczba_miejsc }}</td>
             <td>{{ model.predkosc }}</td>
             <td>{{ model.producent.nazwa }}</td>
             <td>
-                <a href="{{ url_for('flights.update_model', model_id=model._id) }}"
+                <a href="{{ url_for('flights.update_model', model_id=model.id) }}"
                    class="icon-edit-table">
                     <i class="fa-solid fa-pen"></i>
                 </a>
-                <button id="delete{{ model._id }}" class="icon-delete-table">
+                <button id="delete{{ model.id }}" class="icon-delete-table">
                     <i class="fa-solid fa-trash"></i>
                 </button>
             </td>
@@ -58,7 +58,7 @@
         {# BUTTONS IN DATATABLE - DELETING MANUFACTURER #}
         {% for model in models_data %}
 
-            document.getElementById("delete{{ model._id }}").addEventListener("click", function () {
+            $('#example tbody').on('click', '#delete{{ model.id }}', function () {
                 Swal.fire({
                     title: 'Czy na pewno chcesz usunąć: {{ model.producent.nazwa }} {{ model.nazwa }}?',
                     text: "Nie będziesz mógł cofnąć tej dezycji!",
@@ -69,7 +69,7 @@
                     confirmButtonText: 'Tak, usuń!'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        post("{{ url_for('flights.delete_model') }}", {model_id: {{ model._id }}})
+                        post("{{ url_for('flights.delete_model') }}", {model_id: {{ model.id }}})
                     }
                 })
             })
