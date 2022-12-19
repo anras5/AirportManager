@@ -425,6 +425,16 @@ class OracleDB:
 
         return headers, runways_list
 
+    def select_runway(self, runway_id) -> Pas:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        cr.execute("""SELECT NAZWA, DLUGOSC, OPIS
+                        FROM PAS
+                       WHERE PAS_ID = :id""",
+                   id=runway_id)
+        data = cr.fetchone()
+        return Pas(nazwa=data[0], dlugosc=data[1], opis=data[2])
+
     def insert_runway(self, nazwa, dlugosc, opis) -> Tuple[str, str, str]:
         connection = self.pool.acquire()
         cr = connection.cursor()
@@ -444,3 +454,24 @@ class OracleDB:
             connection.commit()
             cr.close()
         return "Pomyślnie dodano nowy pas startowy", c.SUCCESS, None
+
+    def update_runway(self, runway_id, nazwa, dlugosc, opis) -> Tuple[str, str, str]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        try:
+            cr.execute("""UPDATE PAS
+                             SET NAZWA = :nazwa,
+                                 DLUGOSC = :dlugosc,
+                                 OPIS = :opis
+                           WHERE PAS_ID =  :id""",
+                       nazwa=nazwa,
+                       dlugosc=dlugosc,
+                       opis=opis,
+                       id=runway_id)
+        except cx_Oracle.IntegrityError:
+            # TODO: catching unique keys error
+            return "Wystąpił błąd", c.ERROR, None
+        else:
+            connection.commit()
+            cr.close()
+            return "Pomyślna aktualizacja pasa startowego", c.SUCCESS, None

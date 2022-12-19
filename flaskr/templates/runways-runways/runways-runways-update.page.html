@@ -4,7 +4,7 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col table-header">
-                <h3>Pasy startowe - dodawanie nowego pasa</h3>
+                <h3>Pasy startowe - aktualizacja pasa {{ pas.nazwa }}</h3>
             </div>
         </div>
     </div>
@@ -34,7 +34,7 @@
                 {{ form.opis(class_='form-control', placeholder='Pas wykorzystywany do...') }}
             </div>
             <div class="col-12">
-                {{ form.submit(class_='btn btn-success') }}
+                {{ form.submit(class_='btn btn-warning') }}
             </div>
         </form>
     </div>

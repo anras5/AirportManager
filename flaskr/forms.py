@@ -106,6 +106,6 @@ class ModelsForm(FlaskForm):
 
 class RunwaysForm(FlaskForm):
     nazwa = StringField("Podaj nazwę pasa startowego", validators=[DataRequired()])
-    dlugosc = IntegerField("Podaj długość pasa w metrach", validators=[DataRequired()])
+    dlugosc = FloatField("Podaj długość pasa w metrach", validators=[DataRequired()])
     opis = StringField("Podaj dodatkowy opis pasa startowego")
     submit = SubmitField("Dodaj pas")
