@@ -424,3 +424,23 @@ class OracleDB:
         cr.close()
 
         return headers, runways_list
+
+    def insert_runway(self, nazwa, dlugosc, opis) -> Tuple[str, str, str]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        try:
+            cr.execute("""INSERT INTO PAS (NAZWA, DLUGOSC, OPIS)
+                               VALUES (:nazwa,
+                                       :dlugosc,
+                                       :opis)""",
+                       nazwa=nazwa,
+                       dlugosc=dlugosc,
+                       opis=opis)
+        except cx_Oracle.IntegrityError:
+            # TODO: catching unique keys exceptions
+            cr.close()
+            return "Wystąpił błąd", c.ERROR, None
+        else:
+            connection.commit()
+            cr.close()
+        return "Pomyślnie dodano nowy pas startowy", c.SUCCESS, None
