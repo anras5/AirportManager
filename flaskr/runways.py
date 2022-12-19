@@ -80,5 +80,15 @@ def update_runway(runway_id: int):
 
 @runways_bp.route('/runways/delete', methods=['POST'])
 def delete_runway():
-    print(request.form.get('runway_id'))
-    return redirect(url_for('runways.main'))
+    # get runway id from parameters
+    parameters = request.form
+    runway_id = parameters.get('runway_id', '')
+    if not runway_id:
+        flash("Błąd - nie podane linii lotniczej do usunięcia", category='error')
+        return redirect(url_for('runways.runways'))
+
+    # delete record from database
+    flash_message, flash_category = oracle_db.delete_runway(runway_id)
+
+    flash(flash_message, flash_category)
+    return redirect(url_for('runways.runways'))

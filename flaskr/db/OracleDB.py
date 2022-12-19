@@ -475,3 +475,17 @@ class OracleDB:
             connection.commit()
             cr.close()
             return "Pomyślna aktualizacja pasa startowego", c.SUCCESS, None
+
+    def delete_runway(self, runway_id) -> Tuple[str, str]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        try:
+            cr.execute("DELETE FROM PAS WHERE PAS_ID = :id",
+                       id=runway_id)
+        except cx_Oracle.IntegrityError:
+            cr.close()
+            return "Błąd - nie można usunąć pasa startowego, ponieważ jest przypisany do lotu", c.ERROR
+        else:
+            connection.commit()
+            cr.close()
+            return "Pomyślnie usunięto pas startowy", c.SUCCESS
