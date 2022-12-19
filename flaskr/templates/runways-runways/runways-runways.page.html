@@ -33,15 +33,16 @@
 
     {% for pas in data %}
         <tr>
-            <td>{{ pas._id }}</td>
+            <td>{{ pas.id }}</td>
+            <td>{{ pas.nazwa }}</td>
             <td>{{ pas.dlugosc }}</td>
             <td>{{ pas.opis }}</td>
             <td>
-                <a href="{{ url_for('runways.update_runway', runway_id=pas._id) }}"
+                <a href="{{ url_for('runways.update_runway', runway_id=pas.id) }}"
                    class="icon-edit-table">
                     <i class="fa-solid fa-pen"></i>
                 </a>
-                <button id="delete{{ pas._id }}" class="icon-delete-table">
+                <button id="delete{{ pas.id }}" class="icon-delete-table">
                     <i class="fa-solid fa-trash"></i>
                 </button>
             </td>

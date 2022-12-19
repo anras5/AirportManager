@@ -4,7 +4,7 @@ import os
 from typing import List, Tuple
 
 from flaskr import constants as c
-from flaskr.models import LiniaLotnicza, Lotnisko, Producent, Model
+from flaskr.models import LiniaLotnicza, Lotnisko, Producent, Model, Pas
 
 
 class OracleDB:
@@ -407,3 +407,20 @@ class OracleDB:
             connection.commit()
             cr.close()
             return "Pomyślnie usunięto model", c.SUCCESS
+
+    def select_runways(self) -> Tuple[List[str], List[Pas]]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        cr.execute("SELECT PAS_ID, NAZWA, DLUGOSC, OPIS FROM PAS")
+        headers = [header[0] for header in cr.description]
+        runways_list = []
+        for runway in cr:
+            runways_list.append(
+                Pas(_id=runway[0],
+                    nazwa=runway[1],
+                    dlugosc=runway[2],
+                    opis=runway[3])
+            )
+        cr.close()
+
+        return headers, runways_list

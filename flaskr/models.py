@@ -60,8 +60,10 @@ class Pas:
 
     def __init__(self,
                  _id: int = None,
+                 nazwa: str = '',
                  dlugosc: float = None,
                  opis: str = ''):
         self.id = _id
+        self.nazwa = nazwa
         self.dlugosc = dlugosc
         self.opis = opis

@@ -1,7 +1,7 @@
-import cx_Oracle
 from flask import Blueprint, render_template, redirect, url_for, request
-
 from flaskr.models import Pas
+from flaskr import oracle_db
+
 
 runways_bp = Blueprint('runways', __name__, url_prefix='/runways')
 
@@ -16,20 +16,7 @@ def main():
 
 @runways_bp.route('/runways')
 def runways():
-    # TODO: change
-    return redirect("/")
-    db = pool.acquire()
-    cr = db.cursor()
-    cr.execute("SELECT PAS_ID, DLUGOSC, OPIS FROM PAS")
-    headers = [header[0] for header in cr.description]
-    runways_list = []
-    for runway in cr:
-        runways_list.append(
-            Pas(runway[0],
-                runway[1],
-                runway[2])
-        )
-    cr.close()
+    headers, runways_list = oracle_db.select_runways()
 
     return render_template('runways-runways/runways-runways.page.html',
                            data=runways_list,
