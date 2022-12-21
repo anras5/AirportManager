@@ -18,12 +18,12 @@
 
     <div class="container-fluid create-new-container">
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-6 date-filter">
                 <a href="{{ url_for('flights.new_arrival') }}">
                     <button type="button" class="btn btn-success">Nowy przylot</button>
                 </a>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-6 date-filter">
                 <form method="POST">
                     <div class="input-group">
                         <input type="text" id="date-picker" name="date" class="form-control"
