@@ -129,7 +129,7 @@ def update_airport(airport_id: int):
     if form.validate_on_submit():
         # POST
 
-        flash_message, flash_category, flash_type = oracle_db.update_airport(id=airport_id,
+        flash_message, flash_category, flash_type = oracle_db.update_airport(airport_id=airport_id,
                                                                              nazwa=form.nazwa.data,
                                                                              miasto=form.miasto.data,
                                                                              kraj=form.kraj.data,
