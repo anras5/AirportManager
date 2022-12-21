@@ -3,8 +3,8 @@ import os
 
 from typing import List, Tuple
 
-from flaskr import constants as c
-from flaskr.models import LiniaLotnicza, Lotnisko, Producent, Model, Pas
+from flaskr.internal.helpers import constants as c
+from flaskr.internal.helpers.models import LiniaLotnicza, Lotnisko, Producent, Model, Pas
 
 
 class OracleDB:

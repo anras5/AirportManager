@@ -1,10 +1,10 @@
-import cx_Oracle
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 
-from flaskr.forms import AirportForm, AirlinesForm, ManufacturersForm, ModelsForm
-from flaskr.models import Lotnisko, LiniaLotnicza, Producent, Model
-from flaskr import oracle_db, constants as c
-from flaskr.constants import SUCCESS, ERROR
+from flaskr.internal.helpers.forms import AirportForm, AirlinesForm, ManufacturersForm, ModelsForm
+from flaskr.internal.helpers.models import Lotnisko
+from flaskr import oracle_db
+from flaskr.internal.helpers import constants as c
+from flaskr.internal.helpers.constants import ERROR
 
 import os
 import json
