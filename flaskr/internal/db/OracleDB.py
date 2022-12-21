@@ -4,7 +4,7 @@ import os
 from typing import List, Tuple
 
 from flaskr.internal.helpers import constants as c
-from flaskr.internal.helpers.models import LiniaLotnicza, Lotnisko, Producent, Model, Pas
+from flaskr.internal.helpers.models import LiniaLotnicza, Lotnisko, Producent, Model, Pas, Przylot
 
 
 class OracleDB:
@@ -489,3 +489,34 @@ class OracleDB:
             connection.commit()
             cr.close()
             return "Pomyślnie usunięto pas startowy", c.SUCCESS
+
+    def select_arrivals(self) -> Tuple[List[str], List[Przylot]]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        cr.execute("""SELECT p.LOT_ID AS ID,
+                             p.DATAPRZYLOTU AS TERMIN,
+	                         p.LICZBAPASAZEROW,
+	                         ll.NAZWA AS LINIA_LOTNICZA,
+	                         lt.NAZWA AS LOTNISKO,
+	                         p2.NAZWA || ' ' || m.NAZWA AS MODEL_SAMOLOTU 
+                      FROM PRZYLOT p INNER JOIN LOT l ON p.LOT_ID = l.LOT_ID 
+                                     INNER JOIN LINIALOTNICZA ll  ON l.LINIALOTNICZA_ID = ll.LINIALOTNICZA_ID
+                                     INNER JOIN LOTNISKO lt ON l.LOTNISKO_ID = lt.LOTNISKO_ID
+                                     INNER JOIN MODEL m ON l.MODEL_ID = m.MODEL_ID 
+                                     INNER JOIN PRODUCENT p2 ON m.PRODUCENT_ID = p2.PRODUCENT_ID """)
+        headers = [header[0] for header in cr.description]
+        arrivals_list = []
+        for arrival in cr:
+            arrivals_list.append(
+                Przylot(
+                    _id=arrival[0],
+                    data_przylotu=arrival[1],
+                    liczba_pasazerow=arrival[2],
+                    linia_lotnicza=LiniaLotnicza(nazwa=arrival[3]),
+                    lotnisko=Lotnisko(nazwa=arrival[4]),
+                    model=Model(nazwa=arrival[5])
+                )
+            )
+        cr.close()
+
+        return headers, arrivals_list

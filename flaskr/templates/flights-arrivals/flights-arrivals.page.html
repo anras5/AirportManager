@@ -1,0 +1,79 @@
+{% extends "table.layout.html" %}
+
+
+{% block page_header %}
+
+    <h3>PRZYLOTY</h3>
+
+{% endblock %}
+
+
+{% block button_add_new %}
+
+    <div class="container-fluid create-new-container">
+        <a href="{{ url_for('flights.new_arrival') }}">
+            <button id="add-new-manufacturer" type="button" class="btn btn-success">Nowy przylot</button>
+        </a>
+    </div>
+
+{% endblock %}
+
+
+{% block thead %}
+
+    {% for header in headers %}
+        <th>{{ header }}</th>
+    {% endfor %}
+    <th>Opcje</th>
+
+{% endblock %}
+
+
+{% block tbody %}
+
+    {% for arrival in arrivals_data %}
+        <tr>
+            <td>{{ arrival.id }}</td>
+            <td>{{ arrival.data_przylotu }}</td>
+            <td>{{ arrival.liczba_pasazerow }}</td>
+            <td>{{ arrival.linia_lotnicza.nazwa }}</td>
+            <td>{{ arrival.lotnisko.nazwa }}</td>
+            <td>{{ arrival.model.nazwa }}</td>
+            <td>
+                <a href="{{ url_for('flights.update_arrival', arrival_id=arrival.id) }}"
+                   class="icon-edit-table">
+                    <i class="fa-solid fa-pen"></i>
+                </a>
+                <button id="delete{{ arrival.id }}" class="icon-delete-table">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </td>
+        </tr>
+    {% endfor %}
+
+{% endblock %}
+
+
+{% block custom_js %}
+    <script>
+        {# BUTTONS IN DATATABLE - DELETING MANUFACTURER #}
+        {% for arrival in arrivals_data %}
+
+            $('#example tbody').on('click', '#delete{{ arrival.id }}', function () {
+                Swal.fire({
+                    title: 'Czy na pewno chcesz usunąć: {{ arrival.nazwa }}?',
+                    text: "Nie będziesz mógł cofnąć tej dezycji!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Tak, usuń!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        post("{{ url_for('flights.delete_arrival') }}", {arrival_id: {{ arrival.id }}})
+                    }
+                })
+            })
+        {% endfor %}
+    </script>
+{% endblock %}

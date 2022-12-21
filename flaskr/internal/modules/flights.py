@@ -147,8 +147,6 @@ def update_airport(airport_id: int):
         else:
             return redirect(url_for('flights.airports'))
 
-
-
     # set default values on the form
     form.nazwa.data = lotnisko.nazwa
     form.miasto.data = lotnisko.miasto
@@ -241,7 +239,6 @@ def update_airline(airline_id: int):
         else:
             # success
             return redirect(url_for('flights.airlines'))
-
 
     # set default values on the form
     form.nazwa.data = linialotnicza.nazwa
@@ -442,3 +439,27 @@ def delete_model():
 
     flash(flash_messsage, flash_category)
     return redirect(url_for('flights.models'))
+
+
+@flights_bp.route('/arrivals')
+def arrivals():
+    headers, arrivals_list = oracle_db.select_arrivals()
+
+    return render_template('flights-arrivals/flights-arrivals.page.html',
+                           arrivals_data=arrivals_list,
+                           headers=headers)
+
+
+@flights_bp.route('/arrivals/new', methods=['GET', 'POST'])
+def new_arrival():
+    return redirect(url_for('flights.arrivals'))
+
+
+@flights_bp.route('/arrivals/update/<int:arrival_id>', methods=['GET', 'POST'])
+def update_arrival(arrival_id: int):
+    return redirect(url_for('flights.arrivals'))
+
+
+@flights_bp.route('/arrivals/delete', methods=['POST'])
+def delete_arrival():
+    return redirect(url_for('flights.arrivals'))
