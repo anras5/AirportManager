@@ -504,6 +504,34 @@ class OracleDB:
                                      INNER JOIN LOTNISKO lt ON l.LOTNISKO_ID = lt.LOTNISKO_ID
                                      INNER JOIN MODEL m ON l.MODEL_ID = m.MODEL_ID 
                                      INNER JOIN PRODUCENT p2 ON m.PRODUCENT_ID = p2.PRODUCENT_ID """)
+        headers, arrivals_list = self.__select_arrivals_query_to_list(cr)
+        cr.close()
+
+        return headers, arrivals_list
+
+    def select_arrivals_by_dates(self, date_start, date_end) -> Tuple[List[str], List[Przylot]]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        cr.execute("""SELECT p.LOT_ID AS ID,
+                                     p.DATAPRZYLOTU AS TERMIN,
+        	                         p.LICZBAPASAZEROW,
+        	                         ll.NAZWA AS LINIA_LOTNICZA,
+        	                         lt.NAZWA AS LOTNISKO,
+        	                         p2.NAZWA || ' ' || m.NAZWA AS MODEL_SAMOLOTU 
+                      FROM PRZYLOT p INNER JOIN LOT l ON p.LOT_ID = l.LOT_ID 
+                                     INNER JOIN LINIALOTNICZA ll  ON l.LINIALOTNICZA_ID = ll.LINIALOTNICZA_ID
+                                     INNER JOIN LOTNISKO lt ON l.LOTNISKO_ID = lt.LOTNISKO_ID
+                                     INNER JOIN MODEL m ON l.MODEL_ID = m.MODEL_ID 
+                                     INNER JOIN PRODUCENT p2 ON m.PRODUCENT_ID = p2.PRODUCENT_ID
+                      WHERE p.DATAPRZYLOTU >= :date_start AND p.DATAPRZYLOTU <= :date_end""",
+                   date_start=date_start,
+                   date_end=date_end)
+        headers, arrivals_list = self.__select_arrivals_query_to_list(cr)
+        cr.close()
+
+        return headers, arrivals_list
+
+    def __select_arrivals_query_to_list(self, cr: cx_Oracle.Cursor):
         headers = [header[0] for header in cr.description]
         arrivals_list = []
         for arrival in cr:
@@ -517,6 +545,5 @@ class OracleDB:
                     model=Model(nazwa=arrival[5])
                 )
             )
-        cr.close()
 
         return headers, arrivals_list

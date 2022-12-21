@@ -1,3 +1,5 @@
+import datetime
+
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 
 from flaskr.internal.helpers.forms import AirportForm, AirlinesForm, ManufacturersForm, ModelsForm
@@ -441,10 +443,25 @@ def delete_model():
     return redirect(url_for('flights.models'))
 
 
-@flights_bp.route('/arrivals')
+@flights_bp.route('/arrivals', methods=['GET', 'POST'])
 def arrivals():
-    headers, arrivals_list = oracle_db.select_arrivals()
+    if request.method == 'POST':
+        date_range = request.form['date']
+        if " to " in date_range:
+            # filter arrivals by dates
+            sd, ed = date_range.split(" to ")
+            start_date = datetime.datetime.strptime(sd, "%Y-%m-%d %H:%M")
+            end_date = datetime.datetime.strptime(ed, "%Y-%m-%d %H:%M")
+            headers, arrivals_list = oracle_db.select_arrivals_by_dates(start_date, end_date)
+            return render_template('flights-arrivals/flights-arrivals.page.html',
+                                   arrivals_data=arrivals_list,
+                                   headers=headers)
 
+        else:
+            flash("Niepoprawny format daty", category=c.ERROR)
+
+    # load all arrivals
+    headers, arrivals_list = oracle_db.select_arrivals()
     return render_template('flights-arrivals/flights-arrivals.page.html',
                            arrivals_data=arrivals_list,
                            headers=headers)

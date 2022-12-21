@@ -11,9 +11,22 @@
 {% block button_add_new %}
 
     <div class="container-fluid create-new-container">
-        <a href="{{ url_for('flights.new_arrival') }}">
-            <button id="add-new-manufacturer" type="button" class="btn btn-success">Nowy przylot</button>
-        </a>
+        <div class="row">
+            <div class="col-md-6">
+                <a href="{{ url_for('flights.new_arrival') }}">
+                    <button type="button" class="btn btn-success">Nowy przylot</button>
+                </a>
+            </div>
+            <div class="col-md-6">
+                <form method="POST">
+                    <div class="input-group">
+                        <input type="text" id="date-picker" name="date" class="form-control"
+                               placeholder="Wybierz zakres daty...">
+                        <button type="submit" class="btn btn-primary">Filtruj wyniki</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
 {% endblock %}
@@ -55,7 +68,17 @@
 
 
 {% block custom_js %}
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
+        flatpickr("#date-picker", {
+            mode: "range",
+            enableTime: true,
+            time_24hr: true,
+            dateFormat: 'Y-m-d H:i',
+            altInput: true,
+            altFormat: "F j, Y H:i",
+        });
+
         {# BUTTONS IN DATATABLE - DELETING MANUFACTURER #}
         {% for arrival in arrivals_data %}
 
@@ -75,5 +98,7 @@
                 })
             })
         {% endfor %}
+
+
     </script>
 {% endblock %}
