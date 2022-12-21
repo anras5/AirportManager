@@ -3,8 +3,14 @@
 
 {% block page_header %}
 
-    <h3>PRZYLOTY</h3>
-
+    <h3>PRZYLOTY</h3><br>
+    {% if date %}
+        <h5>Przedział czasowy:</h5>
+        <h5>{{ date }}</h5>
+        <a href="{{ url_for('flights.arrivals') }}">
+        <button class="btn btn-secondary">Anuluj</button>
+        </a>
+    {% endif %}
 {% endblock %}
 
 
@@ -74,9 +80,7 @@
             mode: "range",
             enableTime: true,
             time_24hr: true,
-            dateFormat: 'Y-m-d H:i',
-            altInput: true,
-            altFormat: "F j, Y H:i",
+            dateFormat: 'Y-m-d H:i'
         });
 
         {# BUTTONS IN DATATABLE - DELETING MANUFACTURER #}

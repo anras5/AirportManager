@@ -455,7 +455,8 @@ def arrivals():
             headers, arrivals_list = oracle_db.select_arrivals_by_dates(start_date, end_date)
             return render_template('flights-arrivals/flights-arrivals.page.html',
                                    arrivals_data=arrivals_list,
-                                   headers=headers)
+                                   headers=headers,
+                                   date=f"Od {sd} do {ed}")
 
         else:
             flash("Niepoprawny format daty", category=c.ERROR)
