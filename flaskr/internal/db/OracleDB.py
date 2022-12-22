@@ -1,3 +1,5 @@
+import datetime
+
 import cx_Oracle
 import os
 
@@ -490,6 +492,23 @@ class OracleDB:
             cr.close()
             return "Pomyślnie usunięto pas startowy", c.SUCCESS
 
+    def select_available_runways(self, timestamp: datetime.datetime) -> List[Pas]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        cr.execute("""SELECT p.PAS_ID, p.NAZWA
+                        FROM PAS p 
+                       WHERE p.PAS_ID NOT IN (SELECT r.PAS_ID
+ 					                        FROM REZERWACJA r
+ 					                       WHERE :start_time < r.KONIEC AND :start_time + INTERVAL '10' MINUTE > r.POCZATEK)""",
+                   start_time=timestamp)
+        runways_list = []
+        for runway in cr:
+            runways_list.append(
+                Pas(_id=runway[0], nazwa=runway[1])
+            )
+        cr.close()
+        return runways_list
+
     def select_arrivals(self) -> Tuple[List[str], List[Przylot]]:
         connection = self.pool.acquire()
         cr = connection.cursor()
@@ -545,5 +564,4 @@ class OracleDB:
                     model=Model(nazwa=arrival[5])
                 )
             )
-
         return headers, arrivals_list

@@ -468,6 +468,25 @@ def arrivals():
                            headers=headers)
 
 
+@flights_bp.route('/arrivals/check-availability', methods=['POST'])
+def check_availability_arrival():
+    # get timestamp
+    parameters = request.form
+    timestamp = parameters.get('timestamp', '')
+    if not timestamp:
+        flash("Błąd - nie podano daty odlotu", category="error")
+
+    # parse datetime
+    timestamp = datetime.datetime.strptime(timestamp, "%Y-%m-%d %H:%M")
+
+    # check what runways are available on the given date
+    runway_list = oracle_db.select_available_runways(timestamp)
+    for x in runway_list:
+        print(x.id)
+
+    return redirect(url_for('flights.new_arrival'))
+
+
 @flights_bp.route('/arrivals/new', methods=['GET', 'POST'])
 def new_arrival():
     return redirect(url_for('flights.arrivals'))

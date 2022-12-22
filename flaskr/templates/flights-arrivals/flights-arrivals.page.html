@@ -112,8 +112,8 @@
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    let datetime = document.getElementById('date-picker-check').value
-                    console.log(datetime)
+                    let dt = document.getElementById('date-picker-check').value
+                    post("{{ url_for('flights.check_availability_arrival') }}", {timestamp: dt})
                 }
             })
         })
