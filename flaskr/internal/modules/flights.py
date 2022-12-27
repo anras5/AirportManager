@@ -416,11 +416,11 @@ def update_model(model_id):
             return redirect(url_for('flights.models'))
 
     # set default data on the form
+    form.producent.default = model.producent.id
+    form.process()
     form.nazwa.data = model.nazwa
     form.liczba_miejsc.data = model.liczba_miejsc
     form.predkosc.data = model.predkosc
-    form.producent.default = model.producent.id
-    form.process()
 
     return render_template('flights-models/flights-models-update.page.html',
                            form=form,
