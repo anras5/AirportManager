@@ -1,6 +1,6 @@
 import datetime
 
-from flask import Blueprint, render_template, redirect, url_for, request, flash
+from flask import Blueprint, render_template, redirect, url_for, request, flash, session
 
 from flaskr.internal.helpers.forms import AirportForm, AirlinesForm, ManufacturersForm, ModelsForm
 from flaskr.internal.helpers.models import Lotnisko
@@ -469,7 +469,7 @@ def arrivals():
 
 
 @flights_bp.route('/arrivals/check-availability', methods=['POST'])
-def check_availability_arrival():
+def check_availability_runway():
     # get timestamp
     parameters = request.form
     timestamp = parameters.get('timestamp', '')
@@ -481,15 +481,29 @@ def check_availability_arrival():
 
     # check what runways are available on the given date
     runway_list = oracle_db.select_available_runways(timestamp)
-    for x in runway_list:
-        print(x.id)
-
-    return redirect(url_for('flights.new_arrival'))
+    if runway_list:
+        session['available_runways'] = [runway.id for runway in runway_list]
+        return redirect(url_for('flights.new_arrival'))
+    else:
+        flash("Brak dostępnych pasów startowych w tym terminie", c.ERROR)
+        return redirect(url_for('flights.arrivals'))
 
 
 @flights_bp.route('/arrivals/new', methods=['GET', 'POST'])
 def new_arrival():
-    return redirect(url_for('flights.arrivals'))
+
+    # get available runways list from session
+    runways_ids_list = session.get('available_runways', '')
+    session.pop('available_runways')
+
+    if not runways_ids_list:
+        flash("Wystąpił błąd. Do dodania przylotu użyj przeznaczonego do tego przycisku", c.WARNING)
+        return redirect(url_for('flights.arrivals'))
+    else:
+        runways = oracle_db.select_runways_by_ids(runways_ids_list)
+        for runway in runways:
+            print(runway.id, runway.nazwa, runway.dlugosc, runway.opis)
+        return redirect(url_for('flights.arrivals'))
 
 
 @flights_bp.route('/arrivals/update/<int:arrival_id>', methods=['GET', 'POST'])

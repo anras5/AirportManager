@@ -437,6 +437,24 @@ class OracleDB:
         data = cr.fetchone()
         return Pas(nazwa=data[0], dlugosc=data[1], opis=data[2])
 
+    def select_runways_by_ids(self, runways_id) -> List[Pas]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        bind_names = [f":{i+1}" for i in range(len(runways_id))]
+        sql = "SELECT PAS_ID, NAZWA, DLUGOSC, OPIS FROM PAS WHERE PAS_ID IN (%s)" % (','.join(bind_names))
+        cr.execute(sql, runways_id)
+        runways_list = []
+        for runway in cr:
+            runways_list.append(
+                Pas(_id=runway[0],
+                    nazwa=runway[1],
+                    dlugosc=runway[2],
+                    opis=runway[3])
+            )
+        cr.close()
+
+        return runways_list
+
     def insert_runway(self, nazwa, dlugosc, opis) -> Tuple[str, str, str]:
         connection = self.pool.acquire()
         cr = connection.cursor()
