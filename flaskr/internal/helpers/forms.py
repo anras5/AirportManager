@@ -118,3 +118,17 @@ class RunwaysForm(FlaskForm):
                                        NumberRange(min=1)])
     opis = StringField("Podaj dodatkowy opis pasa startowego")
     submit = SubmitField("Dodaj pas")
+
+
+# ------------------------------------------------------------------------------------------------------------------- #
+# FLIGHTS.ARRIVALS FORMS
+
+class ArrivalForm(FlaskForm):
+    pas = SelectField("Wybierz pas startowy", validators=[DataRequired()])
+    lotnisko = SelectField("Wybierz lotnisko, z którego przyleci samolot", validators=[DataRequired()])
+    model = SelectField("Wybierz model samolotu, który obsługuje połączenie", validators=[DataRequired()])
+    linia_lotnicza = SelectField("Wybierz linię lotniczą, która obsługuje połączenie", validators=[DataRequired()])
+    liczba_pasazerow = IntegerField("Podaj liczbę pasażerów, którzy przylecą tym lotem",
+                                    validators=[DataRequired(),
+                                                NumberRange(min=0)])
+    submit = SubmitField("Dodaj przylot")

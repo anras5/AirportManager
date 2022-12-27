@@ -27,10 +27,15 @@ class OracleDB:
                                           threaded=True,
                                           getmode=pool_gmd)
 
-    def select_airports(self) -> Tuple[List[str], List[Lotnisko]]:
+    def select_airports(self, order=False) -> Tuple[List[str], List[Lotnisko]]:
         connection = self.pool.acquire()
         cr = connection.cursor()
-        cr.execute("SELECT LOTNISKO_ID, NAZWA, MIASTO, KRAJ, IATACODE, ICAOCODE, LONGITUDE, LATITUDE  FROM LOTNISKO")
+        if not order:
+            sql = "SELECT LOTNISKO_ID, NAZWA, MIASTO, KRAJ, IATACODE, ICAOCODE, LONGITUDE, LATITUDE FROM LOTNISKO"
+        else:
+            sql = "SELECT LOTNISKO_ID, NAZWA, MIASTO, KRAJ, IATACODE, ICAOCODE, LONGITUDE, LATITUDE " \
+                  "FROM LOTNISKO ORDER BY NAZWA"
+        cr.execute(sql)
         headers = [header[0] for header in cr.description]
         airports_list = []
         for airport in cr:
@@ -138,10 +143,14 @@ class OracleDB:
             cr.close()
             return "Pomyślnie usunięto lotnisko", c.SUCCESS
 
-    def select_airlines(self) -> Tuple[List[str], List[LiniaLotnicza]]:
+    def select_airlines(self, order=False) -> Tuple[List[str], List[LiniaLotnicza]]:
         connection = self.pool.acquire()
         cr = connection.cursor()
-        cr.execute("SELECT LINIALOTNICZA_ID, NAZWA, KRAJ FROM LINIALOTNICZA")
+        if not order:
+            sql = "SELECT LINIALOTNICZA_ID, NAZWA, KRAJ FROM LINIALOTNICZA"
+        else:
+            sql = "SELECT LINIALOTNICZA_ID, NAZWA, KRAJ FROM LINIALOTNICZA ORDER BY NAZWA"
+        cr.execute(sql)
         headers = [header[0] for header in cr.description]
         airlines_list = []
         for airline in cr:
@@ -219,10 +228,14 @@ class OracleDB:
             cr.close()
             return "Pomyślnie usunięto linię lotniczą", c.SUCCESS
 
-    def select_manufacturers(self) -> Tuple[List[str], List[Producent]]:
+    def select_manufacturers(self, order=False) -> Tuple[List[str], List[Producent]]:
         connection = self.pool.acquire()
         cr = connection.cursor()
-        cr.execute("SELECT PRODUCENT_ID, NAZWA, KRAJ FROM PRODUCENT")
+        if not order:
+            sql = "SELECT PRODUCENT_ID, NAZWA, KRAJ FROM PRODUCENT"
+        else:
+            sql = "SELECT PRODUCENT_ID, NAZWA, KRAJ FROM PRODUCENT ORDER BY NAZWA"
+        cr.execute(sql)
         headers = [header[0] for header in cr.description]
         manufacturers_list = []
         for manufacturer in cr:
@@ -235,22 +248,6 @@ class OracleDB:
             )
         cr.close()
         return headers, manufacturers_list
-
-    def select_manufacturers_sort_nazwa(self) -> List[Producent]:
-        connection = self.pool.acquire()
-        cr = connection.cursor()
-        cr.execute("SELECT PRODUCENT_ID, NAZWA, KRAJ FROM PRODUCENT ORDER BY NAZWA")
-        manufacturers_list = []
-        for manufacturer in cr:
-            manufacturers_list.append(
-                Producent(
-                    _id=manufacturer[0],
-                    nazwa=manufacturer[1],
-                    kraj=manufacturer[2]
-                )
-            )
-        cr.close()
-        return manufacturers_list
 
     def select_manufacturer(self, manufacturer_id: int) -> Producent:
         connection = self.pool.acquire()
@@ -312,15 +309,25 @@ class OracleDB:
             cr.close()
             return "Pomyślnie usunięto producenta", c.SUCCESS
 
-    def select_models_manufacturers(self) -> Tuple[List[str], List[Model]]:
+    def select_models_manufacturers(self, order=False) -> Tuple[List[str], List[Model]]:
         connection = self.pool.acquire()
         cr = connection.cursor()
-        cr.execute("""SELECT m.MODEL_ID AS MODEL_ID,
-                                 m.NAZWA AS NAZWA_MODELU,
-                                 m.LICZBAMIEJSC AS LICZBA_MIEJSC,
-                                 m.PREDKOSC AS PREDKOSC,
-                                 p.NAZWA AS NAZWA_PRODUCENTA
-                          FROM MODEL m INNER JOIN PRODUCENT p ON m.PRODUCENT_ID = p.PRODUCENT_ID""")
+        if not order:
+            sql = """SELECT m.MODEL_ID AS MODEL_ID,
+                            m.NAZWA AS NAZWA_MODELU,
+                            m.LICZBAMIEJSC AS LICZBA_MIEJSC,
+                            m.PREDKOSC AS PREDKOSC,
+                            p.NAZWA AS NAZWA_PRODUCENTA
+                       FROM MODEL m INNER JOIN PRODUCENT p ON m.PRODUCENT_ID = p.PRODUCENT_ID"""
+        else:
+            sql = """SELECT m.MODEL_ID AS MODEL_ID,
+                            m.NAZWA AS NAZWA_MODELU,
+                            m.LICZBAMIEJSC AS LICZBA_MIEJSC,
+                            m.PREDKOSC AS PREDKOSC,
+                            p.NAZWA AS NAZWA_PRODUCENTA
+                       FROM MODEL m INNER JOIN PRODUCENT p ON m.PRODUCENT_ID = p.PRODUCENT_ID
+                       ORDER BY p.NAZWA, m.NAZWA"""
+        cr.execute(sql)
         headers = [header[0] for header in cr.description]
         models_list = []
         for model in cr:

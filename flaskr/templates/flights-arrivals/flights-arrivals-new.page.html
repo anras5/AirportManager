@@ -5,11 +5,12 @@
         <div class="row">
             <div class="col table-header">
                 <h3>Przyloty - dodawanie nowego przylotu</h3>
+                <h4>Czas przylotu: {{ timestamp }}</h4>
             </div>
         </div>
     </div>
     <div class="container-fluid create-new-container">
-        <a href="{{ url_for('flights.manufacturers') }}">
+        <a href="{{ url_for('flights.arrivals') }}">
             <button type="button" class="btn btn-secondary">Powrót</button>
         </a>
     </div>
@@ -21,13 +22,26 @@
     <div class="container form">
         <form method="post" class="row g-3">
             {{ form.hidden_tag() }}
-            <div class="col-md-6">
-                {{ form.nazwa.label(class_='form-label') }}
-                {{ form.nazwa(class_='form-control', placeholder='Nazwa') }}
+            <div class="col-lg-6">
+                {{ form.pas.label(class_='form-label') }}
+                {{ form.pas(class_='form-control') }}
             </div>
-            <div class="col-md-6">
-                {{ form.kraj.label(class_='form-label') }}
-                {{ form.kraj(class_='form-control', placeholder='Kraj') }}
+            <div class="col-lg-6">
+                {{ form.lotnisko.label(class_='form-label') }}
+                {{ form.lotnisko(class_='form-control') }}
+            </div>
+            <div class="col-lg-6">
+                {{ form.linia_lotnicza.label(class_='form-label') }}
+                {{ form.linia_lotnicza(class_='form-control') }}
+            </div>
+            {# TODO: set max number of passengers #}
+            <div class="col-lg-6">
+                {{ form.liczba_pasazerow.label(class_='form-label') }}
+                {{ form.liczba_pasazerow(class_='form-control') }}
+            </div>
+            <div class="col-lg-12">
+                {{ form.model.label(class_='form-label') }}
+                {{ form.model(class_='form-control') }}
             </div>
             <div class="col-12">
                 {{ form.submit(class_='btn btn-success') }}

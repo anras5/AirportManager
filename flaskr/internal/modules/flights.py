@@ -2,7 +2,7 @@ import datetime
 
 from flask import Blueprint, render_template, redirect, url_for, request, flash, session
 
-from flaskr.internal.helpers.forms import AirportForm, AirlinesForm, ManufacturersForm, ModelsForm
+from flaskr.internal.helpers.forms import AirportForm, AirlinesForm, ManufacturersForm, ModelsForm, ArrivalForm
 from flaskr.internal.helpers.models import Lotnisko
 from flaskr import oracle_db
 from flaskr.internal.helpers import constants as c
@@ -364,7 +364,7 @@ def new_model():
     form = ModelsForm()
 
     # get all manufacturers from database
-    manufacturers_list = oracle_db.select_manufacturers_sort_nazwa()
+    _, manufacturers_list = oracle_db.select_manufacturers(order=True)
     # insert manufacturers into form.producent.choices
     form.producent.choices = [(m.id, m.nazwa) for m in manufacturers_list]
 
@@ -483,6 +483,7 @@ def check_availability_runway():
     runway_list = oracle_db.select_available_runways(timestamp)
     if runway_list:
         session['available_runways'] = [runway.id for runway in runway_list]
+        session['arrival_timestamp'] = timestamp
         return redirect(url_for('flights.new_arrival'))
     else:
         flash("Brak dostępnych pasów startowych w tym terminie", c.ERROR)
@@ -491,19 +492,36 @@ def check_availability_runway():
 
 @flights_bp.route('/arrivals/new', methods=['GET', 'POST'])
 def new_arrival():
+    form = ArrivalForm()
+
+    # get all airports from database
+    _, airports_list = oracle_db.select_airports(order=True)
+    form.lotnisko.choices = [(airport.id, airport.nazwa) for airport in airports_list]
+
+    # get all models from database
+    _, models_list = oracle_db.select_models_manufacturers(order=True)
+    form.model.choices = [(model.id, f"{model.producent.nazwa} {model.nazwa}") for model in models_list]
+
+    # get all airline
+    _, airline_list = oracle_db.select_airlines(order=True)
+    form.linia_lotnicza.choices = [(airline.id, airline.nazwa) for airline in airline_list]
 
     # get available runways list from session
     runways_ids_list = session.get('available_runways', '')
-    session.pop('available_runways')
+
+    # get timestamp from session
+    timestamp = session.get('arrival_timestamp', '')
 
     if not runways_ids_list:
-        flash("Wystąpił błąd. Do dodania przylotu użyj przeznaczonego do tego przycisku", c.WARNING)
+        flash("Wystąpił błąd. Do dodania przylotu użyj przeznaczonego do tego przycisku!", c.WARNING)
         return redirect(url_for('flights.arrivals'))
     else:
         runways = oracle_db.select_runways_by_ids(runways_ids_list)
-        for runway in runways:
-            print(runway.id, runway.nazwa, runway.dlugosc, runway.opis)
-        return redirect(url_for('flights.arrivals'))
+        form.pas.choices = [(runway.id, runway.nazwa) for runway in runways]
+
+    return render_template('flights-arrivals/flights-arrivals-new.page.html',
+                           form=form,
+                           timestamp=timestamp)
 
 
 @flights_bp.route('/arrivals/update/<int:arrival_id>', methods=['GET', 'POST'])
