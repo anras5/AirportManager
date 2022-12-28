@@ -16,7 +16,7 @@ function deleteArrival(id, url, post_data) {
 }
 
 
-function addArrival(url) {
+function selectArrivalDate(url) {
     let html = `<form id="check-availability-form" action="" method="post" novalidate class="needs-validation">
                     <div class="p-2">
                         <input disabled type="text" id="date-picker-check" name="date" class="form-control"

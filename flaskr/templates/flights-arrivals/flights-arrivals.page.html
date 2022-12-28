@@ -57,10 +57,9 @@
             <td>{{ arrival.lotnisko.nazwa }}</td>
             <td>{{ arrival.model.nazwa }}</td>
             <td>
-                <a href="{{ url_for('flights.update_arrival', arrival_id=arrival.id) }}"
-                   class="icon-edit-table">
+                <button id="update{{ arrival.id }}" class="icon-edit-table">
                     <i class="fa-solid fa-pen"></i>
-                </a>
+                </button>
                 <button id="delete{{ arrival.id }}" class="icon-delete-table">
                     <i class="fa-solid fa-trash"></i>
                 </button>
@@ -86,14 +85,18 @@
 
         {# ADDING NEW ARRIVAL BUTTON #}
         document.getElementById("add-new-arrival").addEventListener("click", function () {
-            addArrival("{{ url_for('flights.check_availability_runway') }}")
+            selectArrivalDate("{{ url_for('flights.check_availability_runway', redirect_type='new') }}")
         })
 
-        {# BUTTONS IN DATATABLE - DELETING ARRIVAL #}
+        {# BUTTONS IN DATATABLE - UPDATING/DELETING ARRIVAL #}
         {% for arrival in arrivals_data %}
+            $('#example tbody').on('click', '#update{{ arrival.id }}', function () {
+                selectArrivalDate("{{ url_for('flights.check_availability_runway', redirect_type='update', arrival_id=arrival.id) }}")
+            })
             $('#example tbody').on('click', '#delete{{ arrival.id }}', function () {
-                    deleteArrival({{ arrival.id }}, "{{ url_for('flights.delete_arrival') }}", {arrival_id: {{ arrival.id }}})
-                })
+                deleteArrival({{ arrival.id }}, "{{ url_for('flights.delete_arrival') }}", {arrival_id: {{ arrival.id }}})
+            })
+
         {% endfor %}
 
     </script>

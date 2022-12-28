@@ -468,8 +468,8 @@ def arrivals():
                            headers=headers)
 
 
-@flights_bp.route('/arrivals/check-availability', methods=['POST'])
-def check_availability_runway():
+@flights_bp.route('/arrivals/check-availability/<redirect_type>', methods=['POST'])
+def check_availability_runway(redirect_type: str):
     # get timestamp
     parameters = request.form
     timestamp = parameters.get('timestamp', '')
@@ -484,7 +484,15 @@ def check_availability_runway():
     if runway_list:
         session['available_runways'] = [runway.id for runway in runway_list]
         session['arrival_timestamp'] = datetime.datetime.strftime(timestamp, "%Y-%m-%d %H:%M")
-        return redirect(url_for('flights.new_arrival'))
+        if redirect_type == 'new':
+            return redirect(url_for('flights.new_arrival'))
+        if redirect_type == 'update':
+            arrival_id = request.args.get('arrival_id')
+            if not arrival_id:
+                flash("Brak podanego ID przylotu", c.ERROR)
+                return redirect(url_for('flights.arrivals'))
+            else:
+                return redirect(url_for('flights.update_arrival', arrival_id=arrival_id))
     else:
         flash("Brak dostępnych pasów startowych w tym terminie", c.WARNING)
         return redirect(url_for('flights.arrivals'))
