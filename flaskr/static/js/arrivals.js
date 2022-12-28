@@ -16,11 +16,11 @@ function deleteArrival(id, url, post_data) {
 }
 
 
-function selectArrivalDate(url) {
+function selectArrivalDate(url, timestamp="") {
     let html = `<form id="check-availability-form" action="" method="post" novalidate class="needs-validation">
                     <div class="p-2">
                         <input disabled type="text" id="date-picker-check" name="date" class="form-control"
-                                       placeholder="Wybierz termin przylotu...">
+                                       placeholder="Wybierz termin przylotu..." value="${timestamp}">
                     </div>
                 </form>`
     Swal.fire({

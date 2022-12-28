@@ -4,8 +4,8 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col table-header">
-                <h3>Przyloty - dodawanie nowego przylotu</h3>
-                <h4>Czas przylotu: {{ timestamp }}</h4>
+                <h3>Przyloty - aktualizacja<br>Przylot z ID: {{ arrival.id }}</h3>
+                <p>Czas przylotu zmieniony z <b>{{ timestamp_old }}</b> na <b>{{ timestamp_new }}</b></p>
             </div>
         </div>
     </div>
@@ -20,6 +20,7 @@
 {% block content %}
 
     <div class="container form">
+        <h5>Uwaga! Edytowanie przylotu spowoduje usunięcie wszystkich rezerwacji przypisanych do niego w tym momencie.</h5>
         <form method="post" class="row g-3">
             {{ form.hidden_tag() }}
             <div class="col-lg-6">
@@ -43,7 +44,7 @@
                 {{ form.lotnisko(class_='form-control') }}
             </div>
             <div class="col-12">
-                {{ form.submit(class_='btn btn-success') }}
+                {{ form.submit(class_='btn btn-warning') }}
             </div>
         </form>
     </div>

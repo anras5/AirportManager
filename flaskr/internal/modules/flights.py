@@ -558,7 +558,54 @@ def new_arrival():
 
 @flights_bp.route('/arrivals/update/<int:arrival_id>', methods=['GET', 'POST'])
 def update_arrival(arrival_id: int):
-    return redirect(url_for('flights.arrivals'))
+    form = ArrivalForm()
+
+    # get arrival from db
+    arrival = oracle_db.select_arrival(arrival_id)
+
+    # get all airports from database
+    _, airports_list = oracle_db.select_airports(order=True)
+    form.lotnisko.choices = [(airport.id, airport.nazwa) for airport in airports_list]
+
+    # get all models from database
+    _, models_list = oracle_db.select_models_manufacturers(order=True)
+    form.model.choices = [(model.id, f"{model.producent.nazwa} {model.nazwa}") for model in models_list]
+
+    # get all airline
+    _, airline_list = oracle_db.select_airlines(order=True)
+    form.linia_lotnicza.choices = [(airline.id, airline.nazwa) for airline in airline_list]
+
+    # get available runways list from session
+    runways_ids_list = session.get('available_runways', '')
+
+    # get timestamp from session
+    timestamp = session.get('arrival_timestamp', '')
+
+    if not runways_ids_list or not timestamp:
+        flash("Błąd. Do aktualizacji przylotu użyj przeznaczonego do tego przycisku!", c.WARNING)
+        return redirect(url_for('flights.arrivals'))
+    else:
+        # load runways from database using ids from session
+        runways = oracle_db.select_runways_by_ids(runways_ids_list)
+        form.pas.choices = [(runway.id, runway.nazwa) for runway in runways]
+        # parse timestamp to datetime.datetime object
+        timestamp = datetime.datetime.strptime(timestamp, "%Y-%m-%d %H:%M")
+
+    # TODO: POST POST POST
+
+    # set default data on the form
+    form.lotnisko.default = arrival.lotnisko.id
+    form.model.default = arrival.model.id
+    form.linia_lotnicza.default = arrival.linia_lotnicza.id
+    form.process()
+    form.liczba_pasazerow.data = arrival.liczba_pasazerow
+
+    return render_template('flights-arrivals/flights-arrivals-update.page.html',
+                           form=form,
+                           arrival=arrival,
+                           models=models_list,
+                           timestamp_old=datetime.datetime.strftime(arrival.data_przylotu, "%Y-%m-%d %H:%M"),
+                           timestamp_new=datetime.datetime.strftime(timestamp, "%Y-%m-%d %H:%M"))
 
 
 @flights_bp.route('/arrivals/delete', methods=['POST'])
