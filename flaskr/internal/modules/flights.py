@@ -591,7 +591,29 @@ def update_arrival(arrival_id: int):
         # parse timestamp to datetime.datetime object
         timestamp = datetime.datetime.strptime(timestamp, "%Y-%m-%d %H:%M")
 
-    # TODO: POST POST POST
+    if form.validate_on_submit():
+        # update arrival
+        flash_message, flash_category, flash_type = oracle_db.update_arrival(arrival_id,
+                                                                             form.linia_lotnicza.data,
+                                                                             form.lotnisko.data,
+                                                                             form.model.data,
+                                                                             timestamp,
+                                                                             form.liczba_pasazerow.data,
+                                                                             form.pas.data)
+
+        flash(flash_message, flash_category)
+        if flash_category == c.ERROR:
+            return render_template("flights-arrivals/flights-arrivals-update.page.html",
+                                   form=form,
+                                   arrival=arrival,
+                                   models=models_list,
+                                   timestamp_old=datetime.datetime.strftime(arrival.data_przylotu, "%Y-%m-%d %H:%M"),
+                                   timestamp_new=datetime.datetime.strftime(timestamp, "%Y-%m-%d %H:%M"))
+        else:
+            # if no error in updating the data - pop values from session and display arrivals table
+            session.pop('available_runways')
+            session.pop('arrival_timestamp')
+            return redirect(url_for('flights.arrivals'))
 
     # set default data on the form
     form.lotnisko.default = arrival.lotnisko.id

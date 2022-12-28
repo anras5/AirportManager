@@ -650,6 +650,38 @@ class OracleDB:
 
         return "Pomyślnie dodano nowy przylot", c.SUCCESS, None
 
+    def update_arrival(self, lot_id, linia_lotnicza_id, lotnisko_id, model_id,
+                       data_przylotu, liczba_pasazerow, pas_id) -> Tuple[str, str, str]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+
+        lot_sql = """UPDATE LOT
+                        SET LINIALOTNICZA_ID = :1,
+                            LOTNISKO_ID = :2,
+                            MODEL_ID = :3
+                      WHERE LOT_ID = :4"""
+        cr.execute(lot_sql, (linia_lotnicza_id, lotnisko_id, model_id, lot_id))
+
+        przylot_sql = """UPDATE PRZYLOT
+                            SET DATAPRZYLOTU = :1,
+                                LICZBAPASAZEROW = :2
+                          WHERE LOT_ID = :3"""
+        cr.execute(przylot_sql, (data_przylotu, liczba_pasazerow, lot_id))
+
+        rezerwacje_sql = """DELETE FROM REZERWACJA WHERE LOT_ID = :lot_id"""
+        cr.execute(rezerwacje_sql, lot_id=lot_id)
+
+        rezerwacja_sql = """INSERT INTO REZERWACJA(POCZATEK, KONIEC, LOT_ID, PAS_ID)
+                                 VALUES (:1, :2, :3, :4)"""
+        cr.execute(rezerwacja_sql, (data_przylotu,
+                                    data_przylotu + datetime.timedelta(minutes=c.MINUTES_FOR_FLIGHT),
+                                    lot_id,
+                                    pas_id))
+
+        connection.commit()
+        cr.close()
+        return "Pomyślnie zaktualizowano przylot", c.SUCCESS, None
+
     def delete_arrival(self, lot_id) -> Tuple[str, str]:
         connection = self.pool.acquire()
         cr = connection.cursor()
