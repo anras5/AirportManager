@@ -622,3 +622,21 @@ class OracleDB:
         cr.close()
 
         return "Pomyślnie dodano nowy przylot", c.SUCCESS, None
+
+    def delete_arrival(self, lot_id) -> Tuple[str, str]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+
+        # delete from PRZYLOT
+        cr.execute("DELETE FROM PRZYLOT WHERE LOT_ID = :lot_id", lot_id=lot_id)
+
+        # delete from REZERWACJA
+        cr.execute("DELETE FROM REZERWACJA WHERE LOT_ID = :lot_id", lot_id=lot_id)
+
+        # delete from LOT
+        cr.execute("DELETE FROM LOT WHERE LOT_ID = :lot_id", lot_id=lot_id)
+
+        connection.commit()
+        cr.close()
+
+        return "Pomyślnie usunięto przylot", c.SUCCESS

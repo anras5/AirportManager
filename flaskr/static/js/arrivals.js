@@ -1,15 +1,15 @@
 function deleteArrival(id, url, post_data) {
     Swal.fire({
-        title: `Czy na pewno chcesz usunąć przylot z id: ${id}?`,
-        text: "Nie będziesz mógł cofnąć tej dezycji!",
+        title: `Czy na pewno chcesz usunąć przylot z ID: ${id}?`,
+        text: "Usunięcie przylotu usunie również odpowiadające mu rezerwacje pasów!",
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
         cancelButtonColor: '#d33',
-        confirmButtonText: 'Tak, usuń!'
+        confirmButtonText: 'Tak, usuń!',
+        cancelButtonText: "Powrót"
     }).then((result) => {
         if (result.isConfirmed) {
-            console.log(id)
             post(url, post_data)
         }
     })

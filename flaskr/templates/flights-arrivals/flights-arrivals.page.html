@@ -76,7 +76,6 @@
     <script src="{{ url_for('static', filename='js/arrivals.js') }}"></script>
     <script>
 
-
         {# DATEPICKER #}
         flatpickr("#date-picker", {
             mode: "range",
@@ -94,10 +93,8 @@
         {% for arrival in arrivals_data %}
             $('#example tbody').on('click', '#delete{{ arrival.id }}', function () {
                     deleteArrival({{ arrival.id }}, "{{ url_for('flights.delete_arrival') }}", {arrival_id: {{ arrival.id }}})
-                }
-            )
+                })
         {% endfor %}
-
 
     </script>
 {% endblock %}

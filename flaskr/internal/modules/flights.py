@@ -555,4 +555,15 @@ def update_arrival(arrival_id: int):
 
 @flights_bp.route('/arrivals/delete', methods=['POST'])
 def delete_arrival():
+    # get arrival id from parameters
+    parameters = request.form
+    arrival_id = parameters.get('arrival_id', '')
+    if not arrival_id:
+        flash("Błąd - nie podano przylotu do usunięcia", category='error')
+        return redirect(url_for('flights.arrivals'))
+
+    # delete arrival from database
+    flash_messsage, flash_category = oracle_db.delete_arrival(arrival_id)
+
+    flash(flash_messsage, flash_category)
     return redirect(url_for('flights.arrivals'))
