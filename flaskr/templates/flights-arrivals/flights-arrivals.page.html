@@ -73,7 +73,9 @@
 
 {% block custom_js %}
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="{{ url_for('static', filename='js/arrivals.js') }}"></script>
     <script>
+
 
         {# DATEPICKER #}
         flatpickr("#date-picker", {
@@ -85,60 +87,15 @@
 
         {# ADDING NEW ARRIVAL BUTTON #}
         document.getElementById("add-new-arrival").addEventListener("click", function () {
-            let html = `<form id="check-availability-form" action="" method="post" novalidate class="needs-validation">
-                            <div class="p-2">
-                                <input disabled type="text" id="date-picker-check" name="date" class="form-control"
-                                       placeholder="Wybierz termin przylotu...">
-                            </div>
-                        </form>`
-            Swal.fire({
-                title: "Wybierz termin przylotu",
-                html: html,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Dalej...',
-                cancelButtonText: 'Powrót',
-                willOpen: () => {
-                    flatpickr("#date-picker-check", {
-                        enableTime: true,
-                        dateFormat: "Y-m-d H:i",
-                        time_24hr: true,
-                    })
-                },
-                didOpen: () => {
-                    document.getElementById('date-picker-check').removeAttribute('disabled')
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    let dt = document.getElementById('date-picker-check').value
-                    if (dt !== "") {
-                        post("{{ url_for('flights.check_availability_runway') }}", {timestamp: dt})
-                    }
-                }
-            })
+            addArrival("{{ url_for('flights.check_availability_runway') }}")
         })
 
-
-        {# BUTTONS IN DATATABLE - DELETING MANUFACTURER #}
+        {# BUTTONS IN DATATABLE - DELETING ARRIVAL #}
         {% for arrival in arrivals_data %}
-
             $('#example tbody').on('click', '#delete{{ arrival.id }}', function () {
-                Swal.fire({
-                    title: 'Czy na pewno chcesz usunąć: {{ arrival.nazwa }}?',
-                    text: "Nie będziesz mógł cofnąć tej dezycji!",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Tak, usuń!'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        post("{{ url_for('flights.delete_arrival') }}", {arrival_id: {{ arrival.id }}})
-                    }
-                })
-            })
+                    deleteArrival({{ arrival.id }}, "{{ url_for('flights.delete_arrival') }}", {arrival_id: {{ arrival.id }}})
+                }
+            )
         {% endfor %}
 
 

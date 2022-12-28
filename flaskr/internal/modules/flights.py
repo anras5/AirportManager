@@ -395,7 +395,7 @@ def update_model(model_id):
     model = oracle_db.select_model_manufacturer(model_id)
 
     # get all manufacturers from database
-    manufacturers_list = oracle_db.select_manufacturers_sort_nazwa()
+    _, manufacturers_list = oracle_db.select_models_manufacturers(order=True)
     # insert manufacturers into form.producent.choices
     form.producent.choices = [(m.id, m.nazwa) for m in manufacturers_list]
 
