@@ -447,7 +447,7 @@ class OracleDB:
     def select_runways_by_ids(self, runways_id) -> List[Pas]:
         connection = self.pool.acquire()
         cr = connection.cursor()
-        bind_names = [f":{i+1}" for i in range(len(runways_id))]
+        bind_names = [f":{i + 1}" for i in range(len(runways_id))]
         sql = "SELECT PAS_ID, NAZWA, DLUGOSC, OPIS FROM PAS WHERE PAS_ID IN (%s)" % (','.join(bind_names))
         cr.execute(sql, runways_id)
         runways_list = []
@@ -590,3 +590,35 @@ class OracleDB:
                 )
             )
         return headers, arrivals_list
+
+    def insert_arrival(self, linia_lotnicza_id, lotnisko_id, model_id,
+                       data_przylotu, liczba_pasazerow, pas_id) -> Tuple[str, str, str]:
+
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+
+        lot_id = cr.var(cx_Oracle.NUMBER)
+
+        lot_sql = """INSERT INTO LOT(LINIALOTNICZA_ID, LOTNISKO_ID, MODEL_ID, TYP)
+                          VALUES (:1, :2, :3, 'przylot')
+                       RETURNING LOT_ID INTO :4"""
+
+        cr.execute(lot_sql, (linia_lotnicza_id, lotnisko_id, model_id, lot_id))
+
+        przylot_sql = """INSERT INTO PRZYLOT(DATAPRZYLOTU, LICZBAPASAZEROW)
+                              VALUES (:1, :2)"""
+
+        cr.execute(przylot_sql, (data_przylotu, liczba_pasazerow))
+
+        rezerwacja_sql = """INSERT INTO REZERWACJA(POCZATEK, KONIEC, LOT_ID, PAS_ID)
+                                 VALUES (:1, :2, :3, :4)"""
+
+        cr.execute(rezerwacja_sql, (data_przylotu,
+                                    data_przylotu + datetime.timedelta(minutes=c.MINUTES_FOR_FLIGHT),
+                                    lot_id.getvalue()[0],
+                                    pas_id))
+
+        connection.commit()
+        cr.close()
+
+        return "Pomyślnie dodano nowy przylot", c.SUCCESS, None

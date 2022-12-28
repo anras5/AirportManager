@@ -483,7 +483,7 @@ def check_availability_runway():
     runway_list = oracle_db.select_available_runways(timestamp)
     if runway_list:
         session['available_runways'] = [runway.id for runway in runway_list]
-        session['arrival_timestamp'] = timestamp
+        session['arrival_timestamp'] = datetime.datetime.strftime(timestamp, "%Y-%m-%d %H:%M")
         return redirect(url_for('flights.new_arrival'))
     else:
         flash("Brak dostępnych pasów startowych w tym terminie", c.ERROR)
@@ -512,16 +512,39 @@ def new_arrival():
     # get timestamp from session
     timestamp = session.get('arrival_timestamp', '')
 
-    if not runways_ids_list:
+    if not runways_ids_list or not timestamp:
         flash("Wystąpił błąd. Do dodania przylotu użyj przeznaczonego do tego przycisku!", c.WARNING)
         return redirect(url_for('flights.arrivals'))
     else:
+        # load runways from database using ids from session
         runways = oracle_db.select_runways_by_ids(runways_ids_list)
         form.pas.choices = [(runway.id, runway.nazwa) for runway in runways]
+        # parse timestamp to datetime.datetime object
+        timestamp = datetime.datetime.strptime(timestamp, "%Y-%m-%d %H:%M")
+
+    if form.validate_on_submit():
+        flash_message, flash_category, _ = oracle_db.insert_arrival(form.linia_lotnicza.data,
+                                                                    form.lotnisko.data,
+                                                                    form.model.data,
+                                                                    timestamp,
+                                                                    form.liczba_pasazerow.data,
+                                                                    form.pas.data)
+
+        flash(flash_message, flash_category)
+        if flash_category == c.ERROR:
+            return render_template('flights-arrivals/flights-arrivals-new.page.html',
+                                   form=form,
+                                   timestamp=datetime.datetime.strftime(timestamp, "%Y-%m-%d %H:%M"),
+                                   models=models_list)
+        else:
+            # if no error in inserting the data to the database - pop values from session and display arrivals table
+            session.pop('available_runways')
+            session.pop('arrival_timestamp')
+            return redirect(url_for('flights.arrivals'))
 
     return render_template('flights-arrivals/flights-arrivals-new.page.html',
                            form=form,
-                           timestamp=timestamp,
+                           timestamp=datetime.datetime.strftime(timestamp, "%Y-%m-%d %H:%M"),
                            models=models_list)
 
 
