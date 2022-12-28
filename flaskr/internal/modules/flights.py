@@ -486,7 +486,7 @@ def check_availability_runway():
         session['arrival_timestamp'] = datetime.datetime.strftime(timestamp, "%Y-%m-%d %H:%M")
         return redirect(url_for('flights.new_arrival'))
     else:
-        flash("Brak dostępnych pasów startowych w tym terminie", c.ERROR)
+        flash("Brak dostępnych pasów startowych w tym terminie", c.WARNING)
         return redirect(url_for('flights.arrivals'))
 
 

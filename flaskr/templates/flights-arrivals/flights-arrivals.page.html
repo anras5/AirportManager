@@ -113,7 +113,9 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     let dt = document.getElementById('date-picker-check').value
-                    post("{{ url_for('flights.check_availability_runway') }}", {timestamp: dt})
+                    if (dt !== "") {
+                        post("{{ url_for('flights.check_availability_runway') }}", {timestamp: dt})
+                    }
                 }
             })
         })
