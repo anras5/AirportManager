@@ -521,7 +521,8 @@ def new_arrival():
 
     return render_template('flights-arrivals/flights-arrivals-new.page.html',
                            form=form,
-                           timestamp=timestamp)
+                           timestamp=timestamp,
+                           models=models_list)
 
 
 @flights_bp.route('/arrivals/update/<int:arrival_id>', methods=['GET', 'POST'])
