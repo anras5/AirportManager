@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, redirect
+from flask import Flask, render_template, url_for, redirect, flash
 from dotenv import load_dotenv
 from flask_bootstrap import Bootstrap
 from flaskr.internal.db.OracleDB import OracleDB
@@ -49,6 +49,7 @@ def create_app(test_config=None):
 
     @app.errorhandler(404)
     def page_not_found(error):
+        flash("Taka strona nie istnieje!", "error")
         return redirect(url_for('home'))
 
     return app

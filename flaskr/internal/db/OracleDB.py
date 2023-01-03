@@ -1,10 +1,12 @@
+import datetime
+
 import cx_Oracle
 import os
 
 from typing import List, Tuple
 
 from flaskr.internal.helpers import constants as c
-from flaskr.internal.helpers.models import LiniaLotnicza, Lotnisko, Producent, Model, Pas
+from flaskr.internal.helpers.models import LiniaLotnicza, Lotnisko, Producent, Model, Pas, Przylot
 
 
 class OracleDB:
@@ -25,10 +27,15 @@ class OracleDB:
                                           threaded=True,
                                           getmode=pool_gmd)
 
-    def select_airports(self) -> Tuple[List[str], List[Lotnisko]]:
+    def select_airports(self, order=False) -> Tuple[List[str], List[Lotnisko]]:
         connection = self.pool.acquire()
         cr = connection.cursor()
-        cr.execute("SELECT LOTNISKO_ID, NAZWA, MIASTO, KRAJ, IATACODE, ICAOCODE, LONGITUDE, LATITUDE  FROM LOTNISKO")
+        if not order:
+            sql = "SELECT LOTNISKO_ID, NAZWA, MIASTO, KRAJ, IATACODE, ICAOCODE, LONGITUDE, LATITUDE FROM LOTNISKO"
+        else:
+            sql = "SELECT LOTNISKO_ID, NAZWA, MIASTO, KRAJ, IATACODE, ICAOCODE, LONGITUDE, LATITUDE " \
+                  "FROM LOTNISKO ORDER BY NAZWA"
+        cr.execute(sql)
         headers = [header[0] for header in cr.description]
         airports_list = []
         for airport in cr:
@@ -157,10 +164,14 @@ class OracleDB:
             cr.close()
             return "Pomyślnie usunięto lotnisko", c.SUCCESS
 
-    def select_airlines(self) -> Tuple[List[str], List[LiniaLotnicza]]:
+    def select_airlines(self, order=False) -> Tuple[List[str], List[LiniaLotnicza]]:
         connection = self.pool.acquire()
         cr = connection.cursor()
-        cr.execute("SELECT LINIALOTNICZA_ID, NAZWA, KRAJ FROM LINIALOTNICZA")
+        if not order:
+            sql = "SELECT LINIALOTNICZA_ID, NAZWA, KRAJ FROM LINIALOTNICZA"
+        else:
+            sql = "SELECT LINIALOTNICZA_ID, NAZWA, KRAJ FROM LINIALOTNICZA ORDER BY NAZWA"
+        cr.execute(sql)
         headers = [header[0] for header in cr.description]
         airlines_list = []
         for airline in cr:
@@ -238,10 +249,14 @@ class OracleDB:
             cr.close()
             return "Pomyślnie usunięto linię lotniczą", c.SUCCESS
 
-    def select_manufacturers(self) -> Tuple[List[str], List[Producent]]:
+    def select_manufacturers(self, order=False) -> Tuple[List[str], List[Producent]]:
         connection = self.pool.acquire()
         cr = connection.cursor()
-        cr.execute("SELECT PRODUCENT_ID, NAZWA, KRAJ FROM PRODUCENT")
+        if not order:
+            sql = "SELECT PRODUCENT_ID, NAZWA, KRAJ FROM PRODUCENT"
+        else:
+            sql = "SELECT PRODUCENT_ID, NAZWA, KRAJ FROM PRODUCENT ORDER BY NAZWA"
+        cr.execute(sql)
         headers = [header[0] for header in cr.description]
         manufacturers_list = []
         for manufacturer in cr:
@@ -254,22 +269,6 @@ class OracleDB:
             )
         cr.close()
         return headers, manufacturers_list
-
-    def select_manufacturers_sort_nazwa(self) -> List[Producent]:
-        connection = self.pool.acquire()
-        cr = connection.cursor()
-        cr.execute("SELECT PRODUCENT_ID, NAZWA, KRAJ FROM PRODUCENT ORDER BY NAZWA")
-        manufacturers_list = []
-        for manufacturer in cr:
-            manufacturers_list.append(
-                Producent(
-                    _id=manufacturer[0],
-                    nazwa=manufacturer[1],
-                    kraj=manufacturer[2]
-                )
-            )
-        cr.close()
-        return manufacturers_list
 
     def select_manufacturer(self, manufacturer_id: int) -> Producent:
         connection = self.pool.acquire()
@@ -335,15 +334,25 @@ class OracleDB:
             cr.close()
             return "Pomyślnie usunięto producenta", c.SUCCESS
 
-    def select_models_manufacturers(self) -> Tuple[List[str], List[Model]]:
+    def select_models_manufacturers(self, order=False) -> Tuple[List[str], List[Model]]:
         connection = self.pool.acquire()
         cr = connection.cursor()
-        cr.execute("""SELECT m.MODEL_ID AS MODEL_ID,
-                                 m.NAZWA AS NAZWA_MODELU,
-                                 m.LICZBAMIEJSC AS LICZBA_MIEJSC,
-                                 m.PREDKOSC AS PREDKOSC,
-                                 p.NAZWA AS NAZWA_PRODUCENTA
-                          FROM MODEL m INNER JOIN PRODUCENT p ON m.PRODUCENT_ID = p.PRODUCENT_ID""")
+        if not order:
+            sql = """SELECT m.MODEL_ID AS MODEL_ID,
+                            m.NAZWA AS NAZWA_MODELU,
+                            m.LICZBAMIEJSC AS LICZBA_MIEJSC,
+                            m.PREDKOSC AS PREDKOSC,
+                            p.NAZWA AS NAZWA_PRODUCENTA
+                       FROM MODEL m INNER JOIN PRODUCENT p ON m.PRODUCENT_ID = p.PRODUCENT_ID"""
+        else:
+            sql = """SELECT m.MODEL_ID AS MODEL_ID,
+                            m.NAZWA AS NAZWA_MODELU,
+                            m.LICZBAMIEJSC AS LICZBA_MIEJSC,
+                            m.PREDKOSC AS PREDKOSC,
+                            p.NAZWA AS NAZWA_PRODUCENTA
+                       FROM MODEL m INNER JOIN PRODUCENT p ON m.PRODUCENT_ID = p.PRODUCENT_ID
+                       ORDER BY p.NAZWA, m.NAZWA"""
+        cr.execute(sql)
         headers = [header[0] for header in cr.description]
         models_list = []
         for model in cr:
@@ -464,6 +473,24 @@ class OracleDB:
         data = cr.fetchone()
         return Pas(nazwa=data[0], dlugosc=data[1], opis=data[2])
 
+    def select_runways_by_ids(self, runways_id) -> List[Pas]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        bind_names = [f":{i + 1}" for i in range(len(runways_id))]
+        sql = "SELECT PAS_ID, NAZWA, DLUGOSC, OPIS FROM PAS WHERE PAS_ID IN (%s)" % (','.join(bind_names))
+        cr.execute(sql, runways_id)
+        runways_list = []
+        for runway in cr:
+            runways_list.append(
+                Pas(_id=runway[0],
+                    nazwa=runway[1],
+                    dlugosc=runway[2],
+                    opis=runway[3])
+            )
+        cr.close()
+
+        return runways_list
+
     def insert_runway(self, nazwa, dlugosc, opis) -> Tuple[str, str, str]:
         connection = self.pool.acquire()
         cr = connection.cursor()
@@ -522,3 +549,186 @@ class OracleDB:
             connection.commit()
             cr.close()
             return "Pomyślnie usunięto pas startowy", c.SUCCESS
+
+    def select_available_runways(self, timestamp: datetime.datetime) -> List[Pas]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        cr.execute("""SELECT p.PAS_ID, p.NAZWA
+                        FROM PAS p 
+                       WHERE p.PAS_ID NOT IN (SELECT r.PAS_ID
+ 					                        FROM REZERWACJA r
+ 					                       WHERE :start_time < r.KONIEC AND :start_time + INTERVAL '10' MINUTE > r.POCZATEK)""",
+                   start_time=timestamp)
+        runways_list = []
+        for runway in cr:
+            runways_list.append(
+                Pas(_id=runway[0], nazwa=runway[1])
+            )
+        cr.close()
+        return runways_list
+
+    def select_arrivals(self) -> Tuple[List[str], List[Przylot]]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        cr.execute("""SELECT p.LOT_ID AS ID,
+                             p.DATAPRZYLOTU AS TERMIN,
+	                         p.LICZBAPASAZEROW,
+	                         ll.NAZWA AS LINIA_LOTNICZA,
+	                         lt.NAZWA AS LOTNISKO,
+	                         p2.NAZWA || ' ' || m.NAZWA AS MODEL_SAMOLOTU 
+                      FROM PRZYLOT p INNER JOIN LOT l ON p.LOT_ID = l.LOT_ID 
+                                     INNER JOIN LINIALOTNICZA ll  ON l.LINIALOTNICZA_ID = ll.LINIALOTNICZA_ID
+                                     INNER JOIN LOTNISKO lt ON l.LOTNISKO_ID = lt.LOTNISKO_ID
+                                     INNER JOIN MODEL m ON l.MODEL_ID = m.MODEL_ID 
+                                     INNER JOIN PRODUCENT p2 ON m.PRODUCENT_ID = p2.PRODUCENT_ID""")
+        headers, arrivals_list = self.__select_arrivals_query_to_list(cr)
+        cr.close()
+
+        return headers, arrivals_list
+
+    def select_arrivals_by_dates(self, date_start, date_end) -> Tuple[List[str], List[Przylot]]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        cr.execute("""SELECT p.LOT_ID AS ID,
+                                     p.DATAPRZYLOTU AS TERMIN,
+        	                         p.LICZBAPASAZEROW,
+        	                         ll.NAZWA AS LINIA_LOTNICZA,
+        	                         lt.NAZWA AS LOTNISKO,
+        	                         p2.NAZWA || ' ' || m.NAZWA AS MODEL_SAMOLOTU 
+                      FROM PRZYLOT p INNER JOIN LOT l ON p.LOT_ID = l.LOT_ID 
+                                     INNER JOIN LINIALOTNICZA ll  ON l.LINIALOTNICZA_ID = ll.LINIALOTNICZA_ID
+                                     INNER JOIN LOTNISKO lt ON l.LOTNISKO_ID = lt.LOTNISKO_ID
+                                     INNER JOIN MODEL m ON l.MODEL_ID = m.MODEL_ID 
+                                     INNER JOIN PRODUCENT p2 ON m.PRODUCENT_ID = p2.PRODUCENT_ID
+                      WHERE p.DATAPRZYLOTU >= :date_start AND p.DATAPRZYLOTU <= :date_end""",
+                   date_start=date_start,
+                   date_end=date_end)
+        headers, arrivals_list = self.__select_arrivals_query_to_list(cr)
+        cr.close()
+
+        return headers, arrivals_list
+
+    def __select_arrivals_query_to_list(self, cr: cx_Oracle.Cursor):
+        headers = [header[0] for header in cr.description]
+        arrivals_list = []
+        for arrival in cr:
+            arrivals_list.append(
+                Przylot(
+                    _id=arrival[0],
+                    data_przylotu=arrival[1],
+                    liczba_pasazerow=arrival[2],
+                    linia_lotnicza=LiniaLotnicza(nazwa=arrival[3]),
+                    lotnisko=Lotnisko(nazwa=arrival[4]),
+                    model=Model(nazwa=arrival[5])
+                )
+            )
+        return headers, arrivals_list
+
+    def select_arrival(self, lot_id) -> Przylot:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        cr.execute("""SELECT p.LOT_ID AS ID,
+                             p.DATAPRZYLOTU AS TERMIN,
+                             p.LICZBAPASAZEROW,
+                             ll.LINIALOTNICZA_ID,
+                             ll.NAZWA AS LINIA_LOTNICZA,
+                             lt.LOTNISKO_ID,
+                             lt.NAZWA AS LOTNISKO,
+                             m.MODEL_ID,
+                             p2.NAZWA || ' ' || m.NAZWA AS MODEL_SAMOLOTU 
+                      FROM PRZYLOT p INNER JOIN LOT l ON p.LOT_ID = l.LOT_ID 
+                                     INNER JOIN LINIALOTNICZA ll  ON l.LINIALOTNICZA_ID = ll.LINIALOTNICZA_ID
+                                     INNER JOIN LOTNISKO lt ON l.LOTNISKO_ID = lt.LOTNISKO_ID
+                                     INNER JOIN MODEL m ON l.MODEL_ID = m.MODEL_ID 
+                                     INNER JOIN PRODUCENT p2 ON m.PRODUCENT_ID = p2.PRODUCENT_ID
+                      WHERE p.LOT_ID = :lot_id""",
+                   lot_id=lot_id)
+        data = cr.fetchone()
+        arrival = Przylot(_id=data[0], data_przylotu=data[1], liczba_pasazerow=data[2],
+                          linia_lotnicza=LiniaLotnicza(_id=data[3], nazwa=data[4]),
+                          lotnisko=LiniaLotnicza(_id=data[5], nazwa=data[6]),
+                          model=Model(_id=data[7], nazwa=data[8]))
+        cr.close()
+        return arrival
+
+    def insert_arrival(self, linia_lotnicza_id, lotnisko_id, model_id,
+                       data_przylotu, liczba_pasazerow, pas_id) -> Tuple[str, str, str]:
+
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+
+        lot_id = cr.var(cx_Oracle.NUMBER)
+
+        lot_sql = """INSERT INTO LOT(LINIALOTNICZA_ID, LOTNISKO_ID, MODEL_ID, TYP)
+                          VALUES (:1, :2, :3, 'przylot')
+                       RETURNING LOT_ID INTO :4"""
+
+        cr.execute(lot_sql, (linia_lotnicza_id, lotnisko_id, model_id, lot_id))
+
+        przylot_sql = """INSERT INTO PRZYLOT(DATAPRZYLOTU, LICZBAPASAZEROW)
+                              VALUES (:1, :2)"""
+
+        cr.execute(przylot_sql, (data_przylotu, liczba_pasazerow))
+
+        rezerwacja_sql = """INSERT INTO REZERWACJA(POCZATEK, KONIEC, LOT_ID, PAS_ID)
+                                 VALUES (:1, :2, :3, :4)"""
+
+        cr.execute(rezerwacja_sql, (data_przylotu,
+                                    data_przylotu + datetime.timedelta(minutes=c.MINUTES_FOR_FLIGHT),
+                                    lot_id.getvalue()[0],
+                                    pas_id))
+
+        connection.commit()
+        cr.close()
+
+        return "Pomyślnie dodano nowy przylot", c.SUCCESS, None
+
+    def update_arrival(self, lot_id, linia_lotnicza_id, lotnisko_id, model_id,
+                       data_przylotu, liczba_pasazerow, pas_id) -> Tuple[str, str, str]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+
+        lot_sql = """UPDATE LOT
+                        SET LINIALOTNICZA_ID = :1,
+                            LOTNISKO_ID = :2,
+                            MODEL_ID = :3
+                      WHERE LOT_ID = :4"""
+        cr.execute(lot_sql, (linia_lotnicza_id, lotnisko_id, model_id, lot_id))
+
+        przylot_sql = """UPDATE PRZYLOT
+                            SET DATAPRZYLOTU = :1,
+                                LICZBAPASAZEROW = :2
+                          WHERE LOT_ID = :3"""
+        cr.execute(przylot_sql, (data_przylotu, liczba_pasazerow, lot_id))
+
+        rezerwacje_sql = """DELETE FROM REZERWACJA WHERE LOT_ID = :lot_id"""
+        cr.execute(rezerwacje_sql, lot_id=lot_id)
+
+        rezerwacja_sql = """INSERT INTO REZERWACJA(POCZATEK, KONIEC, LOT_ID, PAS_ID)
+                                 VALUES (:1, :2, :3, :4)"""
+        cr.execute(rezerwacja_sql, (data_przylotu,
+                                    data_przylotu + datetime.timedelta(minutes=c.MINUTES_FOR_FLIGHT),
+                                    lot_id,
+                                    pas_id))
+
+        connection.commit()
+        cr.close()
+        return "Pomyślnie zaktualizowano przylot", c.SUCCESS, None
+
+    def delete_arrival(self, lot_id) -> Tuple[str, str]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+
+        # delete from PRZYLOT
+        cr.execute("DELETE FROM PRZYLOT WHERE LOT_ID = :lot_id", lot_id=lot_id)
+
+        # delete from REZERWACJA
+        cr.execute("DELETE FROM REZERWACJA WHERE LOT_ID = :lot_id", lot_id=lot_id)
+
+        # delete from LOT
+        cr.execute("DELETE FROM LOT WHERE LOT_ID = :lot_id", lot_id=lot_id)
+
+        connection.commit()
+        cr.close()
+
+        return "Pomyślnie usunięto przylot", c.SUCCESS
