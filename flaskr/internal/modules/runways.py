@@ -73,7 +73,6 @@ def update_runway(runway_id: int):
         else:
             return redirect(url_for('runways.runways'))
 
-    print("GET")
     # set default values on the form
     form.nazwa.data = pas.nazwa
     form.dlugosc.data = pas.dlugosc
@@ -98,3 +97,17 @@ def delete_runway():
 
     flash(flash_message, flash_category)
     return redirect(url_for('runways.runways'))
+
+
+@runways_bp.route('/reservations')
+def reservations():
+    headers, reservations_list = oracle_db.select_reservations()
+
+    return render_template('runways-reservations/runways-reservations.page.html',
+                           data=reservations_list,
+                           headers=headers)
+
+
+@runways_bp.route('/reservations/delete', methods=['POST'])
+def delete_reservation():
+    pass

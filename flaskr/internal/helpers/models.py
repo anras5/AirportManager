@@ -99,3 +99,18 @@ class Przylot(Lot):
         self.id = _id
         self.data_przylotu = data_przylotu
         self.liczba_pasazerow = liczba_pasazerow
+
+
+class Rezerwacja:
+
+    def __init__(self,
+                 _id: int = None,
+                 poczatek: datetime.datetime = None,
+                 koniec: datetime.datetime = None,
+                 lot: Lot = None,
+                 pas: Pas = None):
+        self.id = _id
+        self.poczatek = poczatek
+        self.koniec = koniec
+        self.lot = lot
+        self.pas = pas
