@@ -795,3 +795,12 @@ class OracleDB:
         connection.commit()
         cr.close()
         return "Pomyślnie dodano nową rezerwację", c.SUCCESS, None
+
+    def delete_reservation(self, reservation_id) -> Tuple[str, str]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        cr.execute("DELETE FROM REZERWACJA WHERE REZERWACJA_ID = :id",
+                   id=reservation_id)
+        connection.commit()
+        cr.close()
+        return "Pomyślnie usunięto wybraną rezerwację", c.SUCCESS

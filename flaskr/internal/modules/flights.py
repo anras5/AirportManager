@@ -766,7 +766,7 @@ def flight_reservations_delete():
         return redirect(url_for('flights.main'))
 
     # delete reservation from database
-    # flash_messsage, flash_category = oracle_db.delete_arrival(arrival_id)
+    flash_messsage, flash_category = oracle_db.delete_reservation(reservation_id)
 
-    # flash(flash_messsage, flash_category)
-    return redirect(url_for('flights.main'))
+    flash(flash_messsage, flash_category)
+    return redirect(url_for('flights.flight_reservations', flight_id=flight_id))
