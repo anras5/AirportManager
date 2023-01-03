@@ -150,7 +150,6 @@ def update_airport(airport_id: int):
                                                                              latitude=form.latitude.data)
 
         flash(flash_message, flash_category)
-        # TODO: catching unique keys exceptions
         if flash_type == c.LOTNISKO_UN_IATA:
             form.iatacode.data = ""
             return render_template('flights-airports/flights-airports-update.page.html', form=form, lotnisko=lotnisko)
