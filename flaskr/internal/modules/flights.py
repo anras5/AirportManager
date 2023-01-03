@@ -6,7 +6,6 @@ from flaskr.internal.helpers.forms import AirportForm, AirlinesForm, Manufacture
 from flaskr.internal.helpers.models import Lotnisko
 from flaskr import oracle_db
 from flaskr.internal.helpers import constants as c
-from flaskr.internal.helpers.constants import ERROR
 
 import os
 import json
@@ -95,10 +94,21 @@ def new_airport():
                                                                              form.longitude.data,
                                                                              form.latitude.data)
         flash(flash_message, flash_category)
-        # TODO: catching unique keys exceptions
-        if flash_category == c.ERROR:
-            return render_template('flights-airports/flights-airports-new.page.html',
-                                   form=form)
+        if flash_type == c.LOTNISKO_UN_IATA:
+            form.iatacode.data = ""
+            return render_template('flights-airports/flights-airports-new.page.html', form=form)
+        if flash_type == c.LOTNISKO_UN_NAZWA:
+            form.nazwa.data = ""
+            return render_template('flights-airports/flights-airports-new.page.html', form=form)
+        if flash_type == c.LOTNISKO_UN_ICAO:
+            form.icaocode.data = ""
+            return render_template('flights-airports/flights-airports-new.page.html', form=form)
+        if flash_type == c.LOTNISKO_UN_GEO:
+            form.longitude.data = ""
+            form.latitude.data = ""
+            return render_template('flights-airports/flights-airports-new.page.html', form=form)
+        elif flash_category == c.ERROR:
+            return redirect(url_for('flights.airports'))
         else:
             return redirect(url_for('flights.airports'))
 
@@ -141,11 +151,21 @@ def update_airport(airport_id: int):
                                                                              latitude=form.latitude.data)
 
         flash(flash_message, flash_category)
-        # TODO: catching unique keys exceptions
-        if flash_category == c.ERROR:
-            return render_template('flights-airports/flights-airports-update.page.html',
-                                   form=form,
-                                   lotnisko=lotnisko)
+        if flash_type == c.LOTNISKO_UN_IATA:
+            form.iatacode.data = ""
+            return render_template('flights-airports/flights-airports-update.page.html', form=form, lotnisko=lotnisko)
+        if flash_type == c.LOTNISKO_UN_NAZWA:
+            form.nazwa.data = ""
+            return render_template('flights-airports/flights-airports-update.page.html', form=form, lotnisko=lotnisko)
+        if flash_type == c.LOTNISKO_UN_ICAO:
+            form.icaocode.data = ""
+            return render_template('flights-airports/flights-airports-update.page.html', form=form, lotnisko=lotnisko)
+        if flash_type == c.LOTNISKO_UN_GEO:
+            form.longitude.data = ""
+            form.latitude.data = ""
+            return render_template('flights-airports/flights-airports-update.page.html', form=form, lotnisko=lotnisko)
+        elif flash_category == c.ERROR:
+            return redirect(url_for('flights.airports'))
         else:
             return redirect(url_for('flights.airports'))
 
@@ -235,7 +255,7 @@ def update_airline(airline_id: int):
             return render_template('flights-airlines/flights-airlines-update.page.html',
                                    form=form,
                                    linialotnicza=linialotnicza)
-        elif flash_category == ERROR:
+        elif flash_category == c.ERROR:
             # some other error occurred
             return redirect(url_for('flights.airlines'))
         else:
@@ -288,12 +308,14 @@ def new_manufacturer():
 
         flash_message, flash_category, flash_type = oracle_db.insert_manufacturer(form.nazwa.data, form.kraj.data)
 
-        if flash_category == c.ERROR:
-            flash(flash_message, category=flash_category)
+        flash(flash_message, flash_category)
+        if flash_type == c.PRODUCENT__UN:
+            form.nazwa.data = ""
             return render_template("flights-manufacturers/flights-manufacturers-new.page.html",
                                    form=form)
+        elif flash_category == c.ERROR:
+            return redirect(url_for('flights.manufacturers'))
         else:
-            flash(flash_message, category=flash_category)
             return redirect(url_for('flights.manufacturers'))
 
     return render_template('flights-manufacturers/flights-manufacturers-new.page.html',
@@ -314,11 +336,14 @@ def update_manufacturer(manufacturer_id: int):
                                                                                   form.kraj.data)
 
         flash(flash_message, flash_category)
-        # TODO: catching unique keys error
-        if flash_category == ERROR:
+        if flash_type == c.PRODUCENT__UN:
+            # duplicated nazwa in db
+            form.nazwa.data = ""
             return render_template("flights-manufacturers/flights-manufacturers-update.page.html",
                                    form=form,
                                    producent=producent)
+        elif flash_category == c.ERROR:
+            return redirect(url_for('flights.manufacturers'))
         else:
             # success
             return redirect(url_for('flights.manufacturers'))
@@ -376,10 +401,12 @@ def new_model():
                                                                            form.producent.data)
 
         flash(flash_message, flash_category)
-        # TODO catching unique keys error
-        if flash_category == c.ERROR:
+        if flash_type == c.MODEL_UN_NAZWA:
+            form.nazwa.data = ""
             return render_template('flights-models/flights-models-new.page.html',
                                    form=form)
+        elif flash_category == c.ERROR:
+            return redirect(url_for('flights.models'))
         else:
             return redirect(url_for('flights.models'))
 
@@ -408,10 +435,13 @@ def update_model(model_id):
                                                                            form.producent.data)
 
         flash(flash_message, flash_type)
-        if flash_type == c.ERROR:
+        if flash_type == c.MODEL_UN_NAZWA:
+            form.nazwa.data = ""
             return render_template("flights-models/flights-models-update.page.html",
                                    form=form,
                                    model=model)
+        if flash_type == c.ERROR:
+            return redirect(url_for('flights.models'))
         else:
             return redirect(url_for('flights.models'))
 
