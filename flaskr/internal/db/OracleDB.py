@@ -84,8 +84,18 @@ class OracleDB:
                        longitude=longitude,
                        latitude=latitude)
         except cx_Oracle.IntegrityError as e:
-            # TODO: catching unique keys exceptions
-            cr.close()
+            if c.LOTNISKO_UN_IATA in str(e):
+                cr.close()
+                return "Lotnisko o takim kodzie IATA już istnieje", c.ERROR, c.LOTNISKO_UN_IATA
+            if c.LOTNISKO_UN_NAZWA in str(e):
+                cr.close()
+                return "Lotnisko o takiej nazwie już istnieje", c.ERROR, c.LOTNISKO_UN_NAZWA
+            if c.LOTNISKO_UN_ICAO in str(e):
+                cr.close()
+                return "Lotnisko o takim kodzie ICAO już istnieje", c.ERROR, c.LOTNISKO_UN_ICAO
+            if c.LOTNISKO_UN_GEO in str(e):
+                cr.close()
+                return "Lotnisko o takim położeniu geograficznym już istnieje", c.ERROR, c.LOTNISKO_UN_GEO
             return "Wystąpił błąd", c.ERROR, None
         else:
             connection.commit()
@@ -115,7 +125,18 @@ class OracleDB:
                        latitude=latitude,
                        id=airport_id)
         except cx_Oracle.IntegrityError as e:
-            # TODO: catching unique keys exceptions
+            if c.LOTNISKO_UN_IATA in str(e):
+                cr.close()
+                return "Lotnisko o takim kodzie IATA już istnieje", c.ERROR, c.LOTNISKO_UN_IATA
+            if c.LOTNISKO_UN_NAZWA in str(e):
+                cr.close()
+                return "Lotnisko o takiej nazwie już istnieje", c.ERROR, c.LOTNISKO_UN_NAZWA
+            if c.LOTNISKO_UN_ICAO in str(e):
+                cr.close()
+                return "Lotnisko o takim kodzie ICAO już istnieje", c.ERROR, c.LOTNISKO_UN_ICAO
+            if c.LOTNISKO_UN_GEO in str(e):
+                cr.close()
+                return "Lotnisko o takim położeniu geograficznym już istnieje", c.ERROR, c.LOTNISKO_UN_GEO
             cr.close()
             return "Wystąpił błąd", c.ERROR, None
         else:

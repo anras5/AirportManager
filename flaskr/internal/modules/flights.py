@@ -93,10 +93,21 @@ def new_airport():
                                                                              form.longitude.data,
                                                                              form.latitude.data)
         flash(flash_message, flash_category)
-        # TODO: catching unique keys exceptions
-        if flash_category == c.ERROR:
-            return render_template('flights-airports/flights-airports-new.page.html',
-                                   form=form)
+        if flash_type == c.LOTNISKO_UN_IATA:
+            form.iatacode.data = ""
+            return render_template('flights-airports/flights-airports-new.page.html', form=form)
+        if flash_type == c.LOTNISKO_UN_NAZWA:
+            form.nazwa.data = ""
+            return render_template('flights-airports/flights-airports-new.page.html', form=form)
+        if flash_type == c.LOTNISKO_UN_ICAO:
+            form.icaocode.data = ""
+            return render_template('flights-airports/flights-airports-new.page.html', form=form)
+        if flash_type == c.LOTNISKO_UN_GEO:
+            form.longitude.data = ""
+            form.latitude.data = ""
+            return render_template('flights-airports/flights-airports-new.page.html', form=form)
+        elif flash_category == c.ERROR:
+            return redirect(url_for('flights.airports'))
         else:
             return redirect(url_for('flights.airports'))
 
@@ -140,10 +151,21 @@ def update_airport(airport_id: int):
 
         flash(flash_message, flash_category)
         # TODO: catching unique keys exceptions
-        if flash_category == c.ERROR:
-            return render_template('flights-airports/flights-airports-update.page.html',
-                                   form=form,
-                                   lotnisko=lotnisko)
+        if flash_type == c.LOTNISKO_UN_IATA:
+            form.iatacode.data = ""
+            return render_template('flights-airports/flights-airports-update.page.html', form=form, lotnisko=lotnisko)
+        if flash_type == c.LOTNISKO_UN_NAZWA:
+            form.nazwa.data = ""
+            return render_template('flights-airports/flights-airports-update.page.html', form=form, lotnisko=lotnisko)
+        if flash_type == c.LOTNISKO_UN_ICAO:
+            form.icaocode.data = ""
+            return render_template('flights-airports/flights-airports-update.page.html', form=form, lotnisko=lotnisko)
+        if flash_type == c.LOTNISKO_UN_GEO:
+            form.longitude.data = ""
+            form.latitude.data = ""
+            return render_template('flights-airports/flights-airports-update.page.html', form=form, lotnisko=lotnisko)
+        elif flash_category == c.ERROR:
+            return redirect(url_for('flights.airports'))
         else:
             return redirect(url_for('flights.airports'))
 
