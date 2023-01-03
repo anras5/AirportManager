@@ -550,15 +550,16 @@ class OracleDB:
             cr.close()
             return "Pomyślnie usunięto pas startowy", c.SUCCESS
 
-    def select_available_runways(self, timestamp: datetime.datetime) -> List[Pas]:
+    def select_available_runways(self, start: datetime.datetime, end: datetime.datetime) -> List[Pas]:
         connection = self.pool.acquire()
         cr = connection.cursor()
         cr.execute("""SELECT p.PAS_ID, p.NAZWA
                         FROM PAS p 
                        WHERE p.PAS_ID NOT IN (SELECT r.PAS_ID
  					                        FROM REZERWACJA r
- 					                       WHERE :start_time < r.KONIEC AND :start_time + INTERVAL '10' MINUTE > r.POCZATEK)""",
-                   start_time=timestamp)
+ 					                       WHERE :start_time < r.KONIEC AND :end_time > r.POCZATEK)""",
+                   start_time=start,
+                   end_time=end)
         runways_list = []
         for runway in cr:
             runways_list.append(
@@ -778,3 +779,19 @@ class OracleDB:
         cr.close()
 
         return headers, reservations_list
+
+    def insert_reservation(self, poczatek, koniec, lot_id, pas_id) -> Tuple[str, str, str]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        cr.execute("""INSERT INTO REZERWACJA (POCZATEK, KONIEC, LOT_ID, PAS_ID)
+                           VALUES (:poczatek,
+                                   :koniec,
+                                   :lot_id,
+                                   :pas_id)""",
+                   poczatek=poczatek,
+                   koniec=koniec,
+                   lot_id=lot_id,
+                   pas_id=pas_id)
+        connection.commit()
+        cr.close()
+        return "Pomyślnie dodano nową rezerwację", c.SUCCESS, None

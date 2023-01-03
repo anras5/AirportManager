@@ -2,7 +2,8 @@ import datetime
 
 from flask import Blueprint, render_template, redirect, url_for, request, flash, session
 
-from flaskr.internal.helpers.forms import AirportForm, AirlinesForm, ManufacturersForm, ModelsForm, ArrivalForm
+from flaskr.internal.helpers.forms import AirportForm, AirlinesForm, ManufacturersForm, ModelsForm, ArrivalForm, \
+    ReservationForm
 from flaskr.internal.helpers.models import Lotnisko
 from flaskr import oracle_db
 from flaskr.internal.helpers import constants as c
@@ -512,7 +513,7 @@ def check_availability_runway(redirect_type: str):
     timestamp = datetime.datetime.strptime(timestamp, "%Y-%m-%d %H:%M")
 
     # check what runways are available on the given date
-    runway_list = oracle_db.select_available_runways(timestamp)
+    runway_list = oracle_db.select_available_runways(timestamp, timestamp + datetime.timedelta(minutes=10))
     if runway_list:
         session['available_runways'] = [runway.id for runway in runway_list]
         session['arrival_timestamp'] = datetime.datetime.strftime(timestamp, "%Y-%m-%d %H:%M")
@@ -681,7 +682,6 @@ def delete_arrival():
 @flights_bp.route('/flights/<int:flight_id>/reservations')
 def flight_reservations(flight_id: int):
     # get flight's reservations
-
     headers, reservations = oracle_db.select_reservations_by_flight(flight_id)
 
     return render_template('flights-flights/flights-flight-reservations.page.html',
@@ -690,12 +690,72 @@ def flight_reservations(flight_id: int):
                            data=reservations)
 
 
-@flights_bp.route('/flights/<int:flight_id>/reservations/new')
+@flights_bp.route('/flights/<int:flight_id>/check-reservation-dates', methods=['POST'])
+def flight_reservations_check_dates(flight_id: int):
+    # get timestamp
+    parameters = request.form
+    timestamp = parameters.get('timestamp', '')
+    if not timestamp:
+        flash("Błąd - nie podano odpowiednich dat", c.ERROR)
+        return redirect(url_for('flights.main'))
+
+    sd, ed = timestamp.split(" to ")
+    start_date = datetime.datetime.strptime(sd, "%Y-%m-%d %H:%M")
+    end_date = datetime.datetime.strptime(ed, "%Y-%m-%d %H:%M")
+
+    runway_list = oracle_db.select_available_runways(start_date, end_date)
+    if runway_list:
+        session['available_runways_reservations'] = [runway.id for runway in runway_list]
+        session['start_time_reservations'] = datetime.datetime.strftime(start_date, "%Y-%m-%d %H:%M")
+        session['end_time_reservations'] = datetime.datetime.strftime(end_date, "%Y-%m-%d %H:%M")
+        return redirect(url_for('flights.flight_reservations_new', flight_id=flight_id))
+    else:
+        flash("Brak dostępnych pasów startowych w tym terminie", c.WARNING)
+        return redirect(url_for('flights.flight_reservations', flight_id=flight_id))
+
+
+@flights_bp.route('/flights/<int:flight_id>/reservations/new', methods=['GET', 'POST'])
 def flight_reservations_new(flight_id: int):
-    pass
+    form = ReservationForm()
+
+    # get available runways list from session
+    runways_ids_list = session.get('available_runways_reservations', '')
+    # get timestamp from session
+    start_time_str = session.get('start_time_reservations', '')
+    end_time_str = session.get('end_time_reservations', '')
+
+    if not runways_ids_list or not start_time_str or not end_time_str:
+        flash("Wystąpił błąd. Do dodania rezerwacji użyj przeznaczonego do tego przycisku!", c.WARNING)
+        return redirect(url_for('flights.flight_reservations', flight_id=flight_id))
+    else:
+        # load runways from database using ids from session
+        runways = oracle_db.select_runways_by_ids(runways_ids_list)
+        form.pas.choices = [(runway.id, runway.nazwa) for runway in runways]
+        # parse start_time_str and end_time_str to datetime.datetime object
+        start_time = datetime.datetime.strptime(start_time_str, "%Y-%m-%d %H:%M")
+        end_time = datetime.datetime.strptime(end_time_str, "%Y-%m-%d %H:%M")
+
+    if form.validate_on_submit():
+        flash_message, flash_category, _ = oracle_db.insert_reservation(start_time,
+                                                                        end_time,
+                                                                        flight_id,
+                                                                        form.pas.data)
+
+        flash(flash_message, flash_category)
+        # pop values from session
+        session.pop('available_runways_reservations')
+        session.pop('start_time_reservations')
+        session.pop('end_time_reservations')
+        return redirect(url_for('flights.flight_reservations', flight_id=flight_id))
+
+    return render_template('flights-flights/flights-flight-reservations-new.page.html',
+                           form=form,
+                           sd=start_time_str,
+                           ed=end_time_str,
+                           flight_id=flight_id)
 
 
-@flights_bp.route('/flights/reservations/delete')
+@flights_bp.route('/flights/reservations/delete', methods=['POST'])
 def flight_reservations_delete():
     # get ids from parameters
     parameters = request.form

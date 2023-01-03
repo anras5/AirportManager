@@ -3,7 +3,11 @@
 
 {% block page_header %}
 
-    <h3>REZERWACJE DLA LOTU {{ flight_id}}</h3>
+    <h3>REZERWACJE DLA LOTU {{ flight_id }}</h3>
+
+    <a href="{{ url_for('flights.arrivals') }}">
+        <button class="btn btn-secondary">Powrót</button>
+    </a>
 
 {% endblock %}
 
@@ -11,9 +15,7 @@
 {% block button_add_new %}
 
     <div class="container-fluid create-new-container">
-        <a href="{{ url_for('flights.flight_reservations_new', flight_id=flight_id) }}">
-            <button type="button" class="btn btn-success">Nowa rezerwacja</button>
-        </a>
+        <button id="add-new-reservation" type="button" class="btn btn-success">Nowa rezerwacja</button>
     </div>
 
 {% endblock %}
@@ -40,11 +42,11 @@
             <td>{{ reservation.koniec }}</td>
             <td>{{ reservation.pas.nazwa }}</td>
             {% if data|length > 1 %}
-            <td>
-                <button id="delete{{ reservation.id }}" class="icon-delete-table">
-                    <i class="fa-solid fa-trash"></i>
-                </button>
-            </td>
+                <td>
+                    <button id="delete{{ reservation.id }}" class="icon-delete-table">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </td>
             {% endif %}
         </tr>
     {% endfor %}
@@ -53,7 +55,15 @@
 
 
 {% block custom_js %}
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="{{ url_for('static', filename='js/flight-reservations.js') }}"></script>
     <script>
+
+        {# ADDING NEW RESERVATION BUTTON #}
+        document.getElementById("add-new-reservation").addEventListener("click", function () {
+            selectReservationDates("{{ url_for('flights.flight_reservations_check_dates', flight_id=flight_id) }}")
+        })
+
         {# BUTTONS IN DATATABLE - DELETING #}
         {% for reservation in data %}
 
@@ -68,7 +78,10 @@
                     confirmButtonText: 'Tak, usuń!'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        post("{{ url_for('flights.flight_reservations_delete') }}", {flight_id: {{ flight_id }}, reservation_id: {{ reservation.id }}})
+                        post("{{ url_for('flights.flight_reservations_delete') }}", {
+                            flight_id: {{ flight_id }},
+                            reservation_id: {{ reservation.id }}
+                        })
                     }
                 })
             })
