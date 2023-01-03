@@ -6,7 +6,7 @@ import os
 from typing import List, Tuple
 
 from flaskr.internal.helpers import constants as c
-from flaskr.internal.helpers.models import LiniaLotnicza, Lotnisko, Producent, Model, Pas, Przylot
+from flaskr.internal.helpers.models import LiniaLotnicza, Lotnisko, Producent, Model, Pas, Przylot, Rezerwacja, Lot
 
 
 class OracleDB:
@@ -550,15 +550,16 @@ class OracleDB:
             cr.close()
             return "Pomyślnie usunięto pas startowy", c.SUCCESS
 
-    def select_available_runways(self, timestamp: datetime.datetime) -> List[Pas]:
+    def select_available_runways(self, start: datetime.datetime, end: datetime.datetime) -> List[Pas]:
         connection = self.pool.acquire()
         cr = connection.cursor()
         cr.execute("""SELECT p.PAS_ID, p.NAZWA
                         FROM PAS p 
                        WHERE p.PAS_ID NOT IN (SELECT r.PAS_ID
  					                        FROM REZERWACJA r
- 					                       WHERE :start_time < r.KONIEC AND :start_time + INTERVAL '10' MINUTE > r.POCZATEK)""",
-                   start_time=timestamp)
+ 					                       WHERE :start_time < r.KONIEC AND :end_time > r.POCZATEK)""",
+                   start_time=start,
+                   end_time=end)
         runways_list = []
         for runway in cr:
             runways_list.append(
@@ -732,3 +733,74 @@ class OracleDB:
         cr.close()
 
         return "Pomyślnie usunięto przylot", c.SUCCESS
+
+    def select_reservations(self) -> Tuple[List[str], List[Rezerwacja]]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        sql = """SELECT r.rezerwacja_id, r.poczatek, r.koniec, l.lot_id, p.NAZWA 
+                 FROM REZERWACJA r INNER JOIN LOT l ON r.LOT_ID = l.LOT_ID 
+                                   INNER JOIN PAS p ON r.PAS_ID = p.PAS_ID"""
+        cr.execute(sql)
+        headers = [header[0] for header in cr.description]
+        reservations_list = []
+        for data in cr:
+            reservations_list.append(
+                Rezerwacja(
+                    _id=data[0],
+                    poczatek=data[1],
+                    koniec=data[2],
+                    lot=Lot(_id=data[3]),
+                    pas=Pas(nazwa=data[4])
+                )
+            )
+        cr.close()
+
+        return headers, reservations_list
+
+    def select_reservations_by_flight(self, flight_id) -> Tuple[List[str], List[Rezerwacja]]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        sql = """SELECT r.rezerwacja_id, r.poczatek, r.koniec, p.NAZWA 
+                 FROM REZERWACJA r INNER JOIN LOT l ON r.LOT_ID = l.LOT_ID 
+                                   INNER JOIN PAS p ON r.PAS_ID = p.PAS_ID
+                 WHERE l.lot_id = :flight_id"""
+        cr.execute(sql, flight_id=flight_id)
+        headers = [header[0] for header in cr.description]
+        reservations_list = []
+        for data in cr:
+            reservations_list.append(
+                Rezerwacja(
+                    _id=data[0],
+                    poczatek=data[1],
+                    koniec=data[2],
+                    pas=Pas(nazwa=data[3])
+                )
+            )
+        cr.close()
+
+        return headers, reservations_list
+
+    def insert_reservation(self, poczatek, koniec, lot_id, pas_id) -> Tuple[str, str, str]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        cr.execute("""INSERT INTO REZERWACJA (POCZATEK, KONIEC, LOT_ID, PAS_ID)
+                           VALUES (:poczatek,
+                                   :koniec,
+                                   :lot_id,
+                                   :pas_id)""",
+                   poczatek=poczatek,
+                   koniec=koniec,
+                   lot_id=lot_id,
+                   pas_id=pas_id)
+        connection.commit()
+        cr.close()
+        return "Pomyślnie dodano nową rezerwację", c.SUCCESS, None
+
+    def delete_reservation(self, reservation_id) -> Tuple[str, str]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        cr.execute("DELETE FROM REZERWACJA WHERE REZERWACJA_ID = :id",
+                   id=reservation_id)
+        connection.commit()
+        cr.close()
+        return "Pomyślnie usunięto wybraną rezerwację", c.SUCCESS

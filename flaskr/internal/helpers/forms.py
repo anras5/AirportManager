@@ -132,3 +132,11 @@ class ArrivalForm(FlaskForm):
                                     validators=[DataRequired(),
                                                 NumberRange(min=0)])
     submit = SubmitField("Dodaj przylot")
+
+
+# ------------------------------------------------------------------------------------------------------------------- #
+# FLIGHTS.FLIGHTS FORMS
+
+class ReservationForm(FlaskForm):
+    pas = SelectField("Wybierz spośród dostępnych pasów startowych", validators=[DataRequired()])
+    submit = SubmitField("Dodaj rezerwację")

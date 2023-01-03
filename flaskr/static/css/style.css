@@ -43,6 +43,19 @@ h1, h2, h3, h4, h5, h6 {
     color: #000000;
 }
 
+.icon-calendar-table {
+    text-decoration: none;
+    background: transparent;
+    border: none !important;
+    color: #11bee9;
+    margin: 6%;
+}
+
+.icon-calendar-table:hover {
+    color: #11bee9;
+}
+
+
 .icon-edit-table {
     text-decoration: none;
     background: transparent;

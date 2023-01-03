@@ -1,0 +1,33 @@
+{% extends "table.layout.html" %}
+
+
+{% block page_header %}
+
+    <h3>REZERWACJE PASÓW STARTOWYCH</h3>
+    <p>Aby dodać lub usunąć rezerwację przejdź do <a href="{{ url_for('flights.main') }}">przylotów/odlotów</a> i wybierz widok pojedynczego lotu</p>
+
+{% endblock %}
+
+
+{% block thead %}
+
+    {% for header in headers %}
+        <th>{{ header }}</th>
+    {% endfor %}
+
+{% endblock %}
+
+
+{% block tbody %}
+
+    {% for rezerwacja in data %}
+        <tr>
+            <td>{{ rezerwacja.id }}</td>
+            <td>{{ rezerwacja.poczatek }}</td>
+            <td>{{ rezerwacja.koniec }}</td>
+            <td>{{ rezerwacja.lot.id }}</td>
+            <td>{{ rezerwacja.pas.nazwa }}</td>
+        </tr>
+    {% endfor %}
+
+{% endblock %}

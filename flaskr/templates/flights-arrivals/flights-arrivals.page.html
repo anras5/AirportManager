@@ -57,6 +57,10 @@
             <td>{{ arrival.lotnisko.nazwa }}</td>
             <td>{{ arrival.model.nazwa }}</td>
             <td>
+                <a href="{{ url_for('flights.flight_reservations', flight_id=arrival.id) }}"
+                   class="icon-calendar-table">
+                    <i class="fa-solid fa-calendar"></i>
+                </a>
                 <button id="update{{ arrival.id }}" class="icon-edit-table">
                     <i class="fa-solid fa-pen"></i>
                 </button>
