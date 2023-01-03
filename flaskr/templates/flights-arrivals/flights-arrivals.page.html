@@ -1,0 +1,104 @@
+{% extends "table.layout.html" %}
+
+
+{% block page_header %}
+
+    <h3>PRZYLOTY</h3><br>
+    {% if date %}
+        <h5>Przedział czasowy:</h5>
+        <h5>{{ date }}</h5>
+        <a href="{{ url_for('flights.arrivals') }}">
+            <button class="btn btn-secondary">Anuluj</button>
+        </a>
+    {% endif %}
+{% endblock %}
+
+
+{% block button_add_new %}
+
+    <div class="container-fluid create-new-container">
+        <div class="row">
+            <div class="col-md-6 date-filter">
+                <button id="add-new-arrival" type="button" class="btn btn-success">Nowy przylot</button>
+            </div>
+            <div class="col-md-6 date-filter">
+                <form method="POST">
+                    <div class="input-group">
+                        <input type="text" id="date-picker" name="date" class="form-control"
+                               placeholder="Wybierz zakres daty...">
+                        <button type="submit" class="btn btn-primary">Filtruj wyniki</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+
+{% block thead %}
+
+    {% for header in headers %}
+        <th>{{ header }}</th>
+    {% endfor %}
+    <th>Opcje</th>
+
+{% endblock %}
+
+
+{% block tbody %}
+
+    {% for arrival in arrivals_data %}
+        <tr>
+            <td>{{ arrival.id }}</td>
+            <td>{{ arrival.data_przylotu }}</td>
+            <td>{{ arrival.liczba_pasazerow }}</td>
+            <td>{{ arrival.linia_lotnicza.nazwa }}</td>
+            <td>{{ arrival.lotnisko.nazwa }}</td>
+            <td>{{ arrival.model.nazwa }}</td>
+            <td>
+                <button id="update{{ arrival.id }}" class="icon-edit-table">
+                    <i class="fa-solid fa-pen"></i>
+                </button>
+                <button id="delete{{ arrival.id }}" class="icon-delete-table">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </td>
+        </tr>
+    {% endfor %}
+
+{% endblock %}
+
+
+{% block custom_js %}
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="{{ url_for('static', filename='js/arrivals.js') }}"></script>
+    <script>
+
+        {# DATEPICKER #}
+        flatpickr("#date-picker", {
+            mode: "range",
+            enableTime: true,
+            time_24hr: true,
+            dateFormat: 'Y-m-d H:i'
+        });
+
+        {# ADDING NEW ARRIVAL BUTTON #}
+        document.getElementById("add-new-arrival").addEventListener("click", function () {
+            selectArrivalDate("{{ url_for('flights.check_availability_runway', redirect_type='new') }}")
+        })
+
+        {# BUTTONS IN DATATABLE - UPDATING/DELETING ARRIVAL #}
+        {% for arrival in arrivals_data %}
+            $('#example tbody').on('click', '#update{{ arrival.id }}', function () {
+                selectArrivalDate("{{ url_for('flights.check_availability_runway', redirect_type='update', arrival_id=arrival.id) }}",
+                    "{{ arrival.data_przylotu }}")
+            })
+            $('#example tbody').on('click', '#delete{{ arrival.id }}', function () {
+                deleteArrival({{ arrival.id }}, "{{ url_for('flights.delete_arrival') }}", {arrival_id: {{ arrival.id }}})
+            })
+
+        {% endfor %}
+
+    </script>
+{% endblock %}
