@@ -475,8 +475,10 @@ class OracleDB:
                        nazwa=nazwa,
                        dlugosc=dlugosc,
                        opis=opis)
-        except cx_Oracle.IntegrityError:
-            # TODO: catching unique keys exceptions
+        except cx_Oracle.IntegrityError as e:
+            if c.PAS__UN in str(e):
+                cr.close()
+                return "Pas o takiej nazwie już istnieje", c.ERROR, c.PAS__UN
             cr.close()
             return "Wystąpił błąd", c.ERROR, None
         else:
@@ -497,8 +499,10 @@ class OracleDB:
                        dlugosc=dlugosc,
                        opis=opis,
                        id=runway_id)
-        except cx_Oracle.IntegrityError:
-            # TODO: catching unique keys error
+        except cx_Oracle.IntegrityError as e:
+            if c.PAS__UN in str(e):
+                cr.close()
+                return "Pas o takiej nazwie już istnieje", c.ERROR, c.PAS__UN
             return "Wystąpił błąd", c.ERROR, None
         else:
             connection.commit()

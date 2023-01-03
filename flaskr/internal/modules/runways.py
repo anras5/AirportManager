@@ -34,8 +34,11 @@ def new_runway():
                                                                             form.opis.data)
 
         flash(flash_message, flash_category)
-        # TODO: catching unique keys exceptions
-        if flash_category == c.ERROR:
+        if flash_type == c.PAS__UN:
+            form.nazwa.data = ""
+            return render_template('runways-runways/runways-runways-new.page.html',
+                                   form=form)
+        elif flash_category == c.ERROR:
             return redirect(url_for('runways.runways'))
         else:
             return redirect(url_for('runways.runways'))
@@ -60,11 +63,13 @@ def update_runway(runway_id: int):
                                                                             form.opis.data)
 
         flash(flash_message, flash_category)
-        # TODO: catching unique keys error
-        if flash_category == c.ERROR:
+        if flash_type == c.PAS__UN:
+            form.nazwa.data = ""
             return render_template('runways-runways/runways-runways-update.page.html',
                                    form=form,
                                    pas=pas)
+        elif flash_category == c.ERROR:
+            return redirect(url_for('runways.runways'))
         else:
             return redirect(url_for('runways.runways'))
 

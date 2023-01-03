@@ -309,12 +309,14 @@ def new_manufacturer():
 
         flash_message, flash_category, flash_type = oracle_db.insert_manufacturer(form.nazwa.data, form.kraj.data)
 
-        if flash_category == c.ERROR:
-            flash(flash_message, category=flash_category)
+        flash(flash_message, flash_category)
+        if flash_type == c.PRODUCENT__UN:
+            form.nazwa.data = ""
             return render_template("flights-manufacturers/flights-manufacturers-new.page.html",
                                    form=form)
+        elif flash_category == c.ERROR:
+            return redirect(url_for('flights.manufacturers'))
         else:
-            flash(flash_message, category=flash_category)
             return redirect(url_for('flights.manufacturers'))
 
     return render_template('flights-manufacturers/flights-manufacturers-new.page.html',
@@ -434,10 +436,13 @@ def update_model(model_id):
                                                                            form.producent.data)
 
         flash(flash_message, flash_type)
-        if flash_type == c.ERROR:
+        if flash_type == c.MODEL_UN_NAZWA:
+            form.nazwa.data = ""
             return render_template("flights-models/flights-models-update.page.html",
                                    form=form,
                                    model=model)
+        if flash_type == c.ERROR:
+            return redirect(url_for('flights.models'))
         else:
             return redirect(url_for('flights.models'))
 
