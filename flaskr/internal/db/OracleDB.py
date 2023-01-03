@@ -756,3 +756,25 @@ class OracleDB:
 
         return headers, reservations_list
 
+    def select_reservations_by_flight(self, flight_id) -> Tuple[List[str], List[Rezerwacja]]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        sql = """SELECT r.rezerwacja_id, r.poczatek, r.koniec, p.NAZWA 
+                 FROM REZERWACJA r INNER JOIN LOT l ON r.LOT_ID = l.LOT_ID 
+                                   INNER JOIN PAS p ON r.PAS_ID = p.PAS_ID
+                 WHERE l.lot_id = :flight_id"""
+        cr.execute(sql, flight_id=flight_id)
+        headers = [header[0] for header in cr.description]
+        reservations_list = []
+        for data in cr:
+            reservations_list.append(
+                Rezerwacja(
+                    _id=data[0],
+                    poczatek=data[1],
+                    koniec=data[2],
+                    pas=Pas(nazwa=data[3])
+                )
+            )
+        cr.close()
+
+        return headers, reservations_list

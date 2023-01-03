@@ -676,3 +676,37 @@ def delete_arrival():
 
     flash(flash_messsage, flash_category)
     return redirect(url_for('flights.arrivals'))
+
+
+@flights_bp.route('/flights/<int:flight_id>/reservations')
+def flight_reservations(flight_id: int):
+    # get flight's reservations
+
+    headers, reservations = oracle_db.select_reservations_by_flight(flight_id)
+
+    return render_template('flights-flights/flights-flight-reservations.page.html',
+                           flight_id=flight_id,
+                           headers=headers,
+                           data=reservations)
+
+
+@flights_bp.route('/flights/<int:flight_id>/reservations/new')
+def flight_reservations_new(flight_id: int):
+    pass
+
+
+@flights_bp.route('/flights/reservations/delete')
+def flight_reservations_delete():
+    # get ids from parameters
+    parameters = request.form
+    flight_id = parameters.get('flight_id', '')
+    reservation_id = parameters.get('reservation_id', '')
+    if not flight_id or not reservation_id:
+        flash("Błąd - nie podano wystarczających danych", category=c.ERROR)
+        return redirect(url_for('flights.main'))
+
+    # delete reservation from database
+    # flash_messsage, flash_category = oracle_db.delete_arrival(arrival_id)
+
+    # flash(flash_messsage, flash_category)
+    return redirect(url_for('flights.main'))

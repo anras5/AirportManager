@@ -1,0 +1,77 @@
+{% extends "table.layout.html" %}
+
+
+{% block page_header %}
+
+    <h3>REZERWACJE DLA LOTU {{ flight_id}}</h3>
+
+{% endblock %}
+
+
+{% block button_add_new %}
+
+    <div class="container-fluid create-new-container">
+        <a href="{{ url_for('flights.flight_reservations_new', flight_id=flight_id) }}">
+            <button type="button" class="btn btn-success">Nowa rezerwacja</button>
+        </a>
+    </div>
+
+{% endblock %}
+
+
+{% block thead %}
+
+    {% for header in headers %}
+        <th>{{ header }}</th>
+    {% endfor %}
+    {% if data|length > 1 %}
+        <th>Opcje</th>
+    {% endif %}
+
+{% endblock %}
+
+
+{% block tbody %}
+
+    {% for reservation in data %}
+        <tr>
+            <td>{{ reservation.id }}</td>
+            <td>{{ reservation.poczatek }}</td>
+            <td>{{ reservation.koniec }}</td>
+            <td>{{ reservation.pas.nazwa }}</td>
+            {% if data|length > 1 %}
+            <td>
+                <button id="delete{{ reservation.id }}" class="icon-delete-table">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </td>
+            {% endif %}
+        </tr>
+    {% endfor %}
+
+{% endblock %}
+
+
+{% block custom_js %}
+    <script>
+        {# BUTTONS IN DATATABLE - DELETING #}
+        {% for reservation in data %}
+
+            $('#example tbody').on('click', '#delete{{ reservation.id }}', function () {
+                Swal.fire({
+                    title: 'Czy na pewno chcesz usunąć rezerwację o ID:\n{{ reservation.id }}?',
+                    text: "Nie będziesz mógł cofnąć tej dezycji!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Tak, usuń!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        post("{{ url_for('flights.flight_reservations_delete') }}", {flight_id: {{ flight_id }}, reservation_id: {{ reservation.id }}})
+                    }
+                })
+            })
+        {% endfor %}
+    </script>
+{% endblock %}
