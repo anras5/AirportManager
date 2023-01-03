@@ -470,6 +470,8 @@ def arrivals():
 
 @flights_bp.route('/arrivals/check-availability/<redirect_type>', methods=['POST'])
 def check_availability_runway(redirect_type: str):
+    # redirect type can be 'new' or 'update'
+
     # get timestamp
     parameters = request.form
     timestamp = parameters.get('timestamp', '')

@@ -62,6 +62,8 @@
             dict[{{ model.id }}] = {{ model.liczba_miejsc }}
         {% endfor %}
 
+        pInput.setAttribute('max', dict[mInput.value])
+
         mInput.addEventListener('change', function () {
             pInput.setAttribute('max', dict[mInput.value])
         })
