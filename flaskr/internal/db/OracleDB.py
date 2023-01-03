@@ -290,8 +290,10 @@ class OracleDB:
                                        :kraj)""",
                        nazwa=nazwa,
                        kraj=kraj)
-        except cx_Oracle.IntegrityError:
-            # TODO: catching unique keys error
+        except cx_Oracle.IntegrityError as e:
+            if c.PRODUCENT__UN in str(e):
+                cr.close()
+                return "Producent o takiej nazwie już istnieje", c.ERROR, c.PRODUCENT__UN
             return "Wystąpił błąd", c.ERROR, None
         else:
             connection.commit()
@@ -309,8 +311,10 @@ class OracleDB:
                        nazwa=nazwa,
                        kraj=kraj,
                        id=manufacturer_id)
-        except cx_Oracle.IntegrityError:
-            # TODO: catching unique keys error
+        except cx_Oracle.IntegrityError as e:
+            if c.PRODUCENT__UN in str(e):
+                cr.close()
+                return "Producent o takiej nazwie już istnieje", c.ERROR, c.PRODUCENT__UN
             cr.close()
             return "Wystąpił błąd", c.ERROR, None
         else:
@@ -383,8 +387,10 @@ class OracleDB:
                        liczbamiejsc=liczba_miejsc,
                        predkosc=predkosc,
                        producent_id=producent_id)
-        except cx_Oracle.IntegrityError:
-            # TODO: catching unique keys error
+        except cx_Oracle.IntegrityError as e:
+            if c.MODEL_UN_NAZWA in str(e):
+                cr.close()
+                return "Ten producent już posiada model o takiej nazwie", c.ERROR, c.MODEL_UN_NAZWA
             cr.close()
             return "Wystąpił błąd", c.ERROR, None
         else:
@@ -407,8 +413,10 @@ class OracleDB:
                        predkosc=predkosc,
                        producent_id=producent_id,
                        id=model_id)
-        except cx_Oracle.IntegrityError:
-            # TODO catching unique keys error
+        except cx_Oracle.IntegrityError as e:
+            if c.MODEL_UN_NAZWA in str(e):
+                cr.close()
+                return "Ten producent już posiada model o takiej nazwie", c.ERROR, c.MODEL_UN_NAZWA
             cr.close()
             return "Wystąpił błąd", c.ERROR, None
         else:

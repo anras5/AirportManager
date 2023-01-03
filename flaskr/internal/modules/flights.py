@@ -4,7 +4,6 @@ from flaskr.internal.helpers.forms import AirportForm, AirlinesForm, Manufacture
 from flaskr.internal.helpers.models import Lotnisko
 from flaskr import oracle_db
 from flaskr.internal.helpers import constants as c
-from flaskr.internal.helpers.constants import ERROR
 
 import os
 import json
@@ -256,7 +255,7 @@ def update_airline(airline_id: int):
             return render_template('flights-airlines/flights-airlines-update.page.html',
                                    form=form,
                                    linialotnicza=linialotnicza)
-        elif flash_category == ERROR:
+        elif flash_category == c.ERROR:
             # some other error occurred
             return redirect(url_for('flights.airlines'))
         else:
@@ -336,11 +335,14 @@ def update_manufacturer(manufacturer_id: int):
                                                                                   form.kraj.data)
 
         flash(flash_message, flash_category)
-        # TODO: catching unique keys error
-        if flash_category == ERROR:
+        if flash_type == c.PRODUCENT__UN:
+            # duplicated nazwa in db
+            form.nazwa.data = ""
             return render_template("flights-manufacturers/flights-manufacturers-update.page.html",
                                    form=form,
                                    producent=producent)
+        elif flash_category == c.ERROR:
+            return redirect(url_for('flights.manufacturers'))
         else:
             # success
             return redirect(url_for('flights.manufacturers'))
@@ -398,10 +400,12 @@ def new_model():
                                                                            form.producent.data)
 
         flash(flash_message, flash_category)
-        # TODO catching unique keys error
-        if flash_category == c.ERROR:
+        if flash_type == c.MODEL_UN_NAZWA:
+            form.nazwa.data = ""
             return render_template('flights-models/flights-models-new.page.html',
                                    form=form)
+        elif flash_category == c.ERROR:
+            return redirect(url_for('flights.models'))
         else:
             return redirect(url_for('flights.models'))
 
