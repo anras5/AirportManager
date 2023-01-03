@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, DateField, FloatField, SelectField, IntegerField
-from wtforms.validators import DataRequired, EqualTo, ValidationError, Length
+from wtforms import StringField, SubmitField, DateField, FloatField, SelectField, IntegerField, DecimalField
+from wtforms.validators import DataRequired, EqualTo, ValidationError, Length, NumberRange
 
 
 # Custom validators
@@ -64,11 +64,15 @@ class AirportForm(FlaskForm):
     miasto = StringField("Podaj miasto lotniska", validators=[DataRequired()])
     kraj = StringField("Podaj kraj lotniska", validators=[DataRequired()])
     iatacode = StringField("Podaj kod IATA",
-                           validators=[DataRequired(), Length(min=3, max=3, message="Kody IATA mają 3 cyfry")])
+                           validators=[DataRequired(),
+                                       Length(min=3, max=3, message="Kody IATA mają 3 cyfry")])
     icaocode = StringField("Podaj kod ICAO",
-                           validators=[DataRequired(), Length(min=4, max=4, message="Kody ICAO mają 4 cyfry")])
-    longitude = FloatField("Podaj długość geograficzną", validators=[DataRequired()])
-    latitude = FloatField("Podaj szerokość geograficzną", validators=[DataRequired()])
+                           validators=[DataRequired(),
+                                       Length(min=4, max=4, message="Kody ICAO mają 4 cyfry")])
+    longitude = DecimalField("Podaj długość geograficzną",
+                             validators=[DataRequired(), NumberRange(min=-180, max=180)])
+    latitude = DecimalField("Podaj szerokość geograficzną",
+                            validators=[DataRequired(), NumberRange(min=-90, max=90)])
     submit = SubmitField("Dodaj lotnisko")
 
 
@@ -95,8 +99,11 @@ class ManufacturersForm(FlaskForm):
 
 class ModelsForm(FlaskForm):
     nazwa = StringField("Podaj nazwę modelu", validators=[DataRequired()])
-    liczba_miejsc = IntegerField("Podaj liczbę miejsc w samolocie", validators=[DataRequired()])
-    predkosc = FloatField("Podaj prędkość modelu", validators=[DataRequired()])
+    liczba_miejsc = IntegerField("Podaj liczbę miejsc w samolocie",
+                                 validators=[DataRequired(),
+                                             NumberRange(min=0)])
+    predkosc = DecimalField("Podaj maksymalną prędkość modelu",
+                            validators=[DataRequired(), NumberRange(min=100)])
     producent = SelectField("Wybierz producenta samolotu", validators=[DataRequired()])
     submit = SubmitField("Dodaj model")
 
@@ -106,6 +113,22 @@ class ModelsForm(FlaskForm):
 
 class RunwaysForm(FlaskForm):
     nazwa = StringField("Podaj nazwę pasa startowego", validators=[DataRequired()])
-    dlugosc = FloatField("Podaj długość pasa w metrach", validators=[DataRequired()])
+    dlugosc = DecimalField("Podaj długość pasa w metrach",
+                           validators=[DataRequired(),
+                                       NumberRange(min=1)])
     opis = StringField("Podaj dodatkowy opis pasa startowego")
     submit = SubmitField("Dodaj pas")
+
+
+# ------------------------------------------------------------------------------------------------------------------- #
+# FLIGHTS.ARRIVALS FORMS
+
+class ArrivalForm(FlaskForm):
+    pas = SelectField("Wybierz spośród dostępnych pasów startowych", validators=[DataRequired()])
+    lotnisko = SelectField("Wybierz lotnisko, z którego przyleci samolot", validators=[DataRequired()])
+    model = SelectField("Wybierz model samolotu, który obsługuje połączenie", validators=[DataRequired()])
+    linia_lotnicza = SelectField("Wybierz linię lotniczą, która obsługuje połączenie", validators=[DataRequired()])
+    liczba_pasazerow = IntegerField("Podaj liczbę pasażerów, którzy przylecą tym lotem",
+                                    validators=[DataRequired(),
+                                                NumberRange(min=0)])
+    submit = SubmitField("Dodaj przylot")

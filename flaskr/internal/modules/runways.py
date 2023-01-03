@@ -1,7 +1,8 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 
-from flaskr.forms import RunwaysForm
-from flaskr import oracle_db, constants as c
+from flaskr.internal.helpers.forms import RunwaysForm
+from flaskr import oracle_db
+from flaskr.internal.helpers import constants as c
 
 runways_bp = Blueprint('runways', __name__, url_prefix='/runways')
 

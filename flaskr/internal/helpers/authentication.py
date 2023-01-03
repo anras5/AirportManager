@@ -1,6 +1,5 @@
 from flask import Blueprint, render_template, flash, redirect, url_for, session
-from flaskr.forms import RegistrationForm, LoginForm
-from flaskr import oracle_db
+from flaskr.internal.helpers.forms import RegistrationForm, LoginForm
 
 at_bp = Blueprint('authentication', __name__)
 

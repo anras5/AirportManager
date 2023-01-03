@@ -1,7 +1,7 @@
-from flask import Flask, render_template, url_for, redirect
+from flask import Flask, render_template, url_for, redirect, flash
 from dotenv import load_dotenv
 from flask_bootstrap import Bootstrap
-from flaskr.db.OracleDB import OracleDB
+from flaskr.internal.db.OracleDB import OracleDB
 
 bootstrap = Bootstrap()
 oracle_db = OracleDB()
@@ -25,16 +25,16 @@ def create_app(test_config=None):
         app.config.from_mapping(test_config)
 
     # modules
-    from . import authentication
+    from flaskr.internal.helpers import authentication
     app.register_blueprint(authentication.at_bp)
 
-    from . import flights
+    from flaskr.internal.modules import flights
     app.register_blueprint(flights.flights_bp)
 
-    from . import passengers
+    from flaskr.internal.modules import passengers
     app.register_blueprint(passengers.ps_bp)
 
-    from . import runways
+    from flaskr.internal.modules import runways
     app.register_blueprint(runways.runways_bp)
 
     # general routes
@@ -49,6 +49,7 @@ def create_app(test_config=None):
 
     @app.errorhandler(404)
     def page_not_found(error):
+        flash("Taka strona nie istnieje!", "error")
         return redirect(url_for('home'))
 
     return app

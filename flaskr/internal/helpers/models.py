@@ -1,4 +1,5 @@
 # FILE WITH MODELS FROM DATABASE
+import datetime
 
 
 class Lotnisko:
@@ -67,3 +68,34 @@ class Pas:
         self.nazwa = nazwa
         self.dlugosc = dlugosc
         self.opis = opis
+
+
+class Lot:
+
+    def __init__(self,
+                 _id: int = None,
+                 linia_lotnicza: LiniaLotnicza = None,
+                 lotnisko: Lotnisko = None,
+                 model: Model = None,
+                 typ: str = ''):
+        self.id = _id
+        self.linia_lotnicza = linia_lotnicza
+        self.lotnisko = lotnisko
+        self.model = model
+        self.typ = typ
+
+
+class Przylot(Lot):
+
+    def __init__(self,
+                 _id: int = None,
+                 data_przylotu: datetime.datetime = None,
+                 liczba_pasazerow: int = None,
+                 linia_lotnicza: LiniaLotnicza = None,
+                 lotnisko: Lotnisko = None,
+                 model: Model = None,
+                 typ: str = ''):
+        super().__init__(_id, linia_lotnicza, lotnisko, model, typ)
+        self.id = _id
+        self.data_przylotu = data_przylotu
+        self.liczba_pasazerow = liczba_pasazerow
