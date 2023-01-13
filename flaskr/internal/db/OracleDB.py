@@ -6,7 +6,8 @@ import os
 from typing import List, Tuple
 
 from flaskr.internal.helpers import constants as c
-from flaskr.internal.helpers.models import LiniaLotnicza, Lotnisko, Producent, Model, Pas, Przylot, Rezerwacja, Lot
+from flaskr.internal.helpers.models import LiniaLotnicza, Lotnisko, Producent, Model, Pas, Przylot, Rezerwacja, Lot, \
+    Klasa
 
 
 class OracleDB:
@@ -804,3 +805,99 @@ class OracleDB:
         connection.commit()
         cr.close()
         return "Pomyślnie usunięto wybraną rezerwację", c.SUCCESS
+
+    def select_classes(self, order=False) -> Tuple[List[str], List[LiniaLotnicza]]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        if not order:
+            sql = "SELECT KLASA_ID, NAZWA, OBSLUGA, KOMFORT, CENA FROM KLASA"
+        else:
+            sql = "SELECT KLASA_ID, NAZWA, OBSLUGA, KOMFORT, CENA FROM KLASA ORDER BY NAZWA"
+        cr.execute(sql)
+        headers = [header[0] for header in cr.description]
+        classes_list = []
+        for class_ in cr:
+            classes_list.append(
+                Klasa(
+                    _id=class_[0],
+                    nazwa=class_[1],
+                    obsluga=class_[2],
+                    komfort=class_[3],
+                    cena=class_[4]
+                )
+            )
+        cr.close()
+
+        return headers, classes_list
+
+    def insert_class(self, nazwa, obsluga, komfort, cena) -> Tuple[str, str, str]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        try:
+            cr.execute("""INSERT INTO KLASA (NAZWA, OBSLUGA, KOMFORT, CENA)
+                               VALUES (:nazwa,
+                                       :obsluga,
+                                       :komfort,
+                                       :cena)""",
+                       nazwa=nazwa,
+                       obsluga=obsluga,
+                       komfort=komfort,
+                       cena=cena)
+        except cx_Oracle.IntegrityError as e:
+            if c.KLASA_UN_NAZWA in str(e):
+                cr.close()
+                return "Klasa o takiej nazwie już istnieje", c.ERROR, c.KLASA_UN_NAZWA
+            return "Wystąpił błąd", c.ERROR, None
+        else:
+            connection.commit()
+            cr.close()
+        return "Pomyślnie dodano nową klasę", c.SUCCESS, None
+
+    def select_class(self, class_id: int) -> Klasa:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        cr.execute("""SELECT NAZWA, OBSLUGA, KOMFORT, CENA
+                            FROM KLASA
+                           WHERE KLASA_ID = :id""",
+                   id=class_id)
+        data = cr.fetchone()
+        return Klasa(class_id, nazwa=data[0], obsluga=data[1], komfort=data[2], cena=data[3])
+
+    def update_class(self, class_id, nazwa, obsluga, komfort, cena) -> Tuple[str, str, str]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        try:
+            cr.execute("""UPDATE KLASA
+                             SET NAZWA = :nazwa,
+                                 OBSLUGA = :obsluga,
+                                 KOMFORT = :komfort,
+                                 CENA = :cena
+                           WHERE KLASA_ID = :id""",
+                       nazwa=nazwa,
+                       obsluga=obsluga,
+                       komfort=komfort,
+                       cena=cena,
+                       id=class_id)
+        except cx_Oracle.IntegrityError as e:
+            if c.KLASA_UN_NAZWA in str(e):
+                cr.close()
+                return "Klasa o takiej nazwie już istnieje", c.ERROR, c.KLASA_UN_NAZWA
+            cr.close()
+            return "Wystąpił błąd", c.ERROR, None
+        else:
+            connection.commit()
+            cr.close()
+        return "Pomyślna aktualizacja klasy", c.SUCCESS, None
+
+    def delete_class(self, class_id: int) -> Tuple[str, str]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        try:
+            cr.execute("DELETE FROM KLASA WHERE KLASA_ID = :id", id=class_id)
+        except cx_Oracle.IntegrityError:
+            cr.close()
+            return "Błąd - nie można usunąć klasy, ponieważ jest przypisana do biletów", c.ERROR
+        else:
+            connection.commit()
+            cr.close()
+            return "Pomyślnie usunięto klasę biletów", c.SUCCESS

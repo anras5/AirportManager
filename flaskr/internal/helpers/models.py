@@ -101,6 +101,22 @@ class Przylot(Lot):
         self.liczba_pasazerow = liczba_pasazerow
 
 
+class Odlot(Lot):
+
+    def __init__(self,
+                 _id: int = None,
+                 data_odlotu: datetime.datetime = None,
+                 liczba_miejsc: int = None,
+                 linia_lotnicza: LiniaLotnicza = None,
+                 lotnisko: Lotnisko = None,
+                 model: Model = None,
+                 typ: str = ''):
+        super().__init__(_id, linia_lotnicza, lotnisko, model, typ)
+        self.id = _id
+        self.data_odlotu = data_odlotu
+        self.liczba_miejsc = liczba_miejsc
+
+
 class Rezerwacja:
 
     def __init__(self,
@@ -114,3 +130,70 @@ class Rezerwacja:
         self.koniec = koniec
         self.lot = lot
         self.pas = pas
+
+
+class Klasa:
+
+    def __init__(self,
+                 _id: int = None,
+                 nazwa: str = '',
+                 obsluga: str = '',
+                 komfort: str = '',
+                 cena: int = None):
+        self.id = _id
+        self.nazwa = nazwa
+        self.obsluga = obsluga
+        self.komfort = komfort
+        self.cena = cena
+
+
+class PulaBiletow:
+
+    def __init__(self,
+                 _id: int = None,
+                 ile_wszystkich_miejsc: int = None,
+                 ile_dostepnych_miejsc: int = None,
+                 odlot: Odlot = None,
+                 klasa: Klasa = None):
+        self.id = _id
+        self.ile_wszystkich_miejsc = ile_wszystkich_miejsc
+        self.ile_dostepnych_miejsc = ile_dostepnych_miejsc
+        self.odlot = odlot
+        self.klasa = klasa
+
+
+class Pasazer:
+
+    def __init__(self,
+                 _id: int = None,
+                 login: str = '',
+                 haslo: str = '',
+                 imie: str = '',
+                 nazwisko: str = '',
+                 pesel: str = '',
+                 data_urodzenia: datetime.datetime = None,
+                 ):
+        self.id = _id
+        self.login = login
+        self.haslo = haslo
+        self.imie = imie
+        self.nazwisko = nazwisko
+        self.pesel = pesel
+        self.data_urodzenia = data_urodzenia
+
+
+class Bilet:
+
+    def __init__(self,
+                 _id: int = None,
+                 czy_oplacony: int = None,
+                 miejsce: str = '',
+                 cena: int = None,
+                 pasazer: Pasazer = None,
+                 pula_biletow: PulaBiletow = None):
+        self.id = _id
+        self.czy_oplacony = czy_oplacony
+        self.miejsce = miejsce
+        self.cena = cena
+        self.pasazer = pasazer
+        self.pula_biletow = pula_biletow

@@ -31,8 +31,8 @@ def create_app(test_config=None):
     from flaskr.internal.modules import flights
     app.register_blueprint(flights.flights_bp)
 
-    from flaskr.internal.modules import passengers
-    app.register_blueprint(passengers.ps_bp)
+    from flaskr.internal.modules import tickets
+    app.register_blueprint(tickets.tickets_bp)
 
     from flaskr.internal.modules import runways
     app.register_blueprint(runways.runways_bp)
