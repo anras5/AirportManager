@@ -888,3 +888,16 @@ class OracleDB:
             connection.commit()
             cr.close()
         return "Pomyślna aktualizacja klasy", c.SUCCESS, None
+
+    def delete_class(self, class_id: int) -> Tuple[str, str]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        try:
+            cr.execute("DELETE FROM KLASA WHERE KLASA_ID = :id", id=class_id)
+        except cx_Oracle.IntegrityError:
+            cr.close()
+            return "Błąd - nie można usunąć klasy, ponieważ jest przypisana do biletów", c.ERROR
+        else:
+            connection.commit()
+            cr.close()
+            return "Pomyślnie usunięto klasę biletów", c.SUCCESS

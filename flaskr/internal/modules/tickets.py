@@ -86,4 +86,15 @@ def update_class(class_id: int):
 
 @tickets_bp.route('/classes/delete', methods=['POST'])
 def delete_class():
+    # get class id from parameters
+    parameters = request.form
+    class_id = parameters.get('class_id', '')
+    if not class_id:
+        flash("Błąd - nie podano klasy do usunięcia", category='error')
+        return redirect(url_for('tickets.classes'))
+
+    # delete model from database
+    flash_messsage, flash_category = oracle_db.delete_class(class_id)
+
+    flash(flash_messsage, flash_category)
     return redirect(url_for('tickets.classes'))
