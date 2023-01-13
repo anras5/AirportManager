@@ -13,22 +13,41 @@
 {% block js %}
 
     <script>
-        var data = [{
-            type: 'scattergeo',
-            lat: [52.4, -37.81],
-            lon: [16.93, 144.97],
-            mode: 'lines',
-            line: {
-                width: 3,
-                color: 'green'
-            }
-        }];
+        const data = [];
+        {% for flight in arrivals %}
+            var c = {
+                type: 'scattergeo',
+                lat: [52.4, {{ flight.lotnisko.latitude }}],
+                lon: [16.93, {{ flight.lotnisko.longitude }}],
+                hovertext: ['Poznan', '{{ flight.lotnisko.nazwa }}'],
+                mode: 'lines',
+                line: {
+                    width: 3,
+                    color: '#FFFF00'
+                },
+                name: '{{ flight.lotnisko.nazwa }}'
+            };
+            data.push(c);
+        {% endfor %}
+        {% for flight in departures %}
+            var c = {
+                type: 'scattergeo',
+                lat: [52.4, {{ flight.lotnisko.latitude }}],
+                lon: [16.93, {{ flight.lotnisko.longitude }}],
+                hovertext: ['Poznan', '{{ flight.lotnisko.nazwa }}'],
+                mode: 'lines',
+                line: {
+                    width: 3,
+                    color: '#FF0000'
+                },
+                name: '{{ flight.lotnisko.nazwa }}'
+            };
+            data.push(c);
+        {% endfor %}
 
-        var layout = {
-            title: 'Poznań to Melbourne',
-            showlegend: false,
-            {#width: 1900,#}
-            {#height: 800,#}
+        const layout = {
+            title: 'Mapa lotów',
+            showlegend: true,
             autosize: true,
             geo: {
 
@@ -36,26 +55,25 @@
                 projection: {
                     type: 'orthographic'
                 },
-                showcountries: true
-                // scope: "europe"
-                // lataxis: {
-                //     range: [20, 60],
-                //     showgrid: true,
-                //     tickmode: 'linear',
-                //     dtick: 10
-                // },
-                // lonaxis: {
-                //     range: [-100, 20],
-                //     showgrid: true,
-                //     tickmode: 'linear',
-                //     dtick: 20
-                // }
+                showcountries: true,
+                showocean: true,
+                oceancolor: 'rgb(127, 205, 255)',
+                showland: true,
+                landcolor: 'rgb(93, 169, 55)'
             }
         };
 
         var config = {responsive: true}
 
         Plotly.newPlot('map', data, layout, config);
+
+
+        let arrName = ["trace1", "trace2"];
+        let arrColors = ["#FF0000", "#0000FF"];
+        // I get the Legend component object
+        let legendObj = document.getElementById("LegendComponentId");
+        // I set my legend with one of its functions using JQuery
+        $(legendObj).SetLegend(arrNames, arrColors);
 
     </script>
 {% endblock js %}
