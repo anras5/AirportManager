@@ -61,12 +61,9 @@ def main():
 
 @flights_bp.route('/map')
 def world_map():
-    # try:
-    #     if not session["user"] or not session["admin"]:
-    #         return redirect(url_for('authentication.do_login_user'))
-    # except:
-    #     pass
-    return render_template('flights-worldmap.page.html')
+    arrivals = oracle_db.select_arrivals_for_map()
+    departures = oracle_db.select_departures_for_map()
+    return render_template('flights-worldmap.page.html', arrivals=arrivals, departures=departures)
 
 
 # -------------------------------------------------------------------------------------------------------------------- #

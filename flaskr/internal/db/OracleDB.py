@@ -569,6 +569,35 @@ class OracleDB:
         cr.close()
         return runways_list
 
+    def select_arrivals_for_map(self):
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        cr.execute("""SELECT DISTINCT l2.LATITUDE , l2.LONGITUDE, l2.NAZWA
+                      FROM LOT l INNER JOIN LOTNISKO l2 ON l.LOTNISKO_ID = l2.LOTNISKO_ID
+                                 INNER JOIN PRZYLOT p ON l.LOT_ID = p.LOT_ID """)
+        flights_list = []
+        for flight in cr:
+            flights_list.append(
+                Lot(lotnisko=Lotnisko(latitude=flight[0], longitude=flight[1], nazwa=flight[2]))
+            )
+        cr.close()
+        return flights_list
+
+
+    def select_departures_for_map(self):
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        cr.execute("""SELECT DISTINCT l2.LATITUDE , l2.LONGITUDE, l2.NAZWA
+                      FROM LOT l INNER JOIN LOTNISKO l2 ON l.LOTNISKO_ID = l2.LOTNISKO_ID
+                                 INNER JOIN ODLOT p ON l.LOT_ID = p.LOT_ID """)
+        flights_list = []
+        for flight in cr:
+            flights_list.append(
+                Lot(lotnisko=Lotnisko(latitude=flight[0], longitude=flight[1], nazwa=flight[2]))
+            )
+        cr.close()
+        return flights_list
+
     def select_arrivals(self) -> Tuple[List[str], List[Przylot]]:
         connection = self.pool.acquire()
         cr = connection.cursor()
