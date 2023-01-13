@@ -49,7 +49,39 @@ def new_class():
 
 @tickets_bp.route('/classes/update/<int:class_id>', methods=['GET', 'POST'])
 def update_class(class_id: int):
-    return redirect(url_for('tickets.classes'))
+    form = ClassForm()
+
+    # get class from db
+    class_ = oracle_db.select_class(class_id)
+
+    if form.validate_on_submit():
+        # update class
+        flash_message, flash_category, flash_type = oracle_db.update_class(class_id,
+                                                                           form.nazwa.data,
+                                                                           form.obsluga.data,
+                                                                           form.komfort.data,
+                                                                           form.cena.data)
+
+        flash(flash_message, flash_category)
+        if flash_type == c.KLASA_UN_NAZWA:
+            # duplicated nazwa in db
+            form.nazwa.data = ""
+            return render_template("tickets-classes/tickets-classes-update.page.html",
+                                   form=form,
+                                   klasa=class_)
+        else:
+            # success
+            return redirect(url_for('tickets.classes'))
+
+    # set default values on the form
+    form.nazwa.data = class_.nazwa
+    form.obsluga.data = class_.obsluga
+    form.komfort.data = class_.komfort
+    form.cena.data = class_.cena
+
+    return render_template("tickets-classes/tickets-classes-update.page.html",
+                           form=form,
+                           klasa=class_)
 
 
 @tickets_bp.route('/classes/delete', methods=['POST'])

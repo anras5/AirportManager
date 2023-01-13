@@ -852,3 +852,39 @@ class OracleDB:
             connection.commit()
             cr.close()
         return "Pomyślnie dodano nową klasę", c.SUCCESS, None
+
+    def select_class(self, class_id: int) -> Klasa:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        cr.execute("""SELECT NAZWA, OBSLUGA, KOMFORT, CENA
+                            FROM KLASA
+                           WHERE KLASA_ID = :id""",
+                   id=class_id)
+        data = cr.fetchone()
+        return Klasa(class_id, nazwa=data[0], obsluga=data[1], komfort=data[2], cena=data[3])
+
+    def update_class(self, class_id, nazwa, obsluga, komfort, cena) -> Tuple[str, str, str]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        try:
+            cr.execute("""UPDATE KLASA
+                             SET NAZWA = :nazwa,
+                                 OBSLUGA = :obsluga,
+                                 KOMFORT = :komfort,
+                                 CENA = :cena
+                           WHERE KLASA_ID = :id""",
+                       nazwa=nazwa,
+                       obsluga=obsluga,
+                       komfort=komfort,
+                       cena=cena,
+                       id=class_id)
+        except cx_Oracle.IntegrityError as e:
+            if c.KLASA_UN_NAZWA in str(e):
+                cr.close()
+                return "Klasa o takiej nazwie już istnieje", c.ERROR, c.KLASA_UN_NAZWA
+            cr.close()
+            return "Wystąpił błąd", c.ERROR, None
+        else:
+            connection.commit()
+            cr.close()
+        return "Pomyślna aktualizacja klasy", c.SUCCESS, None

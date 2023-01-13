@@ -149,5 +149,5 @@ class ClassForm(FlaskForm):
     nazwa = StringField("Podaj nazwę klasy biletów", validators=[DataRequired()])
     obsluga = StringField("Podaj krótki opis obsługi", validators=[DataRequired()])
     komfort = StringField("Podaj jaki komfort oferuje klasa", validators=[DataRequired()])
-    cena = IntegerField("Podaj cenę biletu w tej klasie", validators=[DataRequired(), NumberRange(min=0)])
+    cena = DecimalField("Podaj cenę biletu w tej klasie", validators=[DataRequired(), NumberRange(min=0)])
     submit = SubmitField("Dodaj klasę")
