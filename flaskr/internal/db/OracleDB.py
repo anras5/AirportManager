@@ -6,7 +6,8 @@ import os
 from typing import List, Tuple
 
 from flaskr.internal.helpers import constants as c
-from flaskr.internal.helpers.models import LiniaLotnicza, Lotnisko, Producent, Model, Pas, Przylot, Rezerwacja, Lot
+from flaskr.internal.helpers.models import LiniaLotnicza, Lotnisko, Producent, Model, Pas, Przylot, Rezerwacja, Lot, \
+    Klasa
 
 
 class OracleDB:
@@ -804,3 +805,27 @@ class OracleDB:
         connection.commit()
         cr.close()
         return "Pomyślnie usunięto wybraną rezerwację", c.SUCCESS
+
+    def select_classes(self, order=False) -> Tuple[List[str], List[LiniaLotnicza]]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        if not order:
+            sql = "SELECT KLASA_ID, NAZWA, OBSLUGA, KOMFORT, CENA FROM KLASA"
+        else:
+            sql = "SELECT KLASA_ID, NAZWA, OBSLUGA, KOMFORT, CENA FROM KLASA ORDER BY NAZWA"
+        cr.execute(sql)
+        headers = [header[0] for header in cr.description]
+        classes_list = []
+        for class_ in cr:
+            classes_list.append(
+                Klasa(
+                    _id=class_[0],
+                    nazwa=class_[1],
+                    obsluga=class_[2],
+                    komfort=class_[3],
+                    cena=class_[4]
+                )
+            )
+        cr.close()
+
+        return headers, classes_list
