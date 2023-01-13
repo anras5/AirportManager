@@ -829,3 +829,26 @@ class OracleDB:
         cr.close()
 
         return headers, classes_list
+
+    def insert_class(self, nazwa, obsluga, komfort, cena) -> Tuple[str, str, str]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        try:
+            cr.execute("""INSERT INTO KLASA (NAZWA, OBSLUGA, KOMFORT, CENA)
+                               VALUES (:nazwa,
+                                       :obsluga,
+                                       :komfort,
+                                       :cena)""",
+                       nazwa=nazwa,
+                       obsluga=obsluga,
+                       komfort=komfort,
+                       cena=cena)
+        except cx_Oracle.IntegrityError as e:
+            if c.KLASA_UN_NAZWA in str(e):
+                cr.close()
+                return "Klasa o takiej nazwie już istnieje", c.ERROR, c.KLASA_UN_NAZWA
+            return "Wystąpił błąd", c.ERROR, None
+        else:
+            connection.commit()
+            cr.close()
+        return "Pomyślnie dodano nową klasę", c.SUCCESS, None
