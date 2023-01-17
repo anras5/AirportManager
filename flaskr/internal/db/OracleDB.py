@@ -7,7 +7,7 @@ from typing import List, Tuple
 
 from flaskr.internal.helpers import constants as c
 from flaskr.internal.helpers.models import LiniaLotnicza, Lotnisko, Producent, Model, Pas, Przylot, Rezerwacja, Lot, \
-    Klasa
+    Klasa, Pasazer
 
 
 class OracleDB:
@@ -583,7 +583,6 @@ class OracleDB:
         cr.close()
         return flights_list
 
-
     def select_departures_for_map(self):
         connection = self.pool.acquire()
         cr = connection.cursor()
@@ -835,7 +834,7 @@ class OracleDB:
         cr.close()
         return "Pomyślnie usunięto wybraną rezerwację", c.SUCCESS
 
-    def select_classes(self, order=False) -> Tuple[List[str], List[LiniaLotnicza]]:
+    def select_classes(self, order=False) -> Tuple[List[str], List[Klasa]]:
         connection = self.pool.acquire()
         cr = connection.cursor()
         if not order:
@@ -930,3 +929,114 @@ class OracleDB:
             connection.commit()
             cr.close()
             return "Pomyślnie usunięto klasę biletów", c.SUCCESS
+
+    def select_passengers(self) -> Tuple[List[str], List[Pasazer]]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        sql = "SELECT PASAZER_ID, LOGIN, HASLO, IMIE, NAZWISKO, PESEL, DATAURODZENIA FROM PASAZER"
+        cr.execute(sql)
+        headers = [header[0] for header in cr.description]
+        passengers_list = []
+        for passenger in cr:
+            passengers_list.append(
+                Pasazer(
+                    _id=passenger[0],
+                    login=passenger[1],
+                    haslo=passenger[2],
+                    imie=passenger[3],
+                    nazwisko=passenger[4],
+                    pesel=passenger[5],
+                    data_urodzenia=passenger[6]
+                )
+            )
+        cr.close()
+
+        return headers, passengers_list
+
+    def select_passenger(self, passenger_id) -> Pasazer:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        cr.execute("""SELECT PASAZER_ID, LOGIN, HASLO, IMIE, NAZWISKO, PESEL, DATAURODZENIA
+                            FROM PASAZER
+                           WHERE PASAZER_ID = :id""",
+                   id=passenger_id)
+        data = cr.fetchone()
+        return Pasazer(passenger_id, login=data[1], haslo=data[2],
+                       imie=data[3], nazwisko=data[4],
+                       pesel=data[5], data_urodzenia=data[6])
+
+    def insert_passenger(self, login, haslo, imie, nazwisko, pesel, data_urodzenia) -> Tuple[str, str, str]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        try:
+            cr.execute("""INSERT INTO PASAZER (LOGIN, HASLO, IMIE, NAZWISKO, PESEL, DATAURODZENIA)
+                               VALUES (:login,
+                                       :haslo,
+                                       :imie,
+                                       :nazwisko,
+                                       :pesel,
+                                       :dataurodzenia)""",
+                       login=login,
+                       haslo=haslo,
+                       imie=imie,
+                       nazwisko=nazwisko,
+                       pesel=pesel,
+                       dataurodzenia=data_urodzenia)
+        except cx_Oracle.IntegrityError as e:
+            if c.PASAZER_UN_LOGIN in str(e):
+                cr.close()
+                return "Pasażer o takim loginie już istnieje", c.ERROR, c.PASAZER_UN_LOGIN
+            if c.PASAZER_UN_PESEL in str(e):
+                cr.close()
+                return "Pasażer o takim peselu już istnieje", c.ERROR, c.PASAZER_UN_PESEL
+            return "Wystąpił błąd", c.ERROR, None
+        else:
+            connection.commit()
+            cr.close()
+        return "Pomyślnie dodano nowego pasażera", c.SUCCESS, None
+
+    def update_passenger(self, passenger_id, login, haslo, imie, nazwisko, pesel, data_urodzenia) \
+            -> Tuple[str, str, str]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        try:
+            cr.execute("""UPDATE PASAZER
+                             SET LOGIN = :login,
+                                 HASLO = :haslo,
+                                 IMIE = :imie,
+                                 NAZWISKO = :nazwisko,
+                                 PESEL = :pesel,
+                                 DATAURODZENIA = :dataurodzenia
+                           WHERE PASAZER_ID = :id""",
+                       login=login,
+                       haslo=haslo,
+                       imie=imie,
+                       nazwisko=nazwisko,
+                       pesel=pesel,
+                       dataurodzenia=data_urodzenia,
+                       id=passenger_id)
+        except cx_Oracle.IntegrityError as e:
+            if c.PASAZER_UN_LOGIN in str(e):
+                cr.close()
+                return "Pasażer o takim loginie już istnieje", c.ERROR, c.PASAZER_UN_LOGIN
+            if c.PASAZER_UN_PESEL in str(e):
+                cr.close()
+                return "Pasażer o takim peselu już istnieje", c.ERROR, c.PASAZER_UN_PESEL
+            return "Wystąpił błąd", c.ERROR, None
+        else:
+            connection.commit()
+            cr.close()
+        return "Pomyślnie zaktualizowano pasażera", c.SUCCESS, None
+
+    def delete_passenger(self, passenger_id) -> Tuple[str, str]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        try:
+            cr.execute("DELETE FROM PASAZER WHERE PASAZER_ID = :id", id=passenger_id)
+        except cx_Oracle.IntegrityError:
+            cr.close()
+            return "Błąd - nie można usunąć pasażera, ponieważ posiada bilety", c.ERROR
+        else:
+            connection.commit()
+            cr.close()
+            return "Pomyślnie usunięto pasażera", c.SUCCESS

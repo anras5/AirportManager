@@ -1,0 +1,54 @@
+{% extends "base.layout.html" %}
+
+{% block page_header %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col table-header">
+                <h3>Pasażerowie - edycja pasażera id: {{ pasazer.id }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid create-new-container">
+        <a href="{{ url_for('tickets.passengers') }}">
+            <button type="button" class="btn btn-secondary">Powrót</button>
+        </a>
+    </div>
+
+{% endblock %}
+
+{% block content %}
+
+    <div class="container form">
+        <form method="post" class="row g-3">
+            {{ form.hidden_tag() }}
+            <div class="col-md-6">
+                {{ form.login.label(class_='form-label') }}
+                {{ form.login(class_='form-control', placeholder='Login') }}
+            </div>
+            <div class="col-md-6">
+                {{ form.haslo.label(class_='form-label') }}
+                {{ form.haslo(class_='form-control', placeholder='Hasło') }}
+            </div>
+            <div class="col-md-6">
+                {{ form.imie.label(class_='form-label') }}
+                {{ form.imie(class_='form-control', placeholder='Imię') }}
+            </div>
+            <div class="col-md-6">
+                {{ form.nazwisko.label(class_='form-label') }}
+                {{ form.nazwisko(class_='form-control', placeholder='Nazwisko') }}
+            </div>
+            <div class="col-md-6">
+                {{ form.pesel.label(class_='form-label') }}
+                {{ form.pesel(class_='form-control', placeholder='PESEL') }}
+            </div>
+            <div class="col-md-6">
+                {{ form.data_urodzenia.label(class_='form-label') }}
+                {{ form.data_urodzenia(class_='form-control') }}
+            </div>
+            <div class="col-12">
+                {{ form.submit(class_='btn btn-warning') }}
+            </div>
+        </form>
+    </div>
+
+{% endblock %}
