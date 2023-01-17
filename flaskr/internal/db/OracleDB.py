@@ -1027,3 +1027,16 @@ class OracleDB:
             connection.commit()
             cr.close()
         return "Pomyślnie zaktualizowano pasażera", c.SUCCESS, None
+
+    def delete_passenger(self, passenger_id) -> Tuple[str, str]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        try:
+            cr.execute("DELETE FROM PASAZER WHERE PASAZER_ID = :id", id=passenger_id)
+        except cx_Oracle.IntegrityError:
+            cr.close()
+            return "Błąd - nie można usunąć pasażera, ponieważ posiada bilety", c.ERROR
+        else:
+            connection.commit()
+            cr.close()
+            return "Pomyślnie usunięto pasażera", c.SUCCESS

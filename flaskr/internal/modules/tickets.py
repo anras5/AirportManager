@@ -90,7 +90,7 @@ def delete_class():
     parameters = request.form
     class_id = parameters.get('class_id', '')
     if not class_id:
-        flash("Błąd - nie podano klasy do usunięcia", category='error')
+        flash("Błąd - nie podano klasy do usunięcia", category=c.ERROR)
         return redirect(url_for('tickets.classes'))
 
     # delete model from database
@@ -187,4 +187,15 @@ def update_passenger(passenger_id: int):
 
 @tickets_bp.route('/passengers/delete', methods=['POST'])
 def delete_passenger():
+    # get passenger id from parameters
+    parameters = request.form
+    passenger_id = parameters.get('passenger_id', '')
+    if not passenger_id:
+        flash("Błąd - nie podano pasazera do usunięcia", category=c.ERROR)
+        return redirect(url_for('tickets.passengers'))
+
+    # delete model from database
+    flash_messsage, flash_category = oracle_db.delete_passenger(passenger_id)
+
+    flash(flash_messsage, flash_category)
     return redirect(url_for('tickets.passengers'))
