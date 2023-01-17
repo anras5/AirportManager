@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 
 from flaskr import oracle_db
-from flaskr.internal.helpers.forms import ClassForm
+from flaskr.internal.helpers.forms import ClassForm, PassengerForm
 from flaskr.internal.helpers import constants as c
 
 tickets_bp = Blueprint('tickets', __name__, url_prefix='/tickets')
@@ -114,7 +114,31 @@ def passengers():
 
 @tickets_bp.route('/passengers/new', methods=['GET', 'POST'])
 def new_passenger():
-    return redirect(url_for('tickets.passengers'))
+    form = PassengerForm()
+    if form.validate_on_submit():
+        # POST
+
+        flash_message, flash_category, flash_type = oracle_db.insert_passenger(form.login.data,
+                                                                               form.haslo.data,
+                                                                               form.imie.data,
+                                                                               form.nazwisko.data,
+                                                                               form.pesel.data,
+                                                                               form.data_urodzenia.data)
+
+        flash(flash_message, flash_category)
+        if flash_type == c.PASAZER_UN_LOGIN:
+            form.login.data = ""
+            return render_template("tickets-passengers/tickets-passengers-new.page.html",
+                                   form=form)
+        if flash_type == c.PASAZER_UN_PESEL:
+            form.pesel.data = ""
+            return render_template("tickets-passengers/tickets-passengers-new.page.html",
+                                   form=form)
+        else:
+            return redirect(url_for("tickets.passengers"))
+
+    return render_template("tickets-passengers/tickets-passengers-new.page.html",
+                           form=form)
 
 
 @tickets_bp.route('/passengers/update/<int:passenger_id>', methods=['GET', 'POST'])

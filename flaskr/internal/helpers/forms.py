@@ -151,3 +151,16 @@ class ClassForm(FlaskForm):
     komfort = StringField("Podaj jaki komfort oferuje klasa", validators=[DataRequired()])
     cena = DecimalField("Podaj cenę biletu w tej klasie", validators=[DataRequired(), NumberRange(min=0)])
     submit = SubmitField("Dodaj klasę")
+
+
+# ------------------------------------------------------------------------------------------------------------------- #
+# TICKETS.PASSENGERS FORMS
+
+class PassengerForm(FlaskForm):
+    login = StringField("Podaj login", validators=[DataRequired()])
+    haslo = StringField("Podaj hasło", validators=[DataRequired()])
+    imie = StringField("Podaj imię", validators=[DataRequired()])
+    nazwisko = StringField("Podaj nazwisko", validators=[DataRequired()])
+    pesel = StringField("Podaj pesel", validators=[DataRequired(), Length(min=11, max=11)])
+    data_urodzenia = DateField("Podaj datę urodzin", format="%Y-%m-%d", validators=[DataRequired()])
+    submit = SubmitField("Dodaj pasażera")

@@ -953,4 +953,32 @@ class OracleDB:
 
         return headers, passengers_list
 
-
+    def insert_passenger(self, login, haslo, imie, nazwisko, pesel, data_urodzenia) -> Tuple[str, str, str]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        try:
+            cr.execute("""INSERT INTO PASAZER (LOGIN, HASLO, IMIE, NAZWISKO, PESEL, DATAURODZENIA)
+                               VALUES (:login,
+                                       :haslo,
+                                       :imie,
+                                       :nazwisko,
+                                       :pesel,
+                                       :dataurodzenia)""",
+                       login=login,
+                       haslo=haslo,
+                       imie=imie,
+                       nazwisko=nazwisko,
+                       pesel=pesel,
+                       dataurodzenia=data_urodzenia)
+        except cx_Oracle.IntegrityError as e:
+            if c.PASAZER_UN_LOGIN in str(e):
+                cr.close()
+                return "Pasażer o takim loginie już istnieje", c.ERROR, c.PASAZER_UN_LOGIN
+            if c.PASAZER_UN_PESEL in str(e):
+                cr.close()
+                return "Pasażer o takim peselu już istnieje", c.ERROR, c.PASAZER_UN_PESEL
+            return "Wystąpił błąd", c.ERROR, None
+        else:
+            connection.commit()
+            cr.close()
+        return "Pomyślnie dodano nowego pasażera", c.SUCCESS, None
