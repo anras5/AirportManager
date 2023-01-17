@@ -143,7 +143,46 @@ def new_passenger():
 
 @tickets_bp.route('/passengers/update/<int:passenger_id>', methods=['GET', 'POST'])
 def update_passenger(passenger_id: int):
-    return redirect(url_for('tickets.passengers'))
+    form = PassengerForm()
+
+    # get passenger from db
+    passenger = oracle_db.select_passenger(passenger_id)
+
+    if form.validate_on_submit():
+        # update class
+        flash_message, flash_category, flash_type = oracle_db.update_passenger(passenger_id,
+                                                                               form.login.data,
+                                                                               form.haslo.data,
+                                                                               form.imie.data,
+                                                                               form.nazwisko.data,
+                                                                               form.pesel.data,
+                                                                               form.data_urodzenia.data)
+
+        flash(flash_message, flash_category)
+        if flash_type == c.PASAZER_UN_LOGIN:
+            form.login.data = ""
+            return render_template("tickets-passengers/tickets-passengers-update.page.html",
+                                   form=form,
+                                   pasazer=passenger)
+        if flash_type == c.PASAZER_UN_PESEL:
+            form.pesel.data = ""
+            return render_template("tickets-passengers/tickets-passengers-update.page.html",
+                                   form=form,
+                                   pasazer=passenger)
+        else:
+            return redirect(url_for("tickets.passengers"))
+
+    # set default values on the form
+    form.login.data = passenger.login
+    form.haslo.data = passenger.haslo
+    form.imie.data = passenger.imie
+    form.nazwisko.data = passenger.nazwisko
+    form.pesel.data = passenger.pesel
+    form.data_urodzenia.data = passenger.data_urodzenia
+
+    return render_template("tickets-passengers/tickets-passengers-update.page.html",
+                           form=form,
+                           pasazer=passenger)
 
 
 @tickets_bp.route('/passengers/delete', methods=['POST'])

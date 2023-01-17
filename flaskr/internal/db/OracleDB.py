@@ -953,6 +953,18 @@ class OracleDB:
 
         return headers, passengers_list
 
+    def select_passenger(self, passenger_id) -> Pasazer:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        cr.execute("""SELECT PASAZER_ID, LOGIN, HASLO, IMIE, NAZWISKO, PESEL, DATAURODZENIA
+                            FROM PASAZER
+                           WHERE PASAZER_ID = :id""",
+                   id=passenger_id)
+        data = cr.fetchone()
+        return Pasazer(passenger_id, login=data[1], haslo=data[2],
+                       imie=data[3], nazwisko=data[4],
+                       pesel=data[5], data_urodzenia=data[6])
+
     def insert_passenger(self, login, haslo, imie, nazwisko, pesel, data_urodzenia) -> Tuple[str, str, str]:
         connection = self.pool.acquire()
         cr = connection.cursor()
@@ -982,3 +994,36 @@ class OracleDB:
             connection.commit()
             cr.close()
         return "Pomyślnie dodano nowego pasażera", c.SUCCESS, None
+
+    def update_passenger(self, passenger_id, login, haslo, imie, nazwisko, pesel, data_urodzenia) \
+            -> Tuple[str, str, str]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        try:
+            cr.execute("""UPDATE PASAZER
+                             SET LOGIN = :login,
+                                 HASLO = :haslo,
+                                 IMIE = :imie,
+                                 NAZWISKO = :nazwisko,
+                                 PESEL = :pesel,
+                                 DATAURODZENIA = :dataurodzenia
+                           WHERE PASAZER_ID = :id""",
+                       login=login,
+                       haslo=haslo,
+                       imie=imie,
+                       nazwisko=nazwisko,
+                       pesel=pesel,
+                       dataurodzenia=data_urodzenia,
+                       id=passenger_id)
+        except cx_Oracle.IntegrityError as e:
+            if c.PASAZER_UN_LOGIN in str(e):
+                cr.close()
+                return "Pasażer o takim loginie już istnieje", c.ERROR, c.PASAZER_UN_LOGIN
+            if c.PASAZER_UN_PESEL in str(e):
+                cr.close()
+                return "Pasażer o takim peselu już istnieje", c.ERROR, c.PASAZER_UN_PESEL
+            return "Wystąpił błąd", c.ERROR, None
+        else:
+            connection.commit()
+            cr.close()
+        return "Pomyślnie zaktualizowano pasażera", c.SUCCESS, None
