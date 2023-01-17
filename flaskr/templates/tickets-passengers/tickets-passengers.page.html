@@ -1,0 +1,80 @@
+{% extends "table.layout.html" %}
+
+
+{% block page_header %}
+
+    <h3>PASAŻEROWIE</h3>
+
+{% endblock %}
+
+
+{% block button_add_new %}
+
+    <div class="container-fluid create-new-container">
+        <a href="{{ url_for('tickets.new_passenger') }}">
+            <button type="button" class="btn btn-success">Nowy pasażer</button>
+        </a>
+    </div>
+
+{% endblock %}
+
+
+{% block thead %}
+
+    {% for header in headers %}
+        <th>{{ header }}</th>
+    {% endfor %}
+    <th>Opcje</th>
+
+{% endblock %}
+
+
+{% block tbody %}
+
+    {% for passenger in data %}
+        <tr>
+            <td>{{ passenger.id }}</td>
+            <td>{{ passenger.login }}</td>
+            <td>{{ passenger.haslo }}</td>
+            <td>{{ passenger.imie }}</td>
+            <td>{{ passenger.nazwisko }}</td>
+            <td>{{ passenger.pesel }}</td>
+            <td>{{ passenger.data_urodzenia }}</td>
+            <td>
+                <a href="{{ url_for('tickets.update_passenger', passenger_id=passenger.id) }}" class="icon-edit-table">
+                    <i class="fa-solid fa-pen"></i>
+                </a>
+                <button id="delete{{ passenger.id }}" class="icon-delete-table">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </td>
+        </tr>
+    {% endfor %}
+
+{% endblock %}
+
+
+{% block custom_js %}
+    <script>
+
+        {# BUTTONS IN DATATABLE - DELETING #}
+        {% for passenger in data %}
+
+            $('#example tbody').on('click', '#delete{{ passenger.id }}', function () {
+                Swal.fire({
+                    title: 'Czy na pewno chcesz usunąć pasażera nr: {{ passenger.id }}?',
+                    text: "Nie będziesz mógł cofnąć tej dezycji!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Tak, usuń!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        post("{{ url_for('tickets.delete_passenger') }}", {passenger_id: {{ passenger.id }}})
+                    }
+                })
+            })
+        {% endfor %}
+    </script>
+{% endblock %}

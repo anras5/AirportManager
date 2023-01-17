@@ -7,7 +7,7 @@ from typing import List, Tuple
 
 from flaskr.internal.helpers import constants as c
 from flaskr.internal.helpers.models import LiniaLotnicza, Lotnisko, Producent, Model, Pas, Przylot, Rezerwacja, Lot, \
-    Klasa
+    Klasa, Pasazer
 
 
 class OracleDB:
@@ -583,7 +583,6 @@ class OracleDB:
         cr.close()
         return flights_list
 
-
     def select_departures_for_map(self):
         connection = self.pool.acquire()
         cr = connection.cursor()
@@ -835,7 +834,7 @@ class OracleDB:
         cr.close()
         return "Pomyślnie usunięto wybraną rezerwację", c.SUCCESS
 
-    def select_classes(self, order=False) -> Tuple[List[str], List[LiniaLotnicza]]:
+    def select_classes(self, order=False) -> Tuple[List[str], List[Klasa]]:
         connection = self.pool.acquire()
         cr = connection.cursor()
         if not order:
@@ -930,3 +929,28 @@ class OracleDB:
             connection.commit()
             cr.close()
             return "Pomyślnie usunięto klasę biletów", c.SUCCESS
+
+    def select_passengers(self) -> Tuple[List[str], List[Pasazer]]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        sql = "SELECT PASAZER_ID, LOGIN, HASLO, IMIE, NAZWISKO, PESEL, DATAURODZENIA FROM PASAZER"
+        cr.execute(sql)
+        headers = [header[0] for header in cr.description]
+        passengers_list = []
+        for passenger in cr:
+            passengers_list.append(
+                Pasazer(
+                    _id=passenger[0],
+                    login=passenger[1],
+                    haslo=passenger[2],
+                    imie=passenger[3],
+                    nazwisko=passenger[4],
+                    pesel=passenger[5],
+                    data_urodzenia=passenger[6]
+                )
+            )
+        cr.close()
+
+        return headers, passengers_list
+
+

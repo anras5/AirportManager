@@ -98,3 +98,30 @@ def delete_class():
 
     flash(flash_messsage, flash_category)
     return redirect(url_for('tickets.classes'))
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+# PASSENGERS
+
+@tickets_bp.route('/passengers')
+def passengers():
+    headers, passengers_list = oracle_db.select_passengers()
+
+    return render_template('tickets-passengers/tickets-passengers.page.html',
+                           data=passengers_list,
+                           headers=headers)
+
+
+@tickets_bp.route('/passengers/new', methods=['GET', 'POST'])
+def new_passenger():
+    return redirect(url_for('tickets.passengers'))
+
+
+@tickets_bp.route('/passengers/update/<int:passenger_id>', methods=['GET', 'POST'])
+def update_passenger(passenger_id: int):
+    return redirect(url_for('tickets.passengers'))
+
+
+@tickets_bp.route('/passengers/delete', methods=['POST'])
+def delete_passenger():
+    return redirect(url_for('tickets.passengers'))
