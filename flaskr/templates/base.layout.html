@@ -100,11 +100,10 @@
             </div>
 
             <ul class="nav col-md-4 justify-content-end list-unstyled d-flex">
-                {#TODO add hrefs#}
                 <li class="ms-3"><a class="text-muted" href="https://github.com/anras5/AirportManager"><i
                         class="fa-brands fa-github fa-2x"></i></a></li>
-                <li class="ms-3"><a class="text-muted" href="#"><i class="fa-brands fa-facebook fa-2x"></i></a></li>
-                <li class="ms-3"><a class="text-muted" href="#"><i class="fa-brands fa-telegram fa-2x"></i></a></li>
+                <li class="ms-3"><a class="text-muted" href="{{ url_for('home') }}"><i class="fa-brands fa-facebook fa-2x"></i></a></li>
+                <li class="ms-3"><a class="text-muted" href="{{ url_for('home') }}"><i class="fa-brands fa-telegram fa-2x"></i></a></li>
             </ul>
         </footer>
     </div>
