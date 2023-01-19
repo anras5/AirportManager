@@ -789,7 +789,7 @@ class OracleDB:
     def select_reservations_by_flight(self, flight_id) -> Tuple[List[str], List[Rezerwacja]]:
         connection = self.pool.acquire()
         cr = connection.cursor()
-        sql = """SELECT r.rezerwacja_id, r.poczatek, r.koniec, p.NAZWA 
+        sql = """SELECT r.rezerwacja_id, r.poczatek, r.koniec, p.NAZWA AS PAS
                  FROM REZERWACJA r INNER JOIN LOT l ON r.LOT_ID = l.LOT_ID 
                                    INNER JOIN PAS p ON r.PAS_ID = p.PAS_ID
                  WHERE l.lot_id = :flight_id"""
@@ -808,6 +808,19 @@ class OracleDB:
         cr.close()
 
         return headers, reservations_list
+
+    def select_flight_date(self, flight_id) -> datetime.datetime:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        sql = """SELECT 
+                 CASE 
+                    WHEN :lot_id IN (SELECT LOT_ID FROM PRZYLOT) THEN (SELECT p.DATAPRZYLOTU FROM PRZYLOT p WHERE p.LOT_ID = :lot_id)
+                    ELSE (SELECT o.DATAODLOTU FROM ODLOT o WHERE o.LOT_ID = :lot_id)
+                 END AS DATA_LOTU
+                 FROM DUAL"""
+        cr.execute(sql, lot_id=flight_id)
+        data = cr.fetchone()
+        return data[0]
 
     def insert_reservation(self, poczatek, koniec, lot_id, pas_id) -> Tuple[str, str, str]:
         connection = self.pool.acquire()
