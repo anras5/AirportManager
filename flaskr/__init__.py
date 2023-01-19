@@ -24,10 +24,6 @@ def create_app(test_config=None):
     else:
         app.config.from_mapping(test_config)
 
-    # modules
-    from flaskr.internal.helpers import authentication
-    app.register_blueprint(authentication.at_bp)
-
     from flaskr.internal.modules import flights
     app.register_blueprint(flights.flights_bp)
 

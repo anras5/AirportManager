@@ -66,16 +66,8 @@
                     </ul>
                     <ul class="navbar-nav ms-auto">
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('authentication.register_user') }}">Rejestracja</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('authentication.do_login_user') }}">Zaloguj się</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('authentication.logout') }}">Wyloguj</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link">Zalogowano: {{ session["name"] }}</a>
+{#                            TODO: change path to panel sterowania#}
+                            <a class="nav-link" href="{{ url_for('home') }}">PANEL STEROWANIA</a>
                         </li>
                     </ul>
 
@@ -108,11 +100,10 @@
             </div>
 
             <ul class="nav col-md-4 justify-content-end list-unstyled d-flex">
-                {#TODO add hrefs#}
                 <li class="ms-3"><a class="text-muted" href="https://github.com/anras5/AirportManager"><i
                         class="fa-brands fa-github fa-2x"></i></a></li>
-                <li class="ms-3"><a class="text-muted" href="#"><i class="fa-brands fa-facebook fa-2x"></i></a></li>
-                <li class="ms-3"><a class="text-muted" href="#"><i class="fa-brands fa-telegram fa-2x"></i></a></li>
+                <li class="ms-3"><a class="text-muted" href="{{ url_for('home') }}"><i class="fa-brands fa-facebook fa-2x"></i></a></li>
+                <li class="ms-3"><a class="text-muted" href="{{ url_for('home') }}"><i class="fa-brands fa-telegram fa-2x"></i></a></li>
             </ul>
         </footer>
     </div>
