@@ -4,8 +4,9 @@
 {% block page_header %}
 
     <h3>REZERWACJE DLA LOTU {{ flight_id }}</h3>
+    <h4>Termin lotu: {{ flight_date }}</h4>
 
-    <a href="{{ url_for('flights.arrivals') }}">
+    <a href="{{ url_for('flights.main') }}">
         <button class="btn btn-secondary">Powrót</button>
     </a>
 

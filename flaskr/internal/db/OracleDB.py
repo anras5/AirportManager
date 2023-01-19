@@ -789,7 +789,7 @@ class OracleDB:
     def select_reservations_by_flight(self, flight_id) -> Tuple[List[str], List[Rezerwacja]]:
         connection = self.pool.acquire()
         cr = connection.cursor()
-        sql = """SELECT r.rezerwacja_id, r.poczatek, r.koniec, p.NAZWA 
+        sql = """SELECT r.rezerwacja_id, r.poczatek, r.koniec, p.NAZWA AS PAS
                  FROM REZERWACJA r INNER JOIN LOT l ON r.LOT_ID = l.LOT_ID 
                                    INNER JOIN PAS p ON r.PAS_ID = p.PAS_ID
                  WHERE l.lot_id = :flight_id"""
@@ -809,6 +809,19 @@ class OracleDB:
 
         return headers, reservations_list
 
+    def select_flight_date(self, flight_id) -> datetime.datetime:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        sql = """SELECT 
+                 CASE 
+                    WHEN :lot_id IN (SELECT LOT_ID FROM PRZYLOT) THEN (SELECT p.DATAPRZYLOTU FROM PRZYLOT p WHERE p.LOT_ID = :lot_id)
+                    ELSE (SELECT o.DATAODLOTU FROM ODLOT o WHERE o.LOT_ID = :lot_id)
+                 END AS DATA_LOTU
+                 FROM DUAL"""
+        cr.execute(sql, lot_id=flight_id)
+        data = cr.fetchone()
+        return data[0]
+
     def insert_reservation(self, poczatek, koniec, lot_id, pas_id) -> Tuple[str, str, str]:
         connection = self.pool.acquire()
         cr = connection.cursor()
@@ -825,14 +838,36 @@ class OracleDB:
         cr.close()
         return "Pomyślnie dodano nową rezerwację", c.SUCCESS, None
 
-    def delete_reservation(self, reservation_id) -> Tuple[str, str]:
+    def delete_reservation(self, reservation_id, flight_id) -> Tuple[str, str]:
         connection = self.pool.acquire()
         cr = connection.cursor()
-        cr.execute("DELETE FROM REZERWACJA WHERE REZERWACJA_ID = :id",
-                   id=reservation_id)
-        connection.commit()
-        cr.close()
-        return "Pomyślnie usunięto wybraną rezerwację", c.SUCCESS
+        # sql searches how many reservations are there that will cover the departure / arrival time.
+        # if there is at least one another reservation (other than we want to delete)
+        # then it is safe to delete current reservation
+        cr.execute("""SELECT count(*) 
+                        FROM (SELECT REZERWACJA_ID
+                                FROM REZERWACJA r
+                               WHERE r.REZERWACJA_ID != :rezerwacja_id AND (
+                        SELECT 
+                        CASE 
+                            WHEN :lot_id IN (SELECT LOT_ID FROM PRZYLOT) THEN (SELECT p.DATAPRZYLOTU FROM PRZYLOT p WHERE p.LOT_ID = :lot_id)
+                            ELSE (SELECT o.DATAODLOTU FROM ODLOT o WHERE o.LOT_ID = :lot_id)
+                        END AS DATA_LOTU
+                        FROM DUAL
+                        ) BETWEEN r.POCZATEK AND r.KONIEC) 
+                    """,
+                   lot_id=flight_id,
+                   rezerwacja_id=reservation_id)
+        data = cr.fetchone()[0]
+        if data > 0:
+            cr.execute("DELETE FROM REZERWACJA WHERE REZERWACJA_ID = :id",
+                       id=reservation_id)
+            connection.commit()
+            cr.close()
+            return "Pomyślnie usunięto wybraną rezerwację", c.SUCCESS
+        else:
+            cr.close()
+            return "Nie można usunąć rezerwacji, ponieważ jest jedyną w trakcie momentu przylotu", c.WARNING
 
     def select_classes(self, order=False) -> Tuple[List[str], List[Klasa]]:
         connection = self.pool.acquire()

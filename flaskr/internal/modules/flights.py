@@ -680,9 +680,11 @@ def delete_arrival():
 def flight_reservations(flight_id: int):
     # get flight's reservations
     headers, reservations = oracle_db.select_reservations_by_flight(flight_id)
+    flight_date = oracle_db.select_flight_date(flight_id)
 
     return render_template('flights-flights/flights-flight-reservations.page.html',
                            flight_id=flight_id,
+                           flight_date=flight_date,
                            headers=headers,
                            data=reservations)
 
@@ -763,7 +765,7 @@ def flight_reservations_delete():
         return redirect(url_for('flights.main'))
 
     # delete reservation from database
-    flash_messsage, flash_category = oracle_db.delete_reservation(reservation_id)
+    flash_messsage, flash_category = oracle_db.delete_reservation(reservation_id, flight_id)
 
     flash(flash_messsage, flash_category)
     return redirect(url_for('flights.flight_reservations', flight_id=flight_id))
