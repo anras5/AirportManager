@@ -1,9 +1,11 @@
 import datetime
 
 from flask import Blueprint, render_template, redirect, url_for, request, flash, session
+from wtforms import IntegerField
+from wtforms.validators import NumberRange, DataRequired
 
 from flaskr.internal.helpers.forms import AirportForm, AirlinesForm, ManufacturersForm, ModelsForm, ArrivalForm, \
-    ReservationForm
+    ReservationForm, DepartureForm
 from flaskr.internal.helpers.models import Lotnisko
 from flaskr import oracle_db
 from flaskr.internal.helpers import constants as c
@@ -187,7 +189,7 @@ def delete_airport():
     parameters = request.form
     airport_id = parameters.get('airport_id', '')
     if not airport_id:
-        flash("Błąd - nie podano lotniska do usunięcia", category='error')
+        flash("Błąd - nie podano lotniska do usunięcia", category=c.ERROR)
         return redirect(url_for('flights.airports'))
 
     # delete record from database
@@ -275,7 +277,7 @@ def delete_airline():
     parameters = request.form
     airline_id = parameters.get('airline_id', '')
     if not airline_id:
-        flash("Błąd - nie podano linii lotniczej do usunięcia", category='error')
+        flash("Błąd - nie podano linii lotniczej do usunięcia", category=c.ERROR)
         return redirect(url_for('flights.airlines'))
 
     # delete record from database
@@ -361,7 +363,7 @@ def delete_manufacturer():
     parameters = request.form
     man_id = parameters.get('manufacturer_id', '')
     if not man_id:
-        flash("Błąd - nie podano producenta do usunięcia", category='error')
+        flash("Błąd - nie podano producenta do usunięcia", category=c.ERROR)
         return redirect(url_for('flights.manufacturers'))
 
     flash_messsage, flash_category = oracle_db.delete_manufacturer(man_id)
@@ -461,7 +463,7 @@ def delete_model():
     parameters = request.form
     model_id = parameters.get('model_id', '')
     if not model_id:
-        flash("Błąd - nie podano modelu do usunięcia", category='error')
+        flash("Błąd - nie podano modelu do usunięcia", category=c.ERROR)
         return redirect(url_for('flights.models'))
 
     # delete model from database
@@ -496,7 +498,7 @@ def arrivals():
                            headers=headers)
 
 
-@flights_bp.route('/arrivals/check-availability/<redirect_type>', methods=['POST'])
+@flights_bp.route('/flights/check-availability/<redirect_type>', methods=['POST'])
 def check_availability_runway(redirect_type: str):
     # redirect type can be 'new' or 'update'
 
@@ -512,20 +514,35 @@ def check_availability_runway(redirect_type: str):
     # check what runways are available on the given date
     runway_list = oracle_db.select_available_runways(timestamp, timestamp + datetime.timedelta(minutes=10))
     if runway_list:
+        # store available runways and flight timestamp in session so other endpoints can use it
         session['available_runways'] = [runway.id for runway in runway_list]
-        session['arrival_timestamp'] = datetime.datetime.strftime(timestamp, "%Y-%m-%d %H:%M")
-        if redirect_type == 'new':
+        session['flight_timestamp'] = datetime.datetime.strftime(timestamp, "%Y-%m-%d %H:%M")
+
+        if redirect_type == 'new_arrival':
             return redirect(url_for('flights.new_arrival'))
-        if redirect_type == 'update':
+        if redirect_type == 'update_arrival':
             arrival_id = request.args.get('arrival_id')
             if not arrival_id:
                 flash("Brak podanego ID przylotu", c.ERROR)
                 return redirect(url_for('flights.arrivals'))
             else:
                 return redirect(url_for('flights.update_arrival', arrival_id=arrival_id))
+        if redirect_type == 'new_departure':
+            return redirect(url_for('flights.new_departure'))
+        if redirect_type == 'update_departure':
+            departure_id = request.args.get('departure_id')
+            if not departure_id:
+                flash("Brak podanego ID odlotu", c.ERROR)
+                return redirect(url_for('flights.departure'))
+            else:
+                return redirect(url_for('flights.update_departure', departure_id=departure_id))
     else:
         flash("Brak dostępnych pasów startowych w tym terminie", c.WARNING)
-        return redirect(url_for('flights.arrivals'))
+        if 'arrival' in redirect_type:
+            return redirect(url_for('flights.arrivals'))
+        if 'departures' in redirect_type:
+            return redirect(url_for('flights.departures'))
+        return redirect(url_for('flights.main'))
 
 
 @flights_bp.route('/arrivals/new', methods=['GET', 'POST'])
@@ -548,7 +565,7 @@ def new_arrival():
     runways_ids_list = session.get('available_runways', '')
 
     # get timestamp from session
-    timestamp = session.get('arrival_timestamp', '')
+    timestamp = session.get('flight_timestamp', '')
 
     if not runways_ids_list or not timestamp:
         flash("Wystąpił błąd. Do dodania przylotu użyj przeznaczonego do tego przycisku!", c.WARNING)
@@ -577,7 +594,7 @@ def new_arrival():
         else:
             # if no error in inserting the data to the database - pop values from session and display arrivals table
             session.pop('available_runways')
-            session.pop('arrival_timestamp')
+            session.pop('flight_timestamp')
             return redirect(url_for('flights.arrivals'))
 
     return render_template('flights-arrivals/flights-arrivals-new.page.html',
@@ -609,7 +626,7 @@ def update_arrival(arrival_id: int):
     runways_ids_list = session.get('available_runways', '')
 
     # get timestamp from session
-    timestamp = session.get('arrival_timestamp', '')
+    timestamp = session.get('flight_timestamp', '')
 
     if not runways_ids_list or not timestamp:
         flash("Błąd. Do aktualizacji przylotu użyj przeznaczonego do tego przycisku!", c.WARNING)
@@ -642,7 +659,7 @@ def update_arrival(arrival_id: int):
         else:
             # if no error in updating the data - pop values from session and display arrivals table
             session.pop('available_runways')
-            session.pop('arrival_timestamp')
+            session.pop('flight_timestamp')
             return redirect(url_for('flights.arrivals'))
 
     # set default data on the form
@@ -666,7 +683,7 @@ def delete_arrival():
     parameters = request.form
     arrival_id = parameters.get('arrival_id', '')
     if not arrival_id:
-        flash("Błąd - nie podano przylotu do usunięcia", category='error')
+        flash("Błąd - nie podano przylotu do usunięcia", category=c.ERROR)
         return redirect(url_for('flights.arrivals'))
 
     # delete arrival from database
@@ -674,6 +691,262 @@ def delete_arrival():
 
     flash(flash_messsage, flash_category)
     return redirect(url_for('flights.arrivals'))
+
+
+@flights_bp.route('/departures', methods=['GET', 'POST'])
+def departures():
+    if request.method == 'POST':
+        date_range = request.form['date']
+        if " to " in date_range:
+            # filter arrivals by dates
+            sd, ed = date_range.split(" to ")
+            start_date = datetime.datetime.strptime(sd, "%Y-%m-%d %H:%M")
+            end_date = datetime.datetime.strptime(ed, "%Y-%m-%d %H:%M")
+            headers, departures_list = oracle_db.select_departures_by_dates(start_date, end_date)
+            return render_template('flights-departures/flights-departures.page.html',
+                                   departures_data=departures_list,
+                                   headers=headers,
+                                   date=f"Od {sd} do {ed}")
+
+        else:
+            flash("Niepoprawny format daty", category=c.ERROR)
+
+    # load all arrivals
+    headers, departures_list = oracle_db.select_departures()
+    return render_template('flights-departures/flights-departures.page.html',
+                           departures_data=departures_list,
+                           headers=headers)
+
+
+@flights_bp.route('/departures/new', methods=['GET', 'POST'])
+def new_departure():
+    class DFormPools(DepartureForm):
+        pass
+
+    # get all classes
+    _, class_list = oracle_db.select_classes(order=True)
+    for class_ in class_list:
+        setattr(DFormPools,
+                class_.nazwa,
+                IntegerField(f'Podaj liczbę biletów w klasie {class_.nazwa}',
+                             validators=[NumberRange(min=0)]))
+
+    form = DFormPools()
+
+    # get all airports from database
+    _, airports_list = oracle_db.select_airports(order=True)
+    form.lotnisko.choices = [(airport.id, airport.nazwa) for airport in airports_list]
+
+    # get all models from database
+    _, models_list = oracle_db.select_models_manufacturers(order=True)
+    form.model.choices = [(model.id, f"{model.producent.nazwa} {model.nazwa}") for model in models_list]
+
+    # get all airline
+    _, airline_list = oracle_db.select_airlines(order=True)
+    form.linia_lotnicza.choices = [(airline.id, airline.nazwa) for airline in airline_list]
+
+    # get available runways list from session
+    runways_ids_list = session.get('available_runways', '')
+
+    # get timestamp from session
+    timestamp = session.get('flight_timestamp', '')
+
+    if not runways_ids_list or not timestamp:
+        flash("Wystąpił błąd. Do dodania odlotu użyj przeznaczonego do tego przycisku!", c.WARNING)
+        return redirect(url_for('flights.departures'))
+    else:
+        # load runways from database using ids from session
+        runways = oracle_db.select_runways_by_ids(runways_ids_list)
+        form.pas.choices = [(runway.id, runway.nazwa) for runway in runways]
+        # parse timestamp to datetime.datetime object
+        timestamp = datetime.datetime.strptime(timestamp, "%Y-%m-%d %H:%M")
+
+    if form.validate_on_submit():
+        # check if provided number of seats is lesser than sum of number of tickets
+        # if it is - render the template again with a warning
+        available_seats = form.liczba_miejsc.data
+        ticket_pools = {
+            (class_.id, class_.nazwa): getattr(form, class_.nazwa).data if getattr(form, class_.nazwa).data > 0 else 0
+            for class_ in class_list
+        }
+        if available_seats < sum(ticket_pools.values()):
+            flash("Suma liczby biletów nie może przekraczać liczby dostępnych miejsc", c.WARNING)
+            return render_template('flights-departures/flights-departures-new.page.html',
+                                   form=form,
+                                   timestamp=datetime.datetime.strftime(timestamp, "%Y-%m-%d %H:%M"),
+                                   models=models_list,
+                                   class_list=class_list)
+
+        # insert data to db
+        flash_message, flash_category, _ = oracle_db.insert_departure_and_ticket_pools(form.linia_lotnicza.data,
+                                                                                       form.lotnisko.data,
+                                                                                       form.model.data,
+                                                                                       timestamp,
+                                                                                       form.liczba_miejsc.data,
+                                                                                       form.pas.data,
+                                                                                       ticket_pools)
+
+        flash(flash_message, flash_category)
+        if flash_category == c.ERROR:
+            return render_template('flights-departures/flights-departures-new.page.html',
+                                   form=form,
+                                   timestamp=datetime.datetime.strftime(timestamp, "%Y-%m-%d %H:%M"),
+                                   models=models_list,
+                                   class_list=class_list)
+        else:
+            # if no error in inserting the data to the database - pop values from session and display arrivals table
+            session.pop('available_runways')
+            session.pop('flight_timestamp')
+            return redirect(url_for('flights.departures'))
+
+    return render_template('flights-departures/flights-departures-new.page.html',
+                           form=form,
+                           timestamp=datetime.datetime.strftime(timestamp, "%Y-%m-%d %H:%M"),
+                           models=models_list,
+                           class_list=class_list)
+
+
+@flights_bp.route('/departures/update/<int:departure_id>', methods=['GET', 'POST'])
+def update_departure(departure_id: int):
+    class DFormPools(DepartureForm):
+        pass
+
+    # get all classes and create inputs for them
+    _, class_list = oracle_db.select_classes(order=True)
+
+    # get all ticket pools for this departure
+    _, ticket_pools_list = oracle_db.select_pools_by_departure(departure_id)
+    for class_ in class_list:
+        # if pool of this class already exists for this departure
+        if class_.nazwa in [pool.klasa.nazwa for pool in ticket_pools_list]:
+            for pool in ticket_pools_list:
+                if class_.nazwa == pool.klasa.nazwa:
+                    number_of_tickets = oracle_db.count_tickets_for_pool(pool.id)
+                    setattr(DFormPools,
+                            class_.nazwa,
+                            IntegerField(f'Podaj liczbę biletów w klasie {class_.nazwa}',
+                                         validators=[NumberRange(min=number_of_tickets)]))
+        # if pool of this class does not exist for this departure
+        else:
+            setattr(DFormPools,
+                    class_.nazwa,
+                    IntegerField(f'Podaj liczbę biletów w klasie {class_.nazwa}',
+                                 validators=[NumberRange(min=0)]))
+
+    form = DFormPools()
+
+    # get departure from db
+    departure = oracle_db.select_departure(departure_id)
+
+    # get all airports from database
+    _, airports_list = oracle_db.select_airports(order=True)
+    form.lotnisko.choices = [(airport.id, airport.nazwa) for airport in airports_list]
+
+    # get all models from database
+    _, models_list = oracle_db.select_models_manufacturers(order=True)
+    form.model.choices = [(model.id, f"{model.producent.nazwa} {model.nazwa}") for model in models_list]
+
+    # get all airline
+    _, airline_list = oracle_db.select_airlines(order=True)
+    form.linia_lotnicza.choices = [(airline.id, airline.nazwa) for airline in airline_list]
+
+    # get available runways list from session
+    runways_ids_list = session.get('available_runways', '')
+
+    # get timestamp from session
+    timestamp = session.get('flight_timestamp', '')
+
+    if not runways_ids_list or not timestamp:
+        flash("Błąd. Do aktualizacji odlotu użyj przeznaczonego do tego przycisku!", c.WARNING)
+        return redirect(url_for('flights.departures'))
+    else:
+        # load runways from database using ids from session
+        runways = oracle_db.select_runways_by_ids(runways_ids_list)
+        form.pas.choices = [(runway.id, runway.nazwa) for runway in runways]
+        # parse timestamp to datetime.datetime object
+        timestamp = datetime.datetime.strptime(timestamp, "%Y-%m-%d %H:%M")
+
+    if form.validate_on_submit():
+
+        # check if provided number of seats is lesser than sum of number of tickets
+        # if it is - render the template again with a warning
+        available_seats = form.liczba_miejsc.data
+        ticket_pools = {
+            (class_.id, class_.nazwa): getattr(form, class_.nazwa).data if getattr(form, class_.nazwa).data > 0 else 0
+            for class_ in class_list
+        }
+        if available_seats < sum(ticket_pools.values()):
+            flash("Suma liczby biletów nie może przekraczać liczby dostępnych miejsc", c.WARNING)
+            return render_template('flights-departures/flights-departures-update.page.html',
+                                   form=form,
+                                   departure=departure,
+                                   models=models_list,
+                                   class_list=class_list,
+                                   timestamp_old=datetime.datetime.strftime(departure.data_odlotu, "%Y-%m-%d %H:%M"),
+                                   timestamp_new=datetime.datetime.strftime(timestamp, "%Y-%m-%d %H:%M"))
+
+        # update departure
+        flash_message, flash_category, flash_type = oracle_db.update_departure(departure_id,
+                                                                               form.linia_lotnicza.data,
+                                                                               form.lotnisko.data,
+                                                                               form.model.data,
+                                                                               timestamp,
+                                                                               form.liczba_miejsc.data,
+                                                                               form.pas.data,
+                                                                               ticket_pools)
+
+        flash(flash_message, flash_category)
+        if flash_category == c.ERROR:
+            return render_template("flights-departures/flights-departures-update.page.html",
+                                   form=form,
+                                   departure=departure,
+                                   models=models_list,
+                                   class_list=class_list,
+                                   timestamp_old=datetime.datetime.strftime(departure.data_odlotu, "%Y-%m-%d %H:%M"),
+                                   timestamp_new=datetime.datetime.strftime(timestamp, "%Y-%m-%d %H:%M"))
+        else:
+            # if no error in updating the data - pop values from session and display departures table
+            session.pop('available_runways')
+            session.pop('flight_timestamp')
+            return redirect(url_for('flights.departures'))
+
+    # set default data on the form
+    form.lotnisko.default = departure.lotnisko.id
+    form.model.default = departure.model.id
+    form.linia_lotnicza.default = departure.linia_lotnicza.id
+    form.process()
+    form.liczba_miejsc.data = departure.liczba_miejsc
+    for class_ in class_list:
+        if class_.nazwa in [pool.klasa.nazwa for pool in ticket_pools_list]:
+            for pool in ticket_pools_list:
+                if class_.nazwa == pool.klasa.nazwa:
+                    getattr(form, class_.nazwa).data = pool.ile_wszystkich_miejsc
+        else:
+            getattr(form, class_.nazwa).data = 0
+
+    return render_template('flights-departures/flights-departures-update.page.html',
+                           form=form,
+                           departure=departure,
+                           models=models_list,
+                           class_list=class_list,
+                           timestamp_old=datetime.datetime.strftime(departure.data_odlotu, "%Y-%m-%d %H:%M"),
+                           timestamp_new=datetime.datetime.strftime(timestamp, "%Y-%m-%d %H:%M"))
+
+
+@flights_bp.route('/departures/delete', methods=['POST'])
+def delete_departure():
+    # get departure_id from parameters
+    parameters = request.form
+    departure_id = parameters.get('departure_id', '')
+    if not departure_id:
+        flash("Błąd - nie podano odlotu do usunięcia", category=c.ERROR)
+        return redirect(url_for('flights.departure'))
+
+    # delete arrival from database
+    flash_messsage, flash_category = oracle_db.delete_departure(departure_id)
+
+    flash(flash_messsage, flash_category)
+    return redirect(url_for('flights.departures'))
 
 
 @flights_bp.route('/flights/<int:flight_id>/reservations')
