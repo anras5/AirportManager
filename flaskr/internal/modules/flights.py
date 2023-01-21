@@ -498,7 +498,7 @@ def arrivals():
                            headers=headers)
 
 
-@flights_bp.route('/arrivals/check-availability/<redirect_type>', methods=['POST'])
+@flights_bp.route('/flights/check-availability/<redirect_type>', methods=['POST'])
 def check_availability_runway(redirect_type: str):
     # redirect type can be 'new' or 'update'
 
@@ -530,8 +530,12 @@ def check_availability_runway(redirect_type: str):
         if redirect_type == 'new_departure':
             return redirect(url_for('flights.new_departure'))
         if redirect_type == 'update_departure':
-            print(f"{redirect_type=}")
-            return redirect(url_for('flights.departures'))
+            departure_id = request.args.get('departure_id')
+            if not departure_id:
+                flash("Brak podanego ID odlotu", c.ERROR)
+                return redirect(url_for('flights.departure'))
+            else:
+                return redirect(url_for('flights.update_departure', departure_id=departure_id))
     else:
         flash("Brak dostępnych pasów startowych w tym terminie", c.WARNING)
         if 'arrival' in redirect_type:
@@ -801,6 +805,81 @@ def new_departure():
                            timestamp=datetime.datetime.strftime(timestamp, "%Y-%m-%d %H:%M"),
                            models=models_list,
                            class_list=class_list)
+
+
+@flights_bp.route('/departures/update/<int:departure_id>', methods=['GET', 'POST'])
+def update_departure(departure_id: int):
+    class DFormPools(DepartureForm):
+        pass
+
+    # get all classes and create inputs for them
+    _, class_list = oracle_db.select_classes(order=True)
+    for class_ in class_list:
+        setattr(DFormPools,
+                class_.nazwa,
+                IntegerField(f'Podaj liczbę biletów w klasie {class_.nazwa}',
+                             validators=[NumberRange(min=0)]))
+
+    form = DFormPools()
+
+    # get departure from db
+    departure = oracle_db.select_departure(departure_id)
+
+    # get all airports from database
+    _, airports_list = oracle_db.select_airports(order=True)
+    form.lotnisko.choices = [(airport.id, airport.nazwa) for airport in airports_list]
+
+    # get all models from database
+    _, models_list = oracle_db.select_models_manufacturers(order=True)
+    form.model.choices = [(model.id, f"{model.producent.nazwa} {model.nazwa}") for model in models_list]
+
+    # get all airline
+    _, airline_list = oracle_db.select_airlines(order=True)
+    form.linia_lotnicza.choices = [(airline.id, airline.nazwa) for airline in airline_list]
+
+    # get all ticket pools for this departure
+    _, ticket_pools_list = oracle_db.select_pools_by_dates(departure_id)
+
+    # get available runways list from session
+    runways_ids_list = session.get('available_runways', '')
+
+    # get timestamp from session
+    timestamp = session.get('flight_timestamp', '')
+
+    if not runways_ids_list or not timestamp:
+        flash("Błąd. Do aktualizacji odlotu użyj przeznaczonego do tego przycisku!", c.WARNING)
+        return redirect(url_for('flights.departures'))
+    else:
+        # load runways from database using ids from session
+        runways = oracle_db.select_runways_by_ids(runways_ids_list)
+        form.pas.choices = [(runway.id, runway.nazwa) for runway in runways]
+        # parse timestamp to datetime.datetime object
+        timestamp = datetime.datetime.strptime(timestamp, "%Y-%m-%d %H:%M")
+
+    if form.validate_on_submit():
+        pass
+
+    # set default data on the form
+    form.lotnisko.default = departure.lotnisko.id
+    form.model.default = departure.model.id
+    form.linia_lotnicza.default = departure.linia_lotnicza.id
+    form.process()
+    form.liczba_miejsc.data = departure.liczba_miejsc
+    for class_ in class_list:
+        if class_.nazwa in [pool.klasa.nazwa for pool in ticket_pools_list]:
+            for pool in ticket_pools_list:
+                if class_.nazwa == pool.klasa.nazwa:
+                    getattr(form, class_.nazwa).data = pool.ile_wszystkich_miejsc
+        else:
+            getattr(form, class_.nazwa).data = 0
+
+    return render_template('flights-departures/flights-departures-update.page.html',
+                           form=form,
+                           departure=departure,
+                           models=models_list,
+                           class_list=class_list,
+                           timestamp_old=datetime.datetime.strftime(departure.data_odlotu, "%Y-%m-%d %H:%M"),
+                           timestamp_new=datetime.datetime.strftime(timestamp, "%Y-%m-%d %H:%M"))
 
 
 @flights_bp.route('/flights/<int:flight_id>/reservations')

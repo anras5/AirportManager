@@ -7,7 +7,7 @@ from typing import List, Tuple
 
 from flaskr.internal.helpers import constants as c
 from flaskr.internal.helpers.models import LiniaLotnicza, Lotnisko, Producent, Model, Pas, Przylot, Rezerwacja, Lot, \
-    Klasa, Pasazer, Odlot
+    Klasa, Pasazer, Odlot, PulaBiletow
 
 
 class OracleDB:
@@ -1199,3 +1199,31 @@ class OracleDB:
         cr.close()
 
         return "Pomyślnie dodano nowy odlot", c.SUCCESS, None
+
+    def select_pools_by_dates(self, departure_id: int) -> Tuple[List[str], List[PulaBiletow]]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+
+        cr.execute("""SELECT p.PULABILETOW_ID,
+                             p.ILEWSZYSTKICHMIEJSC,
+                             p.ILEDOSTEPNYCHMIEJSC,
+                             o.LOT_ID,
+                             k.KLASA_ID,
+                             k.NAZWA 
+                       FROM PULABILETOW p INNER JOIN ODLOT o ON p.LOT_ID = o.LOT_ID 
+                                          INNER JOIN KLASA k ON p.KLASA_ID = k.KLASA_ID 
+                      WHERE o.LOT_ID = :odlot_id""",
+                   odlot_id=departure_id)
+        headers = [header[0] for header in cr.description]
+        pools_list = []
+        for pool in cr:
+            pools_list.append(
+                PulaBiletow(
+                    _id=pool[0],
+                    ile_wszystkich_miejsc=pool[1],
+                    ile_dostepnych_miejsc=pool[2],
+                    odlot=Odlot(_id=pool[3]),
+                    klasa=Klasa(_id=pool[4], nazwa=pool[5])
+                )
+            )
+        return headers, pools_list
