@@ -89,13 +89,13 @@
 
         {# ADDING NEW ARRIVAL BUTTON #}
         document.getElementById("add-new-arrival").addEventListener("click", function () {
-            selectArrivalDate("{{ url_for('flights.check_availability_runway', redirect_type='new') }}")
+            selectArrivalDate("{{ url_for('flights.check_availability_runway', redirect_type='new_arrival') }}")
         })
 
         {# BUTTONS IN DATATABLE - UPDATING/DELETING ARRIVAL #}
         {% for arrival in arrivals_data %}
             $('#example tbody').on('click', '#update{{ arrival.id }}', function () {
-                selectArrivalDate("{{ url_for('flights.check_availability_runway', redirect_type='update', arrival_id=arrival.id) }}",
+                selectArrivalDate("{{ url_for('flights.check_availability_runway', redirect_type='update_arrival', arrival_id=arrival.id) }}",
                     "{{ arrival.data_przylotu }}")
             })
             $('#example tbody').on('click', '#delete{{ arrival.id }}', function () {

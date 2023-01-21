@@ -514,9 +514,9 @@ def check_availability_runway(redirect_type: str):
     if runway_list:
         session['available_runways'] = [runway.id for runway in runway_list]
         session['arrival_timestamp'] = datetime.datetime.strftime(timestamp, "%Y-%m-%d %H:%M")
-        if redirect_type == 'new':
+        if redirect_type == 'new_arrival':
             return redirect(url_for('flights.new_arrival'))
-        if redirect_type == 'update':
+        if redirect_type == 'update_arrival':
             arrival_id = request.args.get('arrival_id')
             if not arrival_id:
                 flash("Brak podanego ID przylotu", c.ERROR)
