@@ -1,7 +1,7 @@
 function deleteDeparture(id, url, post_data) {
     Swal.fire({
         title: `Czy na pewno chcesz usunąć odlot z ID: ${id}?`,
-        text: "Usunięcie odlotu usunie również odpowiadające mu rezerwacje pasów!",
+        text: "Usunięcie odlotu usunie również odpowiadające mu rezerwacje pasów oraz pule biletów!",
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#3085d6',

@@ -189,7 +189,7 @@ def delete_airport():
     parameters = request.form
     airport_id = parameters.get('airport_id', '')
     if not airport_id:
-        flash("Błąd - nie podano lotniska do usunięcia", category='error')
+        flash("Błąd - nie podano lotniska do usunięcia", category=c.ERROR)
         return redirect(url_for('flights.airports'))
 
     # delete record from database
@@ -277,7 +277,7 @@ def delete_airline():
     parameters = request.form
     airline_id = parameters.get('airline_id', '')
     if not airline_id:
-        flash("Błąd - nie podano linii lotniczej do usunięcia", category='error')
+        flash("Błąd - nie podano linii lotniczej do usunięcia", category=c.ERROR)
         return redirect(url_for('flights.airlines'))
 
     # delete record from database
@@ -363,7 +363,7 @@ def delete_manufacturer():
     parameters = request.form
     man_id = parameters.get('manufacturer_id', '')
     if not man_id:
-        flash("Błąd - nie podano producenta do usunięcia", category='error')
+        flash("Błąd - nie podano producenta do usunięcia", category=c.ERROR)
         return redirect(url_for('flights.manufacturers'))
 
     flash_messsage, flash_category = oracle_db.delete_manufacturer(man_id)
@@ -463,7 +463,7 @@ def delete_model():
     parameters = request.form
     model_id = parameters.get('model_id', '')
     if not model_id:
-        flash("Błąd - nie podano modelu do usunięcia", category='error')
+        flash("Błąd - nie podano modelu do usunięcia", category=c.ERROR)
         return redirect(url_for('flights.models'))
 
     # delete model from database
@@ -683,7 +683,7 @@ def delete_arrival():
     parameters = request.form
     arrival_id = parameters.get('arrival_id', '')
     if not arrival_id:
-        flash("Błąd - nie podano przylotu do usunięcia", category='error')
+        flash("Błąd - nie podano przylotu do usunięcia", category=c.ERROR)
         return redirect(url_for('flights.arrivals'))
 
     # delete arrival from database
@@ -931,6 +931,22 @@ def update_departure(departure_id: int):
                            class_list=class_list,
                            timestamp_old=datetime.datetime.strftime(departure.data_odlotu, "%Y-%m-%d %H:%M"),
                            timestamp_new=datetime.datetime.strftime(timestamp, "%Y-%m-%d %H:%M"))
+
+
+@flights_bp.route('/departures/delete', methods=['POST'])
+def delete_departure():
+    # get departure_id from parameters
+    parameters = request.form
+    departure_id = parameters.get('departure_id', '')
+    if not departure_id:
+        flash("Błąd - nie podano odlotu do usunięcia", category=c.ERROR)
+        return redirect(url_for('flights.departure'))
+
+    # delete arrival from database
+    flash_messsage, flash_category = oracle_db.delete_departure(departure_id)
+
+    flash(flash_messsage, flash_category)
+    return redirect(url_for('flights.departures'))
 
 
 @flights_bp.route('/flights/<int:flight_id>/reservations')

@@ -99,7 +99,7 @@
                     "{{ departure.data_odlotu }}")
             })
             $('#example tbody').on('click', '#delete{{ departure.id }}', function () {
-                deleteDeparture({{ departure.id }}, "{{ url_for('flights.delete_arrival') }}", {departure_id: {{ departure.id }}})
+                deleteDeparture({{ departure.id }}, "{{ url_for('flights.delete_departure') }}", {departure_id: {{ departure.id }}})
             })
 
         {% endfor %}

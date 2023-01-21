@@ -1266,6 +1266,31 @@ class OracleDB:
         cr.close()
         return "Pomyślnie zaktualizowano przylot", c.SUCCESS, None
 
+    def delete_departure(self, lot_id) -> Tuple[str, str]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+
+        try:
+            # delete from PULABILETOW
+            cr.execute("DELETE FROM PULABILETOW WHERE LOT_ID = :lot_id", lot_id=lot_id)
+        except cx_Oracle.IntegrityError:
+            cr.close()
+            return "Błąd - nie można usunąć lotu, ponieważ istnieją bilety z nim powiązane", c.ERROR
+
+        # delete from ODLOT
+        cr.execute("DELETE FROM ODLOT WHERE LOT_ID = :lot_id", lot_id=lot_id)
+
+        # delete from REZERWACJA
+        cr.execute("DELETE FROM REZERWACJA WHERE LOT_ID = :lot_id", lot_id=lot_id)
+
+        # delete from LOT
+        cr.execute("DELETE FROM LOT WHERE LOT_ID = :lot_id", lot_id=lot_id)
+
+        connection.commit()
+        cr.close()
+
+        return "Pomyślnie usunięto odlot", c.SUCCESS
+
     def select_pools_by_departure(self, departure_id: int) -> Tuple[List[str], List[PulaBiletow]]:
         connection = self.pool.acquire()
         cr = connection.cursor()
