@@ -1095,6 +1095,33 @@ class OracleDB:
 
         return headers, departures_list
 
+    def select_departure(self, lot_id) -> Odlot:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        cr.execute("""SELECT p.LOT_ID AS ID,
+                             p.DATAODLOTU AS TERMIN,
+                             p.LICZBAMIEJSC,
+                             ll.LINIALOTNICZA_ID,
+                             ll.NAZWA AS LINIA_LOTNICZA,
+                             lt.LOTNISKO_ID,
+                             lt.NAZWA AS LOTNISKO,
+                             m.MODEL_ID,
+                             p2.NAZWA || ' ' || m.NAZWA AS MODEL_SAMOLOTU 
+                      FROM ODLOT p INNER JOIN LOT l ON p.LOT_ID = l.LOT_ID 
+                                   INNER JOIN LINIALOTNICZA ll  ON l.LINIALOTNICZA_ID = ll.LINIALOTNICZA_ID
+                                   INNER JOIN LOTNISKO lt ON l.LOTNISKO_ID = lt.LOTNISKO_ID
+                                   INNER JOIN MODEL m ON l.MODEL_ID = m.MODEL_ID 
+                                   INNER JOIN PRODUCENT p2 ON m.PRODUCENT_ID = p2.PRODUCENT_ID
+                      WHERE p.LOT_ID = :lot_id""",
+                   lot_id=lot_id)
+        data = cr.fetchone()
+        departure = Odlot(_id=data[0], data_odlotu=data[1], liczba_miejsc=data[2],
+                          linia_lotnicza=LiniaLotnicza(_id=data[3], nazwa=data[4]),
+                          lotnisko=LiniaLotnicza(_id=data[5], nazwa=data[6]),
+                          model=Model(_id=data[7], nazwa=data[8]))
+        cr.close()
+        return departure
+
     def select_departures_by_dates(self, date_start, date_end) -> Tuple[List[str], List[Odlot]]:
         connection = self.pool.acquire()
         cr = connection.cursor()
