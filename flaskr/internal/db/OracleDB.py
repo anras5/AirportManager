@@ -1160,8 +1160,8 @@ class OracleDB:
             )
         return headers, departures_list
 
-    def insert_departure(self, linia_lotnicza_id, lotnisko_id, model_id,
-                         data_odlotu, liczba_miejsc, pas_id, pule_biletow) -> Tuple[str, str, str]:
+    def insert_departure_and_ticket_pools(self, linia_lotnicza_id, lotnisko_id, model_id,
+                                          data_odlotu, liczba_miejsc, pas_id, pule_biletow) -> Tuple[str, str, str]:
 
         connection = self.pool.acquire()
         cr = connection.cursor()
@@ -1200,7 +1200,73 @@ class OracleDB:
 
         return "Pomyślnie dodano nowy odlot", c.SUCCESS, None
 
-    def select_pools_by_dates(self, departure_id: int) -> Tuple[List[str], List[PulaBiletow]]:
+    def update_departure(self, lot_id, linia_lotnicza_id, lotnisko_id, model_id,
+                         data_odlotu, liczba_miejsc, pas_id, pule_biletow) -> Tuple[str, str, str]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+
+        # UPDATE DATA CONNECTED WITH DEPARTURE
+
+        lot_sql = """UPDATE LOT
+                        SET LINIALOTNICZA_ID = :1,
+                            LOTNISKO_ID = :2,
+                            MODEL_ID = :3
+                      WHERE LOT_ID = :4"""
+        cr.execute(lot_sql, (linia_lotnicza_id, lotnisko_id, model_id, lot_id))
+
+        odlot_sql = """UPDATE ODLOT
+                          SET DATAODLOTU = :1,
+                              LICZBAMIEJSC = :2
+                        WHERE LOT_ID = :3"""
+        cr.execute(odlot_sql, (data_odlotu, liczba_miejsc, lot_id))
+
+        rezerwacje_sql = """DELETE FROM REZERWACJA WHERE LOT_ID = :lot_id"""
+        cr.execute(rezerwacje_sql, lot_id=lot_id)
+
+        rezerwacja_sql = """INSERT INTO REZERWACJA(POCZATEK, KONIEC, LOT_ID, PAS_ID)
+                                 VALUES (:1, :2, :3, :4)"""
+        cr.execute(rezerwacja_sql, (data_odlotu,
+                                    data_odlotu + datetime.timedelta(minutes=c.MINUTES_FOR_FLIGHT),
+                                    lot_id,
+                                    pas_id))
+
+        # UPDATE DATA CONNECTED WITH TICKET POOLS
+        # {(klasa_id, klasa_nazwa) : liczba_biletow, ...}
+        for pula_key, liczba_biletow in pule_biletow.items():
+            # check if we should insert / update / delete pool
+            cr.execute("""SELECT count(*) FROM PULABILETOW p WHERE p.LOT_ID = :lot_id AND p.KLASA_ID = :klasa_id""",
+                       lot_id=lot_id,
+                       klasa_id=pula_key[0])
+            count = cr.fetchone()[0]
+            number_of_tickets = self.count_tickets_for_pool(flight_id=lot_id, class_id=pula_key[0])
+            if count > 0 and liczba_biletow > 0:
+                # update pool
+                update_sql = """UPDATE PULABILETOW
+                                   SET ILEWSZYSTKICHMIEJSC = :liczba_biletow,
+                                       ILEDOSTEPNYCHMIEJSC = :dostepnych_biletow
+                                 WHERE LOT_ID = :lot_id AND KLASA_ID = :klasa_id"""
+                cr.execute(update_sql,
+                           liczba_biletow=liczba_biletow,
+                           dostepnych_biletow=liczba_biletow - number_of_tickets,
+                           lot_id=lot_id,
+                           klasa_id=pula_key[0])
+
+            if count == 0 and liczba_biletow > 0:
+                # insert pool
+                insert_sql = """INSERT INTO PULABILETOW(ILEWSZYSTKICHMIEJSC, ILEDOSTEPNYCHMIEJSC, LOT_ID, KLASA_ID)
+                                     VALUES (:1, :2, :3, :4)"""
+                cr.execute(insert_sql, (liczba_biletow, liczba_biletow, lot_id, pula_key[0]))
+
+            if count > 0 and liczba_biletow == 0:
+                # delete pool
+                delete_sql = """DELETE FROM PULABILETOW WHERE LOT_ID = :lot_id AND KLASA_ID = :klasa_id"""
+                cr.execute(delete_sql, lot_id=lot_id, klasa_id=pula_key[0])
+
+        connection.commit()
+        cr.close()
+        return "Pomyślnie zaktualizowano przylot", c.SUCCESS, None
+
+    def select_pools_by_departure(self, departure_id: int) -> Tuple[List[str], List[PulaBiletow]]:
         connection = self.pool.acquire()
         cr = connection.cursor()
 
@@ -1227,3 +1293,22 @@ class OracleDB:
                 )
             )
         return headers, pools_list
+
+    def count_tickets_for_pool(self, pool_id: int = -1, flight_id: int = -1, class_id: int = -1) -> int:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+
+        if pool_id != -1:
+            cr.execute("""SELECT COUNT(*)
+                            FROM BILET b 
+                           WHERE b.PULABILETOW_ID = :pula_id""",
+                       pula_id=pool_id)
+            return cr.fetchone()[0]
+        if flight_id != -1 and class_id != -1:
+            cr.execute("""SELECT count(*)
+                            FROM BILET b INNER JOIN PULABILETOW p ON b.PULABILETOW_ID = p.PULABILETOW_ID 
+                           WHERE p.LOT_ID = :lot_id AND p.KLASA_ID = :klasa_id""",
+                       lot_id=flight_id,
+                       klasa_id=class_id)
+            return cr.fetchone()[0]
+        return None
