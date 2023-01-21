@@ -512,8 +512,10 @@ def check_availability_runway(redirect_type: str):
     # check what runways are available on the given date
     runway_list = oracle_db.select_available_runways(timestamp, timestamp + datetime.timedelta(minutes=10))
     if runway_list:
+        # store available runways and flight timestamp in session so other endpoints can use it
         session['available_runways'] = [runway.id for runway in runway_list]
-        session['arrival_timestamp'] = datetime.datetime.strftime(timestamp, "%Y-%m-%d %H:%M")
+        session['flight_timestamp'] = datetime.datetime.strftime(timestamp, "%Y-%m-%d %H:%M")
+
         if redirect_type == 'new_arrival':
             return redirect(url_for('flights.new_arrival'))
         if redirect_type == 'update_arrival':
@@ -523,9 +525,19 @@ def check_availability_runway(redirect_type: str):
                 return redirect(url_for('flights.arrivals'))
             else:
                 return redirect(url_for('flights.update_arrival', arrival_id=arrival_id))
+        if redirect_type == 'new_departure':
+            print(f"{redirect_type=}")
+            return redirect(url_for('flights.departures'))
+        if redirect_type == 'update_departure':
+            print(f"{redirect_type=}")
+            return redirect(url_for('flights.departures'))
     else:
         flash("Brak dostępnych pasów startowych w tym terminie", c.WARNING)
-        return redirect(url_for('flights.arrivals'))
+        if 'arrival' in redirect_type:
+            return redirect(url_for('flights.arrivals'))
+        if 'departures' in redirect_type:
+            return redirect(url_for('flights.departures'))
+        return redirect(url_for('flights.main'))
 
 
 @flights_bp.route('/arrivals/new', methods=['GET', 'POST'])
@@ -548,7 +560,7 @@ def new_arrival():
     runways_ids_list = session.get('available_runways', '')
 
     # get timestamp from session
-    timestamp = session.get('arrival_timestamp', '')
+    timestamp = session.get('flight_timestamp', '')
 
     if not runways_ids_list or not timestamp:
         flash("Wystąpił błąd. Do dodania przylotu użyj przeznaczonego do tego przycisku!", c.WARNING)
@@ -577,7 +589,7 @@ def new_arrival():
         else:
             # if no error in inserting the data to the database - pop values from session and display arrivals table
             session.pop('available_runways')
-            session.pop('arrival_timestamp')
+            session.pop('flight_timestamp')
             return redirect(url_for('flights.arrivals'))
 
     return render_template('flights-arrivals/flights-arrivals-new.page.html',
@@ -609,7 +621,7 @@ def update_arrival(arrival_id: int):
     runways_ids_list = session.get('available_runways', '')
 
     # get timestamp from session
-    timestamp = session.get('arrival_timestamp', '')
+    timestamp = session.get('flight_timestamp', '')
 
     if not runways_ids_list or not timestamp:
         flash("Błąd. Do aktualizacji przylotu użyj przeznaczonego do tego przycisku!", c.WARNING)
@@ -642,7 +654,7 @@ def update_arrival(arrival_id: int):
         else:
             # if no error in updating the data - pop values from session and display arrivals table
             session.pop('available_runways')
-            session.pop('arrival_timestamp')
+            session.pop('flight_timestamp')
             return redirect(url_for('flights.arrivals'))
 
     # set default data on the form
@@ -674,6 +686,31 @@ def delete_arrival():
 
     flash(flash_messsage, flash_category)
     return redirect(url_for('flights.arrivals'))
+
+
+@flights_bp.route('/departures', methods=['GET', 'POST'])
+def departures():
+    if request.method == 'POST':
+        date_range = request.form['date']
+        if " to " in date_range:
+            # filter arrivals by dates
+            sd, ed = date_range.split(" to ")
+            start_date = datetime.datetime.strptime(sd, "%Y-%m-%d %H:%M")
+            end_date = datetime.datetime.strptime(ed, "%Y-%m-%d %H:%M")
+            headers, departures_list = oracle_db.select_departures_by_dates(start_date, end_date)
+            return render_template('flights-departures/flights-departures.page.html',
+                                   departures_data=departures_list,
+                                   headers=headers,
+                                   date=f"Od {sd} do {ed}")
+
+        else:
+            flash("Niepoprawny format daty", category=c.ERROR)
+
+    # load all arrivals
+    headers, departures_list = oracle_db.select_departures()
+    return render_template('flights-departures/flights-departures.page.html',
+                           departures_data=departures_list,
+                           headers=headers)
 
 
 @flights_bp.route('/flights/<int:flight_id>/reservations')

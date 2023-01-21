@@ -7,7 +7,7 @@ from typing import List, Tuple
 
 from flaskr.internal.helpers import constants as c
 from flaskr.internal.helpers.models import LiniaLotnicza, Lotnisko, Producent, Model, Pas, Przylot, Rezerwacja, Lot, \
-    Klasa, Pasazer
+    Klasa, Pasazer, Odlot
 
 
 class OracleDB:
@@ -1075,3 +1075,60 @@ class OracleDB:
             connection.commit()
             cr.close()
             return "Pomyślnie usunięto pasażera", c.SUCCESS
+
+    def select_departures(self) -> Tuple[List[str], List[Odlot]]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        cr.execute("""SELECT p.LOT_ID AS ID,
+                             p.DATAODLOTU AS TERMIN,
+                             p.LICZBAMIEJSC,
+                             ll.NAZWA AS LINIA_LOTNICZA,
+                             lt.NAZWA AS LOTNISKO,
+                             p2.NAZWA || ' ' || m.NAZWA AS MODEL_SAMOLOTU 
+                      FROM ODLOT p INNER JOIN LOT l ON p.LOT_ID = l.LOT_ID 
+                                   INNER JOIN LINIALOTNICZA ll  ON l.LINIALOTNICZA_ID = ll.LINIALOTNICZA_ID
+                                   INNER JOIN LOTNISKO lt ON l.LOTNISKO_ID = lt.LOTNISKO_ID
+                                   INNER JOIN MODEL m ON l.MODEL_ID = m.MODEL_ID 
+                                   INNER JOIN PRODUCENT p2 ON m.PRODUCENT_ID = p2.PRODUCENT_ID""")
+        headers, departures_list = self.__select_departures_query_to_list(cr)
+        cr.close()
+
+        return headers, departures_list
+
+    def select_departures_by_dates(self, date_start, date_end) -> Tuple[List[str], List[Odlot]]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        cr.execute("""SELECT p.LOT_ID AS ID,
+                             p.DATAODLOTU AS TERMIN,
+        	                 p.LICZBAMIEJSC AS LICZBA_MIEJSC,
+        	                 ll.NAZWA AS LINIA_LOTNICZA,
+        	                 lt.NAZWA AS LOTNISKO,
+        	                 p2.NAZWA || ' ' || m.NAZWA AS MODEL_SAMOLOTU 
+                      FROM ODLOT p INNER JOIN LOT l ON p.LOT_ID = l.LOT_ID 
+                                   INNER JOIN LINIALOTNICZA ll  ON l.LINIALOTNICZA_ID = ll.LINIALOTNICZA_ID
+                                   INNER JOIN LOTNISKO lt ON l.LOTNISKO_ID = lt.LOTNISKO_ID
+                                   INNER JOIN MODEL m ON l.MODEL_ID = m.MODEL_ID 
+                                   INNER JOIN PRODUCENT p2 ON m.PRODUCENT_ID = p2.PRODUCENT_ID
+                      WHERE p.DATAODLOTU >= :date_start AND p.DATAODLOTU <= :date_end""",
+                   date_start=date_start,
+                   date_end=date_end)
+        headers, departures_list = self.__select_departures_query_to_list(cr)
+        cr.close()
+
+        return headers, departures_list
+
+    def __select_departures_query_to_list(self, cr: cx_Oracle.Cursor):
+        headers = [header[0] for header in cr.description]
+        departures_list = []
+        for departure in cr:
+            departures_list.append(
+                Odlot(
+                    _id=departure[0],
+                    data_odlotu=departure[1],
+                    liczba_miejsc=departure[2],
+                    linia_lotnicza=LiniaLotnicza(nazwa=departure[3]),
+                    lotnisko=Lotnisko(nazwa=departure[4]),
+                    model=Model(nazwa=departure[5])
+                )
+            )
+        return headers, departures_list

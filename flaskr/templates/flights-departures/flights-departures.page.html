@@ -1,0 +1,108 @@
+{% extends "table.layout.html" %}
+
+
+{% block page_header %}
+
+    <h3>PRZYLOTY</h3><br>
+    {% if date %}
+        <h5>Przedział czasowy:</h5>
+        <h5>{{ date }}</h5>
+        <a href="{{ url_for('flights.departures') }}">
+            <button class="btn btn-secondary">Anuluj</button>
+        </a>
+    {% endif %}
+{% endblock %}
+
+
+{% block button_add_new %}
+
+    <div class="container-fluid create-new-container">
+        <div class="row">
+            <div class="col-md-6 date-filter">
+                <button id="add-new-departure" type="button" class="btn btn-success">Nowy odlot</button>
+            </div>
+            <div class="col-md-6 date-filter">
+                <form method="POST">
+                    <div class="input-group">
+                        <input type="text" id="date-picker" name="date" class="form-control"
+                               placeholder="Wybierz zakres daty...">
+                        <button type="submit" class="btn btn-primary">Filtruj wyniki</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+
+{% block thead %}
+
+    {% for header in headers %}
+        <th>{{ header }}</th>
+    {% endfor %}
+    <th>Opcje</th>
+
+{% endblock %}
+
+
+{% block tbody %}
+
+    {% for departure in departures_data %}
+        <tr>
+            <td>{{ departure.id }}</td>
+            <td>{{ departure.data_odlotu }}</td>
+            <td>{{ departure.liczba_miejsc }}</td>
+            <td>{{ departure.linia_lotnicza.nazwa }}</td>
+            <td>{{ departure.lotnisko.nazwa }}</td>
+            <td>{{ departure.model.nazwa }}</td>
+            <td>
+                <a href="{{ url_for('flights.flight_reservations', flight_id=departure.id) }}"
+                   class="icon-calendar-table">
+                    <i class="fa-solid fa-calendar"></i>
+                </a>
+                <button id="update{{ departure.id }}" class="icon-edit-table">
+                    <i class="fa-solid fa-pen"></i>
+                </button>
+                <button id="delete{{ departure.id }}" class="icon-delete-table">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </td>
+        </tr>
+    {% endfor %}
+
+{% endblock %}
+
+
+{% block custom_js %}
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="{{ url_for('static', filename='js/departures.js') }}"></script>
+    <script>
+
+        {# DATEPICKER #}
+        flatpickr("#date-picker", {
+            mode: "range",
+            enableTime: true,
+            time_24hr: true,
+            dateFormat: 'Y-m-d H:i'
+        });
+
+        {# ADDING NEW DEPARTURE BUTTON #}
+        document.getElementById("add-new-departure").addEventListener("click", function () {
+            selectDepartureDate("{{ url_for('flights.check_availability_runway', redirect_type='new_departure') }}")
+        })
+
+        {# BUTTONS IN DATATABLE - UPDATING/DELETING DEPARTURE #}
+        {% for departure in departures_data %}
+            $('#example tbody').on('click', '#update{{ departure.id }}', function () {
+                selectDepartureDate("{{ url_for('flights.check_availability_runway', redirect_type='update_departure', departure_id=departure.id) }}",
+                    "{{ departure.data_odlotu }}")
+            })
+            $('#example tbody').on('click', '#delete{{ departure.id }}', function () {
+                deleteDeparture({{ departure.id }}, "{{ url_for('flights.delete_arrival') }}", {departure_id: {{ departure.id }}})
+            })
+
+        {% endfor %}
+
+    </script>
+{% endblock %}
