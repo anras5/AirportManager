@@ -1,0 +1,76 @@
+{% extends "base.layout.html" %}
+
+{% block page_header %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col table-header">
+                <h3>Odloty - dodawanie nowego odlotu</h3>
+                <h4>Termin odlotu: {{ timestamp }}</h4>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid create-new-container">
+        <a href="{{ url_for('flights.departures') }}">
+            <button type="button" class="btn btn-secondary">Powrót</button>
+        </a>
+    </div>
+
+{% endblock %}
+
+{% block content %}
+
+    <div class="container form">
+        <form method="post" class="row g-3">
+            {{ form.hidden_tag() }}
+            <div class="col-lg-6">
+                {{ form.pas.label(class_='form-label') }}
+                {{ form.pas(class_='form-control') }}
+            </div>
+            <div class="col-lg-6">
+                {{ form.linia_lotnicza.label(class_='form-label') }}
+                {{ form.linia_lotnicza(class_='form-control') }}
+            </div>
+            <div class="col-lg-6">
+                {{ form.model.label(class_='form-label') }}
+                {{ form.model(class_='form-control') }}
+            </div>
+            <div class="col-lg-6">
+                {{ form.liczba_miejsc.label(class_='form-label') }}
+                {{ form.liczba_miejsc(class_='form-control') }}
+            </div>
+            <div class="col-lg-12">
+                {{ form.lotnisko.label(class_='form-label') }}
+                {{ form.lotnisko(class_='form-control') }}
+            </div>
+            {% for class_x in class_list %}
+                <div class="col-lg-6">
+                    {{ form|attr(class_x.nazwa)|attr('label')(class_='form-label') }}
+                    {{ form|attr(class_x.nazwa)(class_='form-control') }}
+                </div>
+            {% endfor %}
+            <div class="col-12">
+                {{ form.submit(class_='btn btn-success') }}
+            </div>
+        </form>
+    </div>
+
+{% endblock %}
+
+{% block js %}
+    <script>
+
+        var mInput = document.getElementById('model')
+        var pInput = document.getElementById('liczba_miejsc')
+
+        var dict = {}
+        {% for model in models %}
+            dict[{{ model.id }}] = {{ model.liczba_miejsc }}
+        {% endfor %}
+
+        pInput.setAttribute('max', dict[{{ models[0].id }}])
+
+        mInput.addEventListener('change', function () {
+            pInput.setAttribute('max', dict[mInput.value])
+        })
+    </script>
+{% endblock %}

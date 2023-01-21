@@ -1,9 +1,11 @@
 import datetime
 
 from flask import Blueprint, render_template, redirect, url_for, request, flash, session
+from wtforms import IntegerField
+from wtforms.validators import NumberRange, DataRequired
 
 from flaskr.internal.helpers.forms import AirportForm, AirlinesForm, ManufacturersForm, ModelsForm, ArrivalForm, \
-    ReservationForm
+    ReservationForm, DepartureForm
 from flaskr.internal.helpers.models import Lotnisko
 from flaskr import oracle_db
 from flaskr.internal.helpers import constants as c
@@ -526,8 +528,7 @@ def check_availability_runway(redirect_type: str):
             else:
                 return redirect(url_for('flights.update_arrival', arrival_id=arrival_id))
         if redirect_type == 'new_departure':
-            print(f"{redirect_type=}")
-            return redirect(url_for('flights.departures'))
+            return redirect(url_for('flights.new_departure'))
         if redirect_type == 'update_departure':
             print(f"{redirect_type=}")
             return redirect(url_for('flights.departures'))
@@ -711,6 +712,59 @@ def departures():
     return render_template('flights-departures/flights-departures.page.html',
                            departures_data=departures_list,
                            headers=headers)
+
+
+@flights_bp.route('/departures/new', methods=['GET', 'POST'])
+def new_departure():
+
+    class DFormPools(DepartureForm):
+        pass
+
+    # get all classes
+    _, class_list = oracle_db.select_classes(order=True)
+    for class_ in class_list:
+        setattr(DFormPools, class_.nazwa, IntegerField(f'Podaj liczbę biletów w klasie {class_.nazwa}',
+                                                       validators=[DataRequired(), NumberRange(min=0)]))
+
+    form = DFormPools()
+
+    # get all airports from database
+    _, airports_list = oracle_db.select_airports(order=True)
+    form.lotnisko.choices = [(airport.id, airport.nazwa) for airport in airports_list]
+
+    # get all models from database
+    _, models_list = oracle_db.select_models_manufacturers(order=True)
+    form.model.choices = [(model.id, f"{model.producent.nazwa} {model.nazwa}") for model in models_list]
+
+    # get all airline
+    _, airline_list = oracle_db.select_airlines(order=True)
+    form.linia_lotnicza.choices = [(airline.id, airline.nazwa) for airline in airline_list]
+
+    # get available runways list from session
+    runways_ids_list = session.get('available_runways', '')
+
+    # get timestamp from session
+    timestamp = session.get('flight_timestamp', '')
+
+    if not runways_ids_list or not timestamp:
+        flash("Wystąpił błąd. Do dodania odlotu użyj przeznaczonego do tego przycisku!", c.WARNING)
+        return redirect(url_for('flights.departures'))
+    else:
+        # load runways from database using ids from session
+        runways = oracle_db.select_runways_by_ids(runways_ids_list)
+        form.pas.choices = [(runway.id, runway.nazwa) for runway in runways]
+        # parse timestamp to datetime.datetime object
+        timestamp = datetime.datetime.strptime(timestamp, "%Y-%m-%d %H:%M")
+
+    if form.validate_on_submit():
+
+        pass
+
+    return render_template('flights-departures/flights-departures-new.page.html',
+                           form=form,
+                           timestamp=datetime.datetime.strftime(timestamp, "%Y-%m-%d %H:%M"),
+                           models=models_list,
+                           class_list=class_list)
 
 
 @flights_bp.route('/flights/<int:flight_id>/reservations')
