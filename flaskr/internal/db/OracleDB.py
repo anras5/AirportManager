@@ -1132,3 +1132,43 @@ class OracleDB:
                 )
             )
         return headers, departures_list
+
+    def insert_departure(self, linia_lotnicza_id, lotnisko_id, model_id,
+                         data_odlotu, liczba_miejsc, pas_id, pule_biletow) -> Tuple[str, str, str]:
+
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+
+        lot_id = cr.var(cx_Oracle.NUMBER)
+
+        lot_sql = """INSERT INTO LOT(LINIALOTNICZA_ID, LOTNISKO_ID, MODEL_ID, TYP)
+                          VALUES (:1, :2, :3, 'odlot')
+                       RETURNING LOT_ID INTO :4"""
+
+        cr.execute(lot_sql, (linia_lotnicza_id, lotnisko_id, model_id, lot_id))
+
+        przylot_sql = """INSERT INTO ODLOT(DATAODLOTU, LICZBAMIEJSC)
+                              VALUES (:1, :2)"""
+
+        cr.execute(przylot_sql, (data_odlotu, liczba_miejsc))
+
+        rezerwacja_sql = """INSERT INTO REZERWACJA(POCZATEK, KONIEC, LOT_ID, PAS_ID)
+                                 VALUES (:1, :2, :3, :4)"""
+
+        cr.execute(rezerwacja_sql, (data_odlotu,
+                                    data_odlotu + datetime.timedelta(minutes=c.MINUTES_FOR_FLIGHT),
+                                    lot_id.getvalue()[0],
+                                    pas_id))
+
+        # {(2, 'Biznes'): 5, (1, 'Ekonomiczna'): 43, (5, 'Premium'): 1} -> pula_biletow
+        for pula_key, liczba_biletow in pule_biletow.items():
+            if liczba_biletow > 0:
+                pula_sql = """INSERT INTO PULABILETOW(ILEWSZYSTKICHMIEJSC, ILEDOSTEPNYCHMIEJSC, LOT_ID, KLASA_ID)
+                                   VALUES (:1, :2, :3, :4)"""
+
+                cr.execute(pula_sql, (liczba_biletow, liczba_biletow, lot_id.getvalue()[0], pula_key[0]))
+
+        connection.commit()
+        cr.close()
+
+        return "Pomyślnie dodano nowy odlot", c.SUCCESS, None

@@ -147,6 +147,7 @@ class DepartureForm(FlaskForm):
     model = SelectField("Wybierz model samolotu, który obsługuje połączenie", validators=[DataRequired()])
     linia_lotnicza = SelectField("Wybierz linię lotniczą, która obsługuje połączenie", validators=[DataRequired()])
     liczba_miejsc = IntegerField("Podaj liczbę dostępnych miejsc dla tego lotu", validators=[DataRequired(), NumberRange(min=0)])
+    # pola z klasą dodawane dynamicznie #
     submit = SubmitField("Dodaj odlot")
 
 

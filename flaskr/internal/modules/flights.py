@@ -716,15 +716,16 @@ def departures():
 
 @flights_bp.route('/departures/new', methods=['GET', 'POST'])
 def new_departure():
-
     class DFormPools(DepartureForm):
         pass
 
     # get all classes
     _, class_list = oracle_db.select_classes(order=True)
     for class_ in class_list:
-        setattr(DFormPools, class_.nazwa, IntegerField(f'Podaj liczbę biletów w klasie {class_.nazwa}',
-                                                       validators=[DataRequired(), NumberRange(min=0)]))
+        setattr(DFormPools,
+                class_.nazwa,
+                IntegerField(f'Podaj liczbę biletów w klasie {class_.nazwa}',
+                             validators=[NumberRange(min=0)]))
 
     form = DFormPools()
 
@@ -758,7 +759,42 @@ def new_departure():
 
     if form.validate_on_submit():
 
-        pass
+        # check if provided number of seats is lesser than sum of number of tickets
+        # if it is - render the template again with a warning
+        available_seats = form.liczba_miejsc.data
+        ticket_pools = {
+            (class_.id, class_.nazwa): getattr(form, class_.nazwa).data if getattr(form, class_.nazwa).data > 0 else 0
+            for class_ in class_list
+        }
+        if available_seats < sum(ticket_pools.values()):
+            flash("Suma liczby biletów nie może przekraczać liczby dostępnych miejsc", c.WARNING)
+            return render_template('flights-departures/flights-departures-new.page.html',
+                                   form=form,
+                                   timestamp=datetime.datetime.strftime(timestamp, "%Y-%m-%d %H:%M"),
+                                   models=models_list,
+                                   class_list=class_list)
+
+        # insert data to db
+        flash_message, flash_category, _ = oracle_db.insert_departure(form.linia_lotnicza.data,
+                                                                      form.lotnisko.data,
+                                                                      form.model.data,
+                                                                      timestamp,
+                                                                      form.liczba_miejsc.data,
+                                                                      form.pas.data,
+                                                                      ticket_pools)
+
+        flash(flash_message, flash_category)
+        if flash_category == c.ERROR:
+            return render_template('flights-departures/flights-departures-new.page.html',
+                                   form=form,
+                                   timestamp=datetime.datetime.strftime(timestamp, "%Y-%m-%d %H:%M"),
+                                   models=models_list,
+                                   class_list=class_list)
+        else:
+            # if no error in inserting the data to the database - pop values from session and display arrivals table
+            session.pop('available_runways')
+            session.pop('flight_timestamp')
+            return redirect(url_for('flights.departures'))
 
     return render_template('flights-departures/flights-departures-new.page.html',
                            form=form,

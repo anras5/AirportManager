@@ -45,7 +45,7 @@
             {% for class_x in class_list %}
                 <div class="col-lg-6">
                     {{ form|attr(class_x.nazwa)|attr('label')(class_='form-label') }}
-                    {{ form|attr(class_x.nazwa)(class_='form-control') }}
+                    {{ form|attr(class_x.nazwa)(class_='form-control', value=0) }}
                 </div>
             {% endfor %}
             <div class="col-12">
