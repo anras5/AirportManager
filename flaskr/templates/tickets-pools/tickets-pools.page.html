@@ -3,12 +3,8 @@
 
 {% block page_header %}
 
-    <h3>PULE BILETÓW DLA LOTU {{ departure_id }}</h3>
+    <h3>PULE BILETÓW</h3>
     <p>Aby dokonać edycji puli biletów przejdź do <a href="{{ url_for('flights.departures') }}">odlotów</a> i wybierz edycję odpowiedniego odlotu</p>
-
-    <a href="{{ url_for('flights.departures') }}">
-        <button class="btn btn-secondary">Powrót</button>
-    </a>
 
 {% endblock %}
 

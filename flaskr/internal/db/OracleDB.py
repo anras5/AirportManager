@@ -1291,6 +1291,31 @@ class OracleDB:
 
         return "Pomyślnie usunięto odlot", c.SUCCESS
 
+    def select_pools(self) -> Tuple[List[str], List[PulaBiletow]]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        cr.execute("""SELECT p.PULABILETOW_ID,
+                             p.ILEWSZYSTKICHMIEJSC AS LICZBA_WSZYSTKICH_MIEJSC,
+                             p.ILEDOSTEPNYCHMIEJSC AS LICZBA_DOSTEPNYCH_MIEJSC,
+                             o.LOT_ID,
+                             k.KLASA_ID,
+                             k.NAZWA AS KLASA
+                       FROM PULABILETOW p INNER JOIN ODLOT o ON p.LOT_ID = o.LOT_ID 
+                                          INNER JOIN KLASA k ON p.KLASA_ID = k.KLASA_ID""")
+        headers = [header[0] for header in cr.description]
+        pools_list = []
+        for pool in cr:
+            pools_list.append(
+                PulaBiletow(
+                    _id=pool[0],
+                    ile_wszystkich_miejsc=pool[1],
+                    ile_dostepnych_miejsc=pool[2],
+                    odlot=Odlot(_id=pool[3]),
+                    klasa=Klasa(_id=pool[4], nazwa=pool[5])
+                )
+            )
+        return headers, pools_list
+
     def select_pools_by_departure(self, departure_id: int) -> Tuple[List[str], List[PulaBiletow]]:
         connection = self.pool.acquire()
         cr = connection.cursor()
