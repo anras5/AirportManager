@@ -1608,3 +1608,11 @@ class OracleDB:
         cr.close()
 
         return "Pomyślnie usunięto wybrany bilet", c.SUCCESS
+
+    def call_obsluzeni(self, start_date: datetime.datetime, end_date: datetime.datetime) -> int:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+
+        val = cr.callfunc('Obsluzeni', int, [start_date, end_date])
+        cr.close()
+        return val
