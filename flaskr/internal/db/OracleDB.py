@@ -1377,6 +1377,7 @@ class OracleDB:
         return headers, pools_list
 
     def count_tickets_for_pool(self, pool_id: int = -1, flight_id: int = -1, class_id: int = -1) -> int:
+        """Give pool_id or (flight_id and class_id)"""
         connection = self.pool.acquire()
         cr = connection.cursor()
 
@@ -1473,6 +1474,11 @@ class OracleDB:
     def insert_ticket(self, passenger_id: int, pool_id: int) -> Tuple[str, str]:
         connection = self.pool.acquire()
         cr = connection.cursor()
+
+        number_of_tickets = self.count_tickets_for_pool(pool_id=pool_id)
+        if number_of_tickets <= 0:
+            cr.close()
+            return "Błąd - brak dostępnych biletów w tej puli biletów", c.ERROR
 
         # INSERT INTO TICKETS
 
