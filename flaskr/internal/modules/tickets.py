@@ -233,9 +233,18 @@ def passenger_new_ticket(passenger_id: int):
                            data=available_pools)
 
 
-@tickets_bp.route('/passengers/tickets/delete')
-def passenger_tickets_delete():
-    return redirect(url_for('tickets.passenger_tickets'))
+@tickets_bp.route('/passengers/<int:passenger_id>/tickets/delete', methods=['POST'])
+def passenger_tickets_delete(passenger_id: int):
+    # get ticket id from parameters
+    parameters = request.form
+    ticket_id = parameters.get('ticket_id', '')
+    if not ticket_id:
+        flash("Błąd - nie podano biletu do usunięcia", category=c.ERROR)
+
+    # delete ticket from database
+    flash_message, flash_category = oracle_db.delete_ticket(ticket_id)
+    flash(flash_message, flash_category)
+    return redirect(url_for('tickets.passenger_tickets', passenger_id=passenger_id))
 
 
 # -------------------------------------------------------------------------------------------------------------------- #

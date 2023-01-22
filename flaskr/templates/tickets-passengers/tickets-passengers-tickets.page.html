@@ -39,6 +39,7 @@
     {% for ticket in data %}
         <tr>
             <td>{{ ticket.id }}</td>
+            <td>{{ ticket.pula_biletow.id }}</td>
             <td>{{ ticket.czy_oplacony }}</td>
             <td>{{ ticket.miejsce }}</td>
             <td>{{ ticket.cena }}</td>
@@ -74,8 +75,7 @@
                     confirmButtonText: 'Tak, usuń!'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        post("{{ url_for('tickets.passenger_tickets_delete') }}", {
-                            passenger_id: {{ passenger.id }},
+                        post("{{ url_for('tickets.passenger_tickets_delete', passenger_id=passenger.id) }}", {
                             ticket_id: {{ ticket.id }}
                         })
                     }

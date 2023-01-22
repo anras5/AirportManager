@@ -1316,6 +1316,28 @@ class OracleDB:
             )
         return headers, pools_list
 
+    def select_pool(self, pool_id: int) -> PulaBiletow:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        cr.execute("""SELECT p.PULABILETOW_ID,
+                             p.ILEWSZYSTKICHMIEJSC AS LICZBA_WSZYSTKICH_MIEJSC,
+                             p.ILEDOSTEPNYCHMIEJSC AS LICZBA_DOSTEPNYCH_MIEJSC,
+                             o.LOT_ID,
+                             k.KLASA_ID,
+                             k.NAZWA AS KLASA
+                       FROM PULABILETOW p INNER JOIN ODLOT o ON p.LOT_ID = o.LOT_ID 
+                                          INNER JOIN KLASA k ON p.KLASA_ID = k.KLASA_ID
+                       WHERE p.PULABILETOW_ID = :id""",
+                   id=pool_id)
+        pool = cr.fetchone()
+        return PulaBiletow(
+            _id=pool[0],
+            ile_wszystkich_miejsc=pool[1],
+            ile_dostepnych_miejsc=pool[2],
+            odlot=Odlot(_id=pool[3]),
+            klasa=Klasa(_id=pool[4], nazwa=pool[5])
+        )
+
     def select_pools_with_seats(self) -> Tuple[List[str], List[PulaBiletow]]:
         connection = self.pool.acquire()
         cr = connection.cursor()
@@ -1337,10 +1359,6 @@ class OracleDB:
             pools_list.append(
                 PulaBiletow(
                     _id=pool[0],
-
-
-
-
                     ile_dostepnych_miejsc=pool[1],
                     klasa=Klasa(nazwa=pool[2], cena=pool[3]),
                     odlot=Odlot(data_odlotu=pool[4], lotnisko=Lotnisko(miasto=pool[5], kraj=pool[6])),
@@ -1439,6 +1457,7 @@ class OracleDB:
         connection = self.pool.acquire()
         cr = connection.cursor()
         cr.execute("""SELECT b.BILET_ID,
+                             p2.PULABILETOW_ID,
                              b.CZYOPLACONY AS CZY_OPLACONY,
                              b.MIEJSCE AS MIEJSCE,
                              b.CENA,
@@ -1460,13 +1479,14 @@ class OracleDB:
             tickets_list.append(
                 Bilet(
                     _id=ticket[0],
-                    czy_oplacony=ticket[1],
-                    miejsce=ticket[2],
-                    cena=ticket[3],
-                    pula_biletow=PulaBiletow(klasa=Klasa(nazwa=ticket[4]),
-                                             odlot=Odlot(data_odlotu=ticket[5],
-                                                         lotnisko=Lotnisko(nazwa=ticket[6]),
-                                                         linia_lotnicza=LiniaLotnicza(nazwa=ticket[7])))
+                    czy_oplacony=ticket[2],
+                    miejsce=ticket[3],
+                    cena=ticket[4],
+                    pula_biletow=PulaBiletow(_id=ticket[1],
+                                             klasa=Klasa(nazwa=ticket[5]),
+                                             odlot=Odlot(data_odlotu=ticket[6],
+                                                         lotnisko=Lotnisko(nazwa=ticket[7]),
+                                                         linia_lotnicza=LiniaLotnicza(nazwa=ticket[8])))
                 )
             )
         return headers, tickets_list
@@ -1475,8 +1495,8 @@ class OracleDB:
         connection = self.pool.acquire()
         cr = connection.cursor()
 
-        number_of_tickets = self.count_tickets_for_pool(pool_id=pool_id)
-        if number_of_tickets <= 0:
+        pool = self.select_pool(pool_id)
+        if pool.ile_dostepnych_miejsc <= 0:
             cr.close()
             return "Błąd - brak dostępnych biletów w tej puli biletów", c.ERROR
 
@@ -1506,3 +1526,31 @@ class OracleDB:
         cr.close()
 
         return "Pomyślnie dodano bilet do wybranego pasażera", c.SUCCESS
+
+    def delete_ticket(self, ticket_id: int) -> Tuple[str, str]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+
+        # DELETE TICKET
+        try:
+            cr.execute("DELETE FROM BILET WHERE BILET_ID = :id", id=ticket_id)
+        except cx_Oracle.IntegrityError:
+            cr.close()
+            return "Błąd usuwania biletu", c.ERROR
+        else:
+            connection.commit()
+            cr.close()
+            return "Pomyślnie usunięto bilet", c.SUCCESS
+
+        # UPDATE TICKET POOL
+        update_sql = """UPDATE PULABILETOW 
+                               SET ILEDOSTEPNYCHMIEJSC = ILEDOSTEPNYCHMIEJSC + 1
+                             WHERE PULABILETOW_ID = (SELECT b.PULABILETOW_ID 
+                                                       FROM BILET b
+                                                      WHERE b.BILET_ID = :id)"""
+        cr.execute(update_sql, id=ticket_id)
+
+        connection.commit()
+        cr.close()
+
+        return "Pomyślnie usunięto wybrany bilet", c.SUCCESS
