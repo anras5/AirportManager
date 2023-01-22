@@ -202,7 +202,7 @@ def delete_passenger():
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
-# PASSENGERS
+# POOLS
 
 @tickets_bp.route('/pools')
 def pools():
@@ -210,4 +210,16 @@ def pools():
 
     return render_template('tickets-pools/tickets-pools.page.html',
                            data=pools_list,
+                           headers=headers)
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+# TICKETS
+
+@tickets_bp.route('/tickets')
+def tickets():
+    headers, tickets_list = oracle_db.select_tickets()
+
+    return render_template('tickets-tickets/tickets-tickets.page.html',
+                           data=tickets_list,
                            headers=headers)
