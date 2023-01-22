@@ -191,7 +191,7 @@ def delete_passenger():
     parameters = request.form
     passenger_id = parameters.get('passenger_id', '')
     if not passenger_id:
-        flash("Błąd - nie podano pasazera do usunięcia", category=c.ERROR)
+        flash("Błąd - nie podano pasażera do usunięcia", category=c.ERROR)
         return redirect(url_for('tickets.passengers'))
 
     # delete model from database
@@ -199,6 +199,27 @@ def delete_passenger():
 
     flash(flash_messsage, flash_category)
     return redirect(url_for('tickets.passengers'))
+
+
+@tickets_bp.route('/passengers/<int:passenger_id>/tickets')
+def passenger_tickets(passenger_id: int):
+    # get passenger's tickets
+    headers, tickets_list = oracle_db.select_tickets_by_passenger(passenger_id)
+    passenger = oracle_db.select_passenger(passenger_id)
+    return render_template('tickets-passengers/tickets-passengers-tickets.page.html',
+                           passenger=passenger,
+                           headers=headers,
+                           data=tickets_list)
+
+
+@tickets_bp.route('/passengers/<int:passenger_id>/tickets/new')
+def passenger_new_ticket(passenger_id: int):
+    return redirect(url_for('tickets.passenger_tickets'))
+
+
+@tickets_bp.route('/passengers/tickets/delete')
+def passenger_tickets_delete():
+    return redirect(url_for('tickets.passenger_tickets'))
 
 
 # -------------------------------------------------------------------------------------------------------------------- #

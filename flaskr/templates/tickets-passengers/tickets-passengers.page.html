@@ -41,6 +41,9 @@
             <td>{{ passenger.pesel }}</td>
             <td>{{ passenger.data_urodzenia }}</td>
             <td>
+                <a href="{{ url_for('tickets.passenger_tickets', passenger_id=passenger.id) }} " class="icon-calendar-table">
+                    <i class="fa-solid fa-ticket"></i>
+                </a>
                 <a href="{{ url_for('tickets.update_passenger', passenger_id=passenger.id) }}" class="icon-edit-table">
                     <i class="fa-solid fa-pen"></i>
                 </a>

@@ -968,7 +968,7 @@ class OracleDB:
     def select_passengers(self) -> Tuple[List[str], List[Pasazer]]:
         connection = self.pool.acquire()
         cr = connection.cursor()
-        sql = "SELECT PASAZER_ID, LOGIN, HASLO, IMIE, NAZWISKO, PESEL, DATAURODZENIA FROM PASAZER"
+        sql = "SELECT PASAZER_ID, LOGIN, HASLO, IMIE, NAZWISKO, PESEL, DATAURODZENIA AS DATA_URODZENIA FROM PASAZER"
         cr.execute(sql)
         headers = [header[0] for header in cr.description]
         passengers_list = []
@@ -1402,3 +1402,38 @@ class OracleDB:
             )
         return headers, tickets_list
 
+    def select_tickets_by_passenger(self, passenger_id: int) -> Tuple[List[str], List[Bilet]]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        cr.execute("""SELECT b.BILET_ID,
+                             b.CZYOPLACONY AS CZY_OPLACONY,
+                             b.MIEJSCE AS MIEJSCE,
+                             b.CENA,
+                             k.NAZWA AS KLASA,
+                             o.DATAODLOTU AS DATA_ODLOTU,
+                             l2.NAZWA AS LOTNISKO,
+                             l3.NAZWA AS LINIA_LOTNICZA 
+                     FROM BILET b INNER JOIN PULABILETOW p2 ON b.PULABILETOW_ID = p2.PULABILETOW_ID 
+                                  INNER JOIN KLASA k ON k.KLASA_ID = p2.KLASA_ID 
+                                  INNER JOIN ODLOT o ON o.LOT_ID = p2.LOT_ID 
+                                  INNER JOIN LOT l ON l.LOT_ID = o.LOT_ID 
+                                  INNER JOIN LOTNISKO l2 ON l2.LOTNISKO_ID = l.LOTNISKO_ID 
+                                  INNER JOIN LINIALOTNICZA l3 ON l3.LINIALOTNICZA_ID = l.LINIALOTNICZA_ID
+                      WHERE b.PASAZER_ID = :passenger_id""",
+                   passenger_id=passenger_id)
+        headers = [header[0] for header in cr.description]
+        tickets_list = []
+        for ticket in cr:
+            tickets_list.append(
+                Bilet(
+                    _id=ticket[0],
+                    czy_oplacony=ticket[1],
+                    miejsce=ticket[2],
+                    cena=ticket[3],
+                    pula_biletow=PulaBiletow(klasa=Klasa(nazwa=ticket[4]),
+                                             odlot=Odlot(data_odlotu=ticket[5],
+                                                         lotnisko=Lotnisko(nazwa=ticket[6]),
+                                                         linia_lotnicza=LiniaLotnicza(nazwa=ticket[7])))
+                )
+            )
+        return headers, tickets_list
