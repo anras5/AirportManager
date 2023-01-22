@@ -5,7 +5,7 @@ from wtforms import IntegerField
 from wtforms.validators import NumberRange, DataRequired
 
 from flaskr.internal.helpers.forms import AirportForm, AirlinesForm, ManufacturersForm, ModelsForm, ArrivalForm, \
-    ReservationForm, DepartureForm, AirportFormUpdate
+    ReservationForm, DepartureForm, AirportFormUpdate, AirlinesFormUpdate
 from flaskr.internal.helpers.models import Lotnisko
 from flaskr import oracle_db
 from flaskr.internal.helpers import constants as c
@@ -237,7 +237,7 @@ def new_airline():
 
 @flights_bp.route('/airlines/update/<int:airline_id>', methods=['GET', 'POST'])
 def update_airline(airline_id: int):
-    form = AirlinesForm()
+    form = AirlinesFormUpdate()
 
     # get linia lotnicza from db
     linialotnicza = oracle_db.select_airline(airline_id)

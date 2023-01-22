@@ -40,9 +40,16 @@ class AirportFormUpdate(AirportForm):
 # FLIGHTS.AIRLINES FORMS
 
 class AirlinesForm(FlaskForm):
-    nazwa = StringField("Podaj nazwę linii lotniczych", validators=[DataRequired()])
-    kraj = StringField("Podaj kraj lotniska", validators=[DataRequired()])
+    nazwa = StringField("Podaj nazwę linii lotniczych",
+                        validators=[DataRequired(),
+                                    Length(min=1, max=100, message="Podaj od 1 do 100 znaków")])
+    kraj = StringField("Podaj kraj lotniska", validators=[DataRequired(),
+                                                          Length(min=1, max=25, message="Podaj od 1 do 25 znaków")])
     submit = SubmitField("Dodaj linię lotniczą")
+
+
+class AirlinesFormUpdate(AirlinesForm):
+    submit = SubmitField("Edytuj linię lotniczą")
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
