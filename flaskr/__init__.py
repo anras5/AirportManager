@@ -33,6 +33,9 @@ def create_app(test_config=None):
     from flaskr.internal.modules import runways
     app.register_blueprint(runways.runways_bp)
 
+    from flaskr.internal.modules import dashboard
+    app.register_blueprint(dashboard.dashboard_bp)
+
     # general routes
     @app.route('/')
     def home():

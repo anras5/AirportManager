@@ -145,7 +145,7 @@ ALTER TABLE pulabiletow ADD CONSTRAINT pulabiletow__un UNIQUE ( lot_id,
 
 CREATE TABLE rezerwacja (
     rezerwacja_id NUMBER(9) NOT NULL,
-    "Start"       DATE NOT NULL,
+    poczatek       DATE NOT NULL,
     koniec        DATE NOT NULL,
     lot_id        NUMBER(9) NOT NULL,
     pas_id        NUMBER(9) NOT NULL
@@ -154,7 +154,7 @@ CREATE TABLE rezerwacja (
 ALTER TABLE rezerwacja ADD CONSTRAINT rezerwacja_pk PRIMARY KEY ( rezerwacja_id );
 
 ALTER TABLE rezerwacja
-    ADD CONSTRAINT rezerwacja__un UNIQUE ( "Start",
+    ADD CONSTRAINT rezerwacja__un UNIQUE ( poczatek,
                                            lot_id,
                                            pas_id );
 
@@ -410,23 +410,23 @@ create or replace PROCEDURE ZmianaCeny(p NUMBER, p2 VARCHAR2 ) AS
                             END;
             END;
         END ZmianaCeny;
-
+/
 --Function
-create or replace FUNCTION Obsluzeni (p1 DATE, p2 DATE)
+CREATE OR REPLACE FUNCTION Obsluzeni (p1 DATE, p2 DATE)
         RETURN NUMBER IS
             v1 NUMBER := 0;
             v2 NUMBER := 0;
             wynik NUMBER;
         BEGIN
-            SELECT SUM(LICZBAPASAZEROW) INTO v1 
-            FROM PRZYLOT 
+            SELECT SUM(LICZBAPASAZEROW) INTO v1
+            FROM PRZYLOT
             WHERE DATAPRZYLOTU >= p1 AND DATAPRZYLOTU <= p2;
 
             SELECT SUM((p.ilewszystkichmiejsc-p.iledostepnychmiejsc)) INTO v2
             FROM PULABILETOW p JOIN ODLOT o ON p.LOT_ID = o.LOT_ID
             WHERE DATAODLOTU >= p1 AND DATAODLOTU <= p2;
 
-            wynik := v1 + v2;
+            wynik := NVL(v1, 0) + NVL(v2, 0);
             RETURN wynik;
         END Obsluzeni;
 
