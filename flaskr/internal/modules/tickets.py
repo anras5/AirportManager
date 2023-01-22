@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 
 from flaskr import oracle_db
-from flaskr.internal.helpers.forms import ClassForm, PassengerForm
+from flaskr.internal.helpers.forms import ClassForm, PassengerForm, TicketForm
 from flaskr.internal.helpers import constants as c
 
 tickets_bp = Blueprint('tickets', __name__, url_prefix='/tickets')
@@ -191,7 +191,7 @@ def delete_passenger():
     parameters = request.form
     passenger_id = parameters.get('passenger_id', '')
     if not passenger_id:
-        flash("Błąd - nie podano pasazera do usunięcia", category=c.ERROR)
+        flash("Błąd - nie podano pasażera do usunięcia", category=c.ERROR)
         return redirect(url_for('tickets.passengers'))
 
     # delete model from database
@@ -201,8 +201,88 @@ def delete_passenger():
     return redirect(url_for('tickets.passengers'))
 
 
+@tickets_bp.route('/passengers/<int:passenger_id>/tickets')
+def passenger_tickets(passenger_id: int):
+    # get passenger's tickets
+    headers, tickets_list = oracle_db.select_tickets_by_passenger(passenger_id)
+    passenger = oracle_db.select_passenger(passenger_id)
+    return render_template('tickets-passengers/tickets-passengers-tickets.page.html',
+                           passenger=passenger,
+                           headers=headers,
+                           data=tickets_list)
+
+
+@tickets_bp.route('/passengers/<int:passenger_id>/tickets/new', methods=['GET', 'POST'])
+def passenger_new_ticket(passenger_id: int):
+    headers, available_pools = oracle_db.select_pools_with_seats()
+    passenger = oracle_db.select_passenger(passenger_id)
+
+    if request.method == 'POST':
+        pool_id = request.form.get('pool_id', '')
+        if not pool_id:
+            flash("Błąd - nie podano puli biletów dla nowego biletu", c.ERROR)
+            return redirect(url_for('tickets.passenger_tickets', passenger_id=passenger_id))
+
+        flash_message, flash_category = oracle_db.insert_ticket(passenger_id, pool_id)
+        flash(flash_message, flash_category)
+        return redirect(url_for('tickets.passenger_tickets', passenger_id=passenger_id))
+
+    return render_template('tickets-passengers/tickets-passengers-tickets-new.page.html',
+                           passenger=passenger,
+                           headers=headers,
+                           data=available_pools)
+
+
+@tickets_bp.route('/passengers/<int:passenger_id>/tickets/update/<int:ticket_id>', methods=['GET', 'POST'])
+def passengers_tickets_update(passenger_id: int, ticket_id: int):
+    form = TicketForm()
+
+    # get ticket from db
+    ticket = oracle_db.select_ticket(ticket_id)
+    # get passenger from db
+    passenger = oracle_db.select_passenger(passenger_id)
+
+    if form.validate_on_submit():
+        # update ticket
+        flash_message, flash_category, flash_type = oracle_db.update_ticket(ticket_id,
+                                                                            form.czy_oplacony.data,
+                                                                            form.cena.data)
+
+        flash(flash_message, flash_category)
+        if flash_category == c.ERROR:
+            return render_template("tickets-passengers/tickets-passengers-tickets-update.page.html",
+                                   form=form,
+                                   ticket=ticket,
+                                   passenger=passenger)
+        else:
+            return redirect(url_for("tickets.passenger_tickets", passenger_id=passenger_id))
+
+    # set default values on the form
+    form.czy_oplacony.data = ticket.czy_oplacony
+    form.cena.data = ticket.cena
+
+    return render_template("tickets-passengers/tickets-passengers-tickets-update.page.html",
+                           form=form,
+                           ticket=ticket,
+                           passenger=passenger)
+
+
+@tickets_bp.route('/passengers/<int:passenger_id>/tickets/delete', methods=['POST'])
+def passenger_tickets_delete(passenger_id: int):
+    # get ticket id from parameters
+    parameters = request.form
+    ticket_id = parameters.get('ticket_id', '')
+    if not ticket_id:
+        flash("Błąd - nie podano biletu do usunięcia", category=c.ERROR)
+
+    # delete ticket from database
+    flash_message, flash_category = oracle_db.delete_ticket(ticket_id)
+    flash(flash_message, flash_category)
+    return redirect(url_for('tickets.passenger_tickets', passenger_id=passenger_id))
+
+
 # -------------------------------------------------------------------------------------------------------------------- #
-# PASSENGERS
+# POOLS
 
 @tickets_bp.route('/pools')
 def pools():
@@ -210,4 +290,16 @@ def pools():
 
     return render_template('tickets-pools/tickets-pools.page.html',
                            data=pools_list,
+                           headers=headers)
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+# TICKETS
+
+@tickets_bp.route('/tickets')
+def tickets():
+    headers, tickets_list = oracle_db.select_tickets()
+
+    return render_template('tickets-tickets/tickets-tickets.page.html',
+                           data=tickets_list,
                            headers=headers)

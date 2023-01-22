@@ -1,0 +1,90 @@
+{% extends "table.layout.html" %}
+
+
+{% block page_header %}
+
+    <h3>BILETY PASAŻERA</h3>
+    <h3>{{ passenger.imie }} {{ passenger.nazwisko }}, ID: {{ passenger.id }}</h3>
+
+    <a href="{{ url_for('tickets.passengers') }}">
+        <button class="btn btn-secondary">Powrót</button>
+    </a>
+
+{% endblock %}
+
+
+{% block button_add_new %}
+
+    <div class="container-fluid create-new-container">
+        <a href="{{ url_for('tickets.passenger_new_ticket', passenger_id=passenger.id) }}">
+            <button type="button" class="btn btn-success">Nowy bilet</button>
+        </a>
+    </div>
+
+{% endblock %}
+
+
+{% block thead %}
+
+    {% for header in headers %}
+        <th>{{ header }}</th>
+    {% endfor %}
+    <th>Opcje:</th>
+
+{% endblock %}
+
+
+{% block tbody %}
+
+    {% for ticket in data %}
+        <tr>
+            <td>{{ ticket.id }}</td>
+            <td>{{ ticket.pula_biletow.id }}</td>
+            <td>{{ ticket.czy_oplacony }}</td>
+            <td>{{ ticket.miejsce }}</td>
+            <td>{{ ticket.cena }}</td>
+            <td>{{ ticket.pula_biletow.klasa.nazwa }}</td>
+            <td>{{ ticket.pula_biletow.odlot.data_odlotu }}</td>
+            <td>{{ ticket.pula_biletow.odlot.lotnisko.nazwa }}</td>
+            <td>{{ ticket.pula_biletow.odlot.linia_lotnicza.nazwa }}</td>
+            <td>
+                <a href="{{ url_for('tickets.passengers_tickets_update', passenger_id=passenger.id, ticket_id=ticket.id) }}"
+                   class="icon-edit-table">
+                    <i class="fa-solid fa-pen"></i>
+                </a>
+                <button id="delete{{ ticket.id }}" class="icon-delete-table">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </td>
+        </tr>
+    {% endfor %}
+
+{% endblock %}
+
+
+{% block custom_js %}
+    <script>
+
+        {# BUTTONS IN DATATABLE - DELETING #}
+        {% for ticket in data %}
+
+            $('#example tbody').on('click', '#delete{{ ticket.id }}', function () {
+                Swal.fire({
+                    title: 'Czy na pewno chcesz usunąć bilet o ID:\n{{ ticket.id }}?',
+                    text: "Nie będziesz mógł cofnąć tej dezycji!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Tak, usuń!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        post("{{ url_for('tickets.passenger_tickets_delete', passenger_id=passenger.id) }}", {
+                            ticket_id: {{ ticket.id }}
+                        })
+                    }
+                })
+            })
+        {% endfor %}
+    </script>
+{% endblock %}

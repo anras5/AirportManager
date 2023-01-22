@@ -1,0 +1,41 @@
+{% extends "base.layout.html" %}
+
+{% block page_header %}
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col table-header">
+                <h3>Bilet - aktualizacja biletu z ID: {{ ticket.id }}</h3>
+                <h3>Pasażer</h3>
+                <h3>{{ passenger.imie }} {{ passenger.nazwisko }}, ID: {{ passenger.id }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid create-new-container">
+        <a href="{{ url_for('tickets.passenger_tickets', passenger_id=passenger.id) }}">
+            <button type="button" class="btn btn-secondary">Powrót</button>
+        </a>
+    </div>
+
+{% endblock %}
+
+
+{% block content %}
+
+    <div class="container form">
+        <form method="post" class="row g-3">
+            {{ form.hidden_tag() }}
+            <div class="col-md-6">
+                {{ form.czy_oplacony.label(class_='form-label') }}
+                {{ form.czy_oplacony(class_='form-control', placeholder='Czy oplacony') }}
+            </div>
+            <div class="col-md-6">
+                {{ form.cena.label(class_='form-label') }}
+                {{ form.cena(class_='form-control', placeholder='Cena') }}
+            </div>
+            <div class="col-12">
+                {{ form.submit(class_='btn btn-warning') }}
+            </div>
+        </form>
+    </div>
+{% endblock %}

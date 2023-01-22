@@ -1,0 +1,39 @@
+{% extends "table.layout.html" %}
+
+
+{% block page_header %}
+
+    <h3>BILETY</h3>
+    <p>Aby dodać, zaktualizować lub usunąć bilet przejdź do <a href="{{ url_for('tickets.passengers') }}">pasażerów</a> i wybierz wyświetlanie biletów pasażera</p>
+
+{% endblock %}
+
+
+{% block thead %}
+
+    {% for header in headers %}
+        <th>{{ header }}</th>
+    {% endfor %}
+
+{% endblock %}
+
+
+{% block tbody %}
+
+    {% for ticket in data %}
+        <tr>
+            <td>{{ ticket.id }}</td>
+            <td>{{ ticket.czy_oplacony }}</td>
+            <td>{{ ticket.miejsce }}</td>
+            <td>{{ ticket.cena }}</td>
+            <td>{{ ticket.pasazer.imie }}</td>
+            <td>{{ ticket.pasazer.nazwisko }}</td>
+            <td>{{ ticket.pasazer.login }}</td>
+            <td>{{ ticket.pula_biletow.klasa.nazwa }}</td>
+            <td>{{ ticket.pula_biletow.odlot.data_odlotu }}</td>
+            <td>{{ ticket.pula_biletow.odlot.lotnisko.nazwa }}</td>
+            <td>{{ ticket.pula_biletow.odlot.linia_lotnicza.nazwa }}</td>
+        </tr>
+    {% endfor %}
+
+{% endblock %}
