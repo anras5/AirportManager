@@ -1081,7 +1081,7 @@ class OracleDB:
         cr = connection.cursor()
         cr.execute("""SELECT p.LOT_ID AS ID,
                              p.DATAODLOTU AS TERMIN,
-                             p.LICZBAMIEJSC,
+                             p.LICZBAMIEJSC AS LICZBA_MIEJSC,
                              ll.NAZWA AS LINIA_LOTNICZA,
                              lt.NAZWA AS LOTNISKO,
                              p2.NAZWA || ' ' || m.NAZWA AS MODEL_SAMOLOTU 
