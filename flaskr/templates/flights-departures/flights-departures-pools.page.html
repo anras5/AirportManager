@@ -1,0 +1,38 @@
+{% extends "table.layout.html" %}
+
+
+{% block page_header %}
+
+    <h3>PULE BILETOW DLA LOTU {{ departure_id }}</h3>
+    <p>Aby dokonać edycji puli biletów przejdź do <a href="{{ url_for('flights.departures') }}">odlotów</a> i wybierz edycję odpowiedniego odlotu</p>
+
+    <a href="{{ url_for('flights.departures') }}">
+        <button class="btn btn-secondary">Powrót</button>
+    </a>
+
+{% endblock %}
+
+
+{% block thead %}
+
+    {% for header in headers %}
+        <th>{{ header }}</th>
+    {% endfor %}
+
+{% endblock %}
+
+
+{% block tbody %}
+
+    {% for pool in data %}
+        <tr>
+            <td>{{ pool.id }}</td>
+            <td>{{ pool.ile_wszystkich_miejsc }}</td>
+            <td>{{ pool.ile_dostepnych_miejsc }}</td>
+            <td>{{ pool.odlot.id }}</td>
+            <td>{{ pool.klasa.id }}</td>
+            <td>{{ pool.klasa.nazwa }}</td>
+        </tr>
+    {% endfor %}
+
+{% endblock %}

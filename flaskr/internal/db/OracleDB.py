@@ -1296,11 +1296,11 @@ class OracleDB:
         cr = connection.cursor()
 
         cr.execute("""SELECT p.PULABILETOW_ID,
-                             p.ILEWSZYSTKICHMIEJSC,
-                             p.ILEDOSTEPNYCHMIEJSC,
+                             p.ILEWSZYSTKICHMIEJSC AS LICZBA_WSZYSTKICH_MIEJSC,
+                             p.ILEDOSTEPNYCHMIEJSC AS LICZBA_DOSTEPNYCH_MIEJSC,
                              o.LOT_ID,
                              k.KLASA_ID,
-                             k.NAZWA 
+                             k.NAZWA AS KLASA
                        FROM PULABILETOW p INNER JOIN ODLOT o ON p.LOT_ID = o.LOT_ID 
                                           INNER JOIN KLASA k ON p.KLASA_ID = k.KLASA_ID 
                       WHERE o.LOT_ID = :odlot_id""",
