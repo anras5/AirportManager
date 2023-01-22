@@ -28,21 +28,40 @@
                         </div>
                     </form>
                 {% else %}
-                    <h4>Wybierz zakres daty</h4>
+                    <h4>Wybierz zakres daty, aby zobaczyć liczbę pasażerów obsłużonych w tym okresie</h4>
                     <form method="POST" style="padding: 4%">
                         <div class="input-group">
                             <input type="text" id="date-picker" name="date" class="form-control"
                                    placeholder="Wybierz zakres daty...">
-                            <button type="submit" class="btn btn-success">Filtruj wyniki</button>
+                            <button type="submit" class="btn btn-info">Filtruj wyniki</button>
                         </div>
                     </form>
 
                 {% endif %}
-
-
             </div>
+            <hr>
             <div class="row">
-
+                <h4>Zmiana cen w klasach biletów</h4>
+                <div class="col">
+                    <form method="POST" style="padding: 4%" action="{{ url_for('dashboard.change') }}">
+                        <div class="input-group">
+                            <input type="number" name="value" class="form-control"
+                                   placeholder="0" value="0" min="1" required>
+                            <input type="hidden" name="type" value="+">
+                            <button type="submit" class="btn btn-success">Podnieś ceny</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="col">
+                    <form method="POST" style="padding: 4%" action="{{ url_for('dashboard.change') }}">
+                        <div class="input-group">
+                            <input type="number" name="value" class="form-control"
+                                   placeholder="0" value="0" min="1" required>
+                            <input type="hidden" name="type" value="-">
+                            <button type="submit" class="btn btn-danger">Obniż ceny</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
 

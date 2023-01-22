@@ -1616,3 +1616,11 @@ class OracleDB:
         val = cr.callfunc('Obsluzeni', int, [start_date, end_date])
         cr.close()
         return val
+
+    def call_zmianaceny(self, value: int, plus_minus: str):
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+
+        cr.callproc('ZmianaCeny', [value, plus_minus])
+        connection.commit()
+        cr.close()
