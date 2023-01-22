@@ -1316,6 +1316,38 @@ class OracleDB:
             )
         return headers, pools_list
 
+    def select_pools_with_seats(self) -> Tuple[List[str], List[PulaBiletow]]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        cr.execute("""SELECT p.PULABILETOW_ID,
+                             p.ILEDOSTEPNYCHMIEJSC AS DOSTEPNE_MIEJSCA,
+                             k.NAZWA AS KLASA,
+                             k.CENA AS CENA,
+                             o.DATAODLOTU AS TERMIN,
+                             l2.MIASTO AS DESTYNACJA,
+                             l2.KRAJ AS KRAJ
+                        FROM PULABILETOW p INNER JOIN KLASA k ON k.KLASA_ID = p.KLASA_ID 
+                                           INNER JOIN ODLOT o ON o.LOT_ID = p.LOT_ID 
+                                           INNER JOIN LOT l ON l.LOT_ID = o.LOT_ID 
+                                           INNER JOIN LOTNISKO l2 ON l2.LOTNISKO_ID = l.LOTNISKO_ID
+                       WHERE p.ILEDOSTEPNYCHMIEJSC > 0""")
+        headers = [header[0] for header in cr.description]
+        pools_list = []
+        for pool in cr:
+            pools_list.append(
+                PulaBiletow(
+                    _id=pool[0],
+
+
+
+
+                    ile_dostepnych_miejsc=pool[1],
+                    klasa=Klasa(nazwa=pool[2], cena=pool[3]),
+                    odlot=Odlot(data_odlotu=pool[4], lotnisko=Lotnisko(miasto=pool[5], kraj=pool[6])),
+                )
+            )
+        return headers, pools_list
+
     def select_pools_by_departure(self, departure_id: int) -> Tuple[List[str], List[PulaBiletow]]:
         connection = self.pool.acquire()
         cr = connection.cursor()
@@ -1437,3 +1469,34 @@ class OracleDB:
                 )
             )
         return headers, tickets_list
+
+    def insert_ticket(self, passenger_id: int, pool_id: int) -> Tuple[str, str]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+
+        # INSERT INTO TICKETS
+
+        insert_sql = """INSERT INTO BILET (CZYOPLACONY, MIEJSCE, CENA, PASAZER_ID, PULABILETOW_ID)
+                        VALUES(0,
+                               (SELECT k.NAZWA
+                                  FROM KLASA k INNER JOIN PULABILETOW p ON k.KLASA_ID = p.KLASA_ID
+                                 WHERE p.PULABILETOW_ID = :pula_biletow) || ' ' || (SELECT count(*)+1
+                                                                                      FROM BILET b
+                                                                                     WHERE b.PULABILETOW_ID = :pula_biletow),
+                               (SELECT k2.CENA
+                                  FROM KLASA k2 INNER JOIN PULABILETOW p2 ON k2.KLASA_ID = p2.KLASA_ID
+                                 WHERE p2.PULABILETOW_ID = :pula_biletow),
+                               :pasazer_id,
+                               :pula_biletow)"""
+        cr.execute(insert_sql, pasazer_id=passenger_id, pula_biletow=pool_id)
+
+        # UPDATE TICKETS POOL
+        update_sql = """UPDATE PULABILETOW 
+                           SET ILEDOSTEPNYCHMIEJSC = ILEDOSTEPNYCHMIEJSC - 1
+                         WHERE PULABILETOW_ID = :pula_biletow"""
+        cr.execute(update_sql, pula_biletow=pool_id)
+
+        connection.commit()
+        cr.close()
+
+        return "Pomyślnie dodano bilet do wybranego pasażera", c.SUCCESS

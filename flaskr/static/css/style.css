@@ -78,6 +78,17 @@ h1, h2, h3, h4, h5, h6 {
     color: red;
 }
 
+.icon-check-table {
+    text-decoration: none;
+    background: transparent;
+    border: none !important;
+    color: green;
+}
+
+.icon-check-table:hover {
+    color: green;
+}
+
 .map-container {
     height: 80vh;
 }

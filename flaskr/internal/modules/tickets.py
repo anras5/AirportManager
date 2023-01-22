@@ -212,9 +212,25 @@ def passenger_tickets(passenger_id: int):
                            data=tickets_list)
 
 
-@tickets_bp.route('/passengers/<int:passenger_id>/tickets/new')
+@tickets_bp.route('/passengers/<int:passenger_id>/tickets/new', methods=['GET', 'POST'])
 def passenger_new_ticket(passenger_id: int):
-    return redirect(url_for('tickets.passenger_tickets'))
+    headers, available_pools = oracle_db.select_pools_with_seats()
+    passenger = oracle_db.select_passenger(passenger_id)
+
+    if request.method == 'POST':
+        pool_id = request.form.get('pool_id', '')
+        if not pool_id:
+            flash("Błąd - nie podano puli biletów dla nowego biletu", c.ERROR)
+            return redirect(url_for('tickets.passenger_tickets', passenger_id=passenger_id))
+
+        flash_message, flash_category = oracle_db.insert_ticket(passenger_id, pool_id)
+        flash(flash_message, flash_category)
+        return redirect(url_for('tickets.passenger_tickets', passenger_id=passenger_id))
+
+    return render_template('tickets-passengers/tickets-passengers-tickets-new.page.html',
+                           passenger=passenger,
+                           headers=headers,
+                           data=available_pools)
 
 
 @tickets_bp.route('/passengers/tickets/delete')

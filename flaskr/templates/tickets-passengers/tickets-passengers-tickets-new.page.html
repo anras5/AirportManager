@@ -1,0 +1,71 @@
+{% extends "table.layout.html" %}
+
+
+{% block page_header %}
+
+    <h3>NOWY BILET DLA PASAŻERA</h3>
+    <h3>{{ passenger.imie }} {{ passenger.nazwisko }}, ID: {{ passenger.id }}</h3>
+    <a href="{{ url_for('tickets.passenger_tickets', passenger_id=passenger.id) }}">
+        <button class="btn btn-secondary">Powrót</button>
+    </a>
+
+{% endblock %}
+
+
+{% block thead %}
+
+    {% for header in headers %}
+        <th>{{ header }}</th>
+    {% endfor %}
+    <th>Dodaj</th>
+
+{% endblock %}
+
+
+{% block tbody %}
+
+    {% for pool in data %}
+        <tr>
+            <td>{{ pool.id }}</td>
+            <td>{{ pool.ile_dostepnych_miejsc }}</td>
+            <td>{{ pool.klasa.nazwa }}</td>
+            <td>{{ pool.klasa.cena }}</td>
+            <td>{{ pool.odlot.data_odlotu }}</td>
+            <td>{{ pool.odlot.lotnisko.miasto }}</td>
+            <td>{{ pool.odlot.lotnisko.kraj }}</td>
+            <td>
+                <button id="add{{ pool.id }}" class="icon-check-table">
+                    <i class="fa-solid fa-check"></i>
+                </button>
+            </td>
+        </tr>
+    {% endfor %}
+
+{% endblock %}
+
+{% block custom_js %}
+
+    <script>
+        {# BUTTONS IN DATATABLE - ADDING #}
+        {% for pool in data %}
+
+            $('#example tbody').on('click', '#add{{ pool.id }}', function () {
+                Swal.fire({
+                    title: 'Czy na pewno chcesz dodać bilet z puli o ID: {{ pool.id }} temu pasażerowi?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#2d9c33',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Tak, dodaj!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        post("{{ url_for('tickets.passenger_new_ticket', passenger_id=passenger.id) }}", {
+                            pool_id: {{ pool.id }},
+                        })
+                    }
+                })
+            })
+        {% endfor %}
+
+    </script>
+{% endblock %}
