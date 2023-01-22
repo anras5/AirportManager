@@ -56,9 +56,15 @@ class AirlinesFormUpdate(AirlinesForm):
 # FLIGHTS.MANUFACTURERS FORMS
 
 class ManufacturersForm(FlaskForm):
-    nazwa = StringField("Podaj nazwę producenta", validators=[DataRequired()])
-    kraj = StringField("Podaj kraj lotniska", validators=[DataRequired()])
+    nazwa = StringField("Podaj nazwę producenta",
+                        validators=[DataRequired(), Length(min=1, max=100, message="Podaj od 1 do 100 znaków")])
+    kraj = StringField("Podaj kraj lotniska",
+                       validators=[DataRequired(), Length(min=1, max=25, message="Podaj od 1 do 25 znaków")])
     submit = SubmitField("Dodaj producenta")
+
+
+class ManufacturersFormUpdate(ManufacturersForm):
+    submit = SubmitField("Edytuj producenta")
 
 
 # ------------------------------------------------------------------------------------------------------------------- #

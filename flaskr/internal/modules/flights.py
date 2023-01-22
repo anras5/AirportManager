@@ -5,7 +5,7 @@ from wtforms import IntegerField
 from wtforms.validators import NumberRange, DataRequired
 
 from flaskr.internal.helpers.forms import AirportForm, AirlinesForm, ManufacturersForm, ModelsForm, ArrivalForm, \
-    ReservationForm, DepartureForm, AirportFormUpdate, AirlinesFormUpdate
+    ReservationForm, DepartureForm, AirportFormUpdate, AirlinesFormUpdate, ManufacturersFormUpdate
 from flaskr.internal.helpers.models import Lotnisko
 from flaskr import oracle_db
 from flaskr.internal.helpers import constants as c
@@ -324,7 +324,7 @@ def new_manufacturer():
 
 @flights_bp.route('/manufacturers/update/<int:manufacturer_id>', methods=['GET', 'POST'])
 def update_manufacturer(manufacturer_id: int):
-    form = ManufacturersForm()
+    form = ManufacturersFormUpdate()
 
     # get producent from db
     producent = oracle_db.select_manufacturer(manufacturer_id)
