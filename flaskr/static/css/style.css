@@ -61,7 +61,6 @@ h1, h2, h3, h4, h5, h6 {
     background: transparent;
     border: none !important;
     color: yellowgreen;
-    margin: 6%;
 }
 
 .icon-edit-table:hover {
@@ -73,7 +72,6 @@ h1, h2, h3, h4, h5, h6 {
     background: transparent;
     border: none !important;
     color: red;
-    margin: 6%;
 }
 
 .icon-delete-table:hover {
