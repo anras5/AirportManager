@@ -145,7 +145,7 @@ ALTER TABLE pulabiletow ADD CONSTRAINT pulabiletow__un UNIQUE ( lot_id,
 
 CREATE TABLE rezerwacja (
     rezerwacja_id NUMBER(9) NOT NULL,
-    "Start"       DATE NOT NULL,
+    poczatek       DATE NOT NULL,
     koniec        DATE NOT NULL,
     lot_id        NUMBER(9) NOT NULL,
     pas_id        NUMBER(9) NOT NULL
@@ -154,7 +154,7 @@ CREATE TABLE rezerwacja (
 ALTER TABLE rezerwacja ADD CONSTRAINT rezerwacja_pk PRIMARY KEY ( rezerwacja_id );
 
 ALTER TABLE rezerwacja
-    ADD CONSTRAINT rezerwacja__un UNIQUE ( "Start",
+    ADD CONSTRAINT rezerwacja__un UNIQUE ( poczatek,
                                            lot_id,
                                            pas_id );
 
