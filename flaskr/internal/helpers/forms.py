@@ -146,7 +146,8 @@ class DepartureForm(FlaskForm):
     lotnisko = SelectField("Wybierz lotnisko docelowe", validators=[DataRequired()])
     model = SelectField("Wybierz model samolotu, który obsługuje połączenie", validators=[DataRequired()])
     linia_lotnicza = SelectField("Wybierz linię lotniczą, która obsługuje połączenie", validators=[DataRequired()])
-    liczba_miejsc = IntegerField("Podaj liczbę dostępnych miejsc dla tego lotu", validators=[DataRequired(), NumberRange(min=0)])
+    liczba_miejsc = IntegerField("Podaj liczbę dostępnych miejsc dla tego lotu",
+                                 validators=[DataRequired(), NumberRange(min=0)])
     # pola z klasą dodawane dynamicznie #
     submit = SubmitField("Dodaj odlot")
 
@@ -181,3 +182,10 @@ class PassengerForm(FlaskForm):
     pesel = StringField("Podaj pesel", validators=[DataRequired(), Length(min=11, max=11)])
     data_urodzenia = DateField("Podaj datę urodzin", format="%Y-%m-%d", validators=[DataRequired()])
     submit = SubmitField("Dodaj pasażera")
+
+
+class TicketForm(FlaskForm):
+    czy_oplacony = IntegerField("Czy bilet został opłacony? Tak - 1, Nie - 0",
+                                validators=[DataRequired(), NumberRange(min=0, max=1)])
+    cena = IntegerField("Cena biletu", validators=[DataRequired(), NumberRange(min=0)])
+    submit = SubmitField("Zatwierdź edycję")

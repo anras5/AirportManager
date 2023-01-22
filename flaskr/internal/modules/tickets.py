@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 
 from flaskr import oracle_db
-from flaskr.internal.helpers.forms import ClassForm, PassengerForm
+from flaskr.internal.helpers.forms import ClassForm, PassengerForm, TicketForm
 from flaskr.internal.helpers import constants as c
 
 tickets_bp = Blueprint('tickets', __name__, url_prefix='/tickets')
@@ -231,6 +231,40 @@ def passenger_new_ticket(passenger_id: int):
                            passenger=passenger,
                            headers=headers,
                            data=available_pools)
+
+
+@tickets_bp.route('/passengers/<int:passenger_id>/tickets/update/<int:ticket_id>', methods=['GET', 'POST'])
+def passengers_tickets_update(passenger_id: int, ticket_id: int):
+    form = TicketForm()
+
+    # get ticket from db
+    ticket = oracle_db.select_ticket(ticket_id)
+    # get passenger from db
+    passenger = oracle_db.select_passenger(passenger_id)
+
+    if form.validate_on_submit():
+        # update ticket
+        flash_message, flash_category, flash_type = oracle_db.update_ticket(ticket_id,
+                                                                            form.czy_oplacony.data,
+                                                                            form.cena.data)
+
+        flash(flash_message, flash_category)
+        if flash_category == c.ERROR:
+            return render_template("tickets-passengers/tickets-passengers-tickets-update.page.html",
+                                   form=form,
+                                   ticket=ticket,
+                                   passenger=passenger)
+        else:
+            return redirect(url_for("tickets.passenger_tickets", passenger_id=passenger_id))
+
+    # set default values on the form
+    form.czy_oplacony.data = ticket.czy_oplacony
+    form.cena.data = ticket.cena
+
+    return render_template("tickets-passengers/tickets-passengers-tickets-update.page.html",
+                           form=form,
+                           ticket=ticket,
+                           passenger=passenger)
 
 
 @tickets_bp.route('/passengers/<int:passenger_id>/tickets/delete', methods=['POST'])

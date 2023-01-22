@@ -48,6 +48,10 @@
             <td>{{ ticket.pula_biletow.odlot.lotnisko.nazwa }}</td>
             <td>{{ ticket.pula_biletow.odlot.linia_lotnicza.nazwa }}</td>
             <td>
+                <a href="{{ url_for('tickets.passengers_tickets_update', passenger_id=passenger.id, ticket_id=ticket.id) }}"
+                   class="icon-edit-table">
+                    <i class="fa-solid fa-pen"></i>
+                </a>
                 <button id="delete{{ ticket.id }}" class="icon-delete-table">
                     <i class="fa-solid fa-trash"></i>
                 </button>
