@@ -57,6 +57,10 @@
             <td>{{ departure.lotnisko.nazwa }}</td>
             <td>{{ departure.model.nazwa }}</td>
             <td>
+                <a href="{{ url_for('flights.departure_pools', departure_id=departure.id) }}"
+                   class="icon-calendar-table">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </a>
                 <a href="{{ url_for('flights.flight_reservations', flight_id=departure.id) }}"
                    class="icon-calendar-table">
                     <i class="fa-solid fa-calendar"></i>

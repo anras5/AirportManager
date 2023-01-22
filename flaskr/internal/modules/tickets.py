@@ -199,3 +199,15 @@ def delete_passenger():
 
     flash(flash_messsage, flash_category)
     return redirect(url_for('tickets.passengers'))
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+# PASSENGERS
+
+@tickets_bp.route('/pools')
+def pools():
+    headers, pools_list = oracle_db.select_pools()
+
+    return render_template('tickets-pools/tickets-pools.page.html',
+                           data=pools_list,
+                           headers=headers)

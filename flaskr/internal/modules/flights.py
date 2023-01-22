@@ -949,6 +949,16 @@ def delete_departure():
     return redirect(url_for('flights.departures'))
 
 
+@flights_bp.route('/departures/<int:departure_id>/pools')
+def departure_pools(departure_id: int):
+    # get departure's pools
+    headers, pools = oracle_db.select_pools_by_departure(departure_id)
+    return render_template('flights-departures/flights-departures-pools.page.html',
+                           departure_id=departure_id,
+                           headers=headers,
+                           data=pools)
+
+
 @flights_bp.route('/flights/<int:flight_id>/reservations')
 def flight_reservations(flight_id: int):
     # get flight's reservations
