@@ -65,15 +65,15 @@
             </div>
             <hr>
             <div class="row">
-                <h4>Ustaw lokację lotniska</h4>
+                <h4>Ustaw lokację tego lotniska</h4>
                 <div class="col">
                     <form method="POST" style="padding: 4%" action="{{ url_for('dashboard.airport') }}">
                         <div class="input-group">
                             <label for="lon" class="form-control">Długość geograficzna</label>
-                            <input type="number" id="lon" name="lon" class="form-control" value="0"
+                            <input type="number" id="lon" name="lon" class="form-control" value="{{ coordinates["lon"] }}"
                                    min="-180" max="180" required step="any">
                             <label for="lat" class="form-control">Szerokość geograficzna</label>
-                            <input type="number" id="lat" name="lat" class="form-control" value="0"
+                            <input type="number" id="lat" name="lat" class="form-control" value="{{ coordinates["lat"] }}"
                                    min="-90" max="90" required step="any">
                             <button type="submit" class="btn btn-warning">Ustaw</button>
                         </div>
