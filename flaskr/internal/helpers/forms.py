@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, DateField, FloatField, SelectField, IntegerField, DecimalField
-from wtforms.validators import DataRequired, EqualTo, ValidationError, Length, NumberRange
+from wtforms import StringField, SubmitField, DateField, SelectField, IntegerField, DecimalField
+from wtforms.validators import DataRequired, ValidationError, Length, NumberRange
+from flaskr.internal.helpers.constants import MAX_NUMBER_9, MAX_NUMBER_12_6, MAX_NUMBER_6
 
 
 def pesel_incorrect(form, field):
@@ -71,14 +72,20 @@ class ManufacturersFormUpdate(ManufacturersForm):
 # FLIGHTS.MODELS FORMS
 
 class ModelsForm(FlaskForm):
-    nazwa = StringField("Podaj nazwę modelu", validators=[DataRequired()])
+    nazwa = StringField("Podaj nazwę modelu",
+                        validators=[DataRequired(), Length(min=1, max=25, message="Podaj od 1 do 25 znaków")])
     liczba_miejsc = IntegerField("Podaj liczbę miejsc w samolocie",
                                  validators=[DataRequired(),
-                                             NumberRange(min=0)])
-    predkosc = DecimalField("Podaj maksymalną prędkość modelu",
-                            validators=[DataRequired(), NumberRange(min=100)])
+                                             NumberRange(min=0, max=MAX_NUMBER_9)])
+    predkosc = IntegerField("Podaj maksymalną prędkość modelu",
+                            validators=[DataRequired(),
+                                        NumberRange(min=100, max=MAX_NUMBER_6)])
     producent = SelectField("Wybierz producenta samolotu", validators=[DataRequired()])
     submit = SubmitField("Dodaj model")
+
+
+class ModelsFormUpdate(ModelsForm):
+    submit = SubmitField("Edytuj model")
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
