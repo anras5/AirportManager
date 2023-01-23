@@ -155,7 +155,7 @@ class ReservationForm(FlaskForm):
 
 class ClassForm(FlaskForm):
     nazwa = StringField("Podaj nazwę klasy biletów",
-                        validators=[DataRequired(), Length(min=1, max=25, message="Podaj od 1 do 25 znaków")])
+                        validators=[DataRequired(), Length(min=1, max=15, message="Podaj od 1 do 15 znaków")])
     obsluga = StringField("Podaj krótki opis obsługi",
                           validators=[DataRequired(), Length(min=1, max=25, message="Podaj od 1 do 25 znaków")])
     komfort = StringField("Podaj jaki komfort oferuje klasa",
