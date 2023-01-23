@@ -6,7 +6,7 @@ from wtforms.validators import NumberRange, DataRequired
 
 from flaskr.internal.helpers.forms import AirportForm, AirlinesForm, ManufacturersForm, ModelsForm, ArrivalForm, \
     ReservationForm, DepartureForm, AirportFormUpdate, AirlinesFormUpdate, ManufacturersFormUpdate, ModelsFormUpdate, \
-    ArrivalFormUpdate
+    ArrivalFormUpdate, DepartureFormUpdate
 from flaskr.internal.helpers.models import Lotnisko
 from flaskr import oracle_db
 from flaskr.internal.helpers import constants as c
@@ -730,7 +730,7 @@ def new_departure():
         setattr(DFormPools,
                 class_.nazwa,
                 IntegerField(f'Podaj liczbę biletów w klasie {class_.nazwa}',
-                             validators=[NumberRange(min=0)]))
+                             validators=[NumberRange(min=0, max=c.MAX_NUMBER_9)]))
 
     form = DFormPools()
 
@@ -809,7 +809,7 @@ def new_departure():
 
 @flights_bp.route('/departures/update/<int:departure_id>', methods=['GET', 'POST'])
 def update_departure(departure_id: int):
-    class DFormPools(DepartureForm):
+    class DFormPools(DepartureFormUpdate):
         pass
 
     # get all classes and create inputs for them
@@ -826,13 +826,13 @@ def update_departure(departure_id: int):
                     setattr(DFormPools,
                             class_.nazwa,
                             IntegerField(f'Podaj liczbę biletów w klasie {class_.nazwa}',
-                                         validators=[NumberRange(min=number_of_tickets)]))
+                                         validators=[NumberRange(min=number_of_tickets, max=c.MAX_NUMBER_9)]))
         # if pool of this class does not exist for this departure
         else:
             setattr(DFormPools,
                     class_.nazwa,
                     IntegerField(f'Podaj liczbę biletów w klasie {class_.nazwa}',
-                                 validators=[NumberRange(min=0)]))
+                                 validators=[NumberRange(min=0, max=c.MAX_NUMBER_9)]))
 
     form = DFormPools()
 

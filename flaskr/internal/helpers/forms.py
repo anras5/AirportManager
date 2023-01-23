@@ -127,19 +127,19 @@ class ArrivalFormUpdate(ArrivalForm):
 # ------------------------------------------------------------------------------------------------------------------- #
 # FLIGHTS.ARRIVALS FORMS
 
-class ClassSeatsForm(FlaskForm):
-    seats = IntegerField()
-
-
 class DepartureForm(FlaskForm):
     pas = SelectField("Wybierz spośród dostępnych pasów startowych", validators=[DataRequired()])
     lotnisko = SelectField("Wybierz lotnisko docelowe", validators=[DataRequired()])
     model = SelectField("Wybierz model samolotu, który obsługuje połączenie", validators=[DataRequired()])
     linia_lotnicza = SelectField("Wybierz linię lotniczą, która obsługuje połączenie", validators=[DataRequired()])
     liczba_miejsc = IntegerField("Podaj liczbę dostępnych miejsc dla tego lotu",
-                                 validators=[DataRequired(), NumberRange(min=0)])
+                                 validators=[DataRequired(), NumberRange(min=0, max=MAX_NUMBER_9)])
     # pola z klasą dodawane dynamicznie #
     submit = SubmitField("Dodaj odlot")
+
+
+class DepartureFormUpdate(DepartureForm):
+    submit = SubmitField("Edytuj odlot")
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
