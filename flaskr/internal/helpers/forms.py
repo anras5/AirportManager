@@ -116,8 +116,12 @@ class ArrivalForm(FlaskForm):
     linia_lotnicza = SelectField("Wybierz linię lotniczą, która obsługuje połączenie", validators=[DataRequired()])
     liczba_pasazerow = IntegerField("Podaj liczbę pasażerów, którzy przylecą tym lotem",
                                     validators=[DataRequired(),
-                                                NumberRange(min=0)])
+                                                NumberRange(min=0, max=MAX_NUMBER_9)])
     submit = SubmitField("Dodaj przylot")
+
+
+class ArrivalFormUpdate(ArrivalForm):
+    submit = SubmitField("Edytuj przylot")
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
