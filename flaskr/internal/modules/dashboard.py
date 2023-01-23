@@ -1,4 +1,5 @@
 import datetime
+import json
 
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 
@@ -34,4 +35,14 @@ def change():
     type = request.form.get('type')
     oracle_db.call_zmianaceny(value, type)
     flash("Pomyślna aktualizacja cen", c.SUCCESS)
+    return redirect(url_for('dashboard.dashboard'))
+
+
+@dashboard_bp.route('/airport', methods=['POST'])
+def airport():
+    lon = request.form.get('lon')
+    lat = request.form.get('lat')
+    with open('airport.json', 'w') as file:
+        json.dump({"lon": lon, "lat": lat}, file)
+    flash("Pomyślna aktualizacja lokacji lotniska", c.SUCCESS)
     return redirect(url_for('dashboard.dashboard'))

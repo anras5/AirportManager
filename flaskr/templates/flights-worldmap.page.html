@@ -25,8 +25,8 @@
         {% for flight in arrivals %}
             var c = {
                 type: 'scattergeo',
-                lat: [52.4, {{ flight.lotnisko.latitude }}],
-                lon: [16.93, {{ flight.lotnisko.longitude }}],
+                lat: [ {{ coordinates['lat'] }}, {{ flight.lotnisko.latitude }}],
+                lon: [ {{ coordinates['lon'] }}, {{ flight.lotnisko.longitude }}],
                 hovertext: ['Poznan', '{{ flight.lotnisko.nazwa }}'],
                 mode: 'lines',
                 line: {
@@ -40,8 +40,8 @@
         {% for flight in departures %}
             var c = {
                 type: 'scattergeo',
-                lat: [52.4, {{ flight.lotnisko.latitude }}],
-                lon: [16.93, {{ flight.lotnisko.longitude }}],
+                lat: [ {{ coordinates['lat'] }}, {{ flight.lotnisko.latitude }}],
+                lon: [ {{ coordinates['lon'] }}, {{ flight.lotnisko.longitude }}],
                 hovertext: ['Poznan', '{{ flight.lotnisko.nazwa }}'],
                 mode: 'lines',
                 line: {
