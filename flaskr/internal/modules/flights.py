@@ -66,7 +66,17 @@ def main():
 def world_map():
     arrivals = oracle_db.select_arrivals_for_map()
     departures = oracle_db.select_departures_for_map()
-    return render_template('flights-worldmap.page.html', arrivals=arrivals, departures=departures)
+    coordinates = {}
+    with open('airport.json', 'r') as file:
+        coordinates = json.load(file)
+    if not coordinates:
+        flash("Ustaw współrzędne lotniska w panelu sterowania", c.ERROR)
+        return redirect(url_for('flights.main'))
+    else:
+        return render_template('flights-worldmap.page.html',
+                               arrivals=arrivals,
+                               departures=departures,
+                               coordinates=coordinates)
 
 
 # -------------------------------------------------------------------------------------------------------------------- #

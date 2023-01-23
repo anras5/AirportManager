@@ -4,6 +4,14 @@
     <script src='https://cdn.plot.ly/plotly-2.14.0.min.js'></script>
 {% endblock head %}
 
+{% block page_header %}
+
+    <div class="container-fluid">
+        <h3 class="page-header">MAPA LOTÓW</h3>
+        <h5><span style="color: #d60f09">Odloty</span> / <span style="color: #ebd915">Przyloty</span></h5>
+    </div>
+{% endblock %}
+
 {% block content %}
     <div class="container-fluid map-container">
         <div id="map"></div>
@@ -17,13 +25,13 @@
         {% for flight in arrivals %}
             var c = {
                 type: 'scattergeo',
-                lat: [52.4, {{ flight.lotnisko.latitude }}],
-                lon: [16.93, {{ flight.lotnisko.longitude }}],
+                lat: [ {{ coordinates['lat'] }}, {{ flight.lotnisko.latitude }}],
+                lon: [ {{ coordinates['lon'] }}, {{ flight.lotnisko.longitude }}],
                 hovertext: ['Poznan', '{{ flight.lotnisko.nazwa }}'],
                 mode: 'lines',
                 line: {
                     width: 3,
-                    color: '#FFFF00'
+                    color: '#ebd915'
                 },
                 name: '{{ flight.lotnisko.nazwa }}'
             };
@@ -32,13 +40,13 @@
         {% for flight in departures %}
             var c = {
                 type: 'scattergeo',
-                lat: [52.4, {{ flight.lotnisko.latitude }}],
-                lon: [16.93, {{ flight.lotnisko.longitude }}],
+                lat: [ {{ coordinates['lat'] }}, {{ flight.lotnisko.latitude }}],
+                lon: [ {{ coordinates['lon'] }}, {{ flight.lotnisko.longitude }}],
                 hovertext: ['Poznan', '{{ flight.lotnisko.nazwa }}'],
                 mode: 'lines',
                 line: {
                     width: 3,
-                    color: '#FF0000'
+                    color: '#d60f09'
                 },
                 name: '{{ flight.lotnisko.nazwa }}'
             };
@@ -46,7 +54,6 @@
         {% endfor %}
 
         const layout = {
-            title: 'Mapa lotów',
             showlegend: true,
             autosize: true,
             geo: {
