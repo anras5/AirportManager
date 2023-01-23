@@ -989,7 +989,7 @@ class OracleDB:
     def select_passengers(self) -> Tuple[List[str], List[Pasazer]]:
         connection = self.pool.acquire()
         cr = connection.cursor()
-        sql = "SELECT PASAZER_ID, LOGIN, HASLO, IMIE, NAZWISKO, PESEL, DATAURODZENIA AS DATA_URODZENIA FROM PASAZER"
+        sql = "SELECT PASAZER_ID, LOGIN, IMIE, NAZWISKO, PESEL, DATAURODZENIA AS DATA_URODZENIA FROM PASAZER"
         cr.execute(sql)
         headers = [header[0] for header in cr.description]
         passengers_list = []
@@ -998,11 +998,10 @@ class OracleDB:
                 Pasazer(
                     _id=passenger[0],
                     login=passenger[1],
-                    haslo=passenger[2],
-                    imie=passenger[3],
-                    nazwisko=passenger[4],
-                    pesel=passenger[5],
-                    data_urodzenia=passenger[6]
+                    imie=passenger[2],
+                    nazwisko=passenger[3],
+                    pesel=passenger[4],
+                    data_urodzenia=passenger[5]
                 )
             )
         cr.close()
