@@ -11,6 +11,12 @@ dashboard_bp = Blueprint('dashboard', __name__, url_prefix='/dashboard')
 
 @dashboard_bp.route('/', methods=['GET', 'POST'])
 def dashboard():
+    with open('airport.json', 'r') as file:
+        coordinates = json.load(file)
+        if not coordinates:
+            coordinates = {"lon": 0, "lat": 0}
+            json.dump(coordinates, file)
+
     if request.method == 'POST':
         date_range = request.form['date']
         if " to " in date_range:
@@ -21,12 +27,13 @@ def dashboard():
 
             return render_template('dashboard-index.page.html',
                                    passengers_count=oracle_db.call_obsluzeni(start_date, end_date),
-                                   date=f"od {sd} do {ed}")
+                                   date=f"od {sd} do {ed}",
+                                   coordinates=coordinates)
 
         else:
             flash("Niepoprawny format daty", category=c.ERROR)
 
-    return render_template('dashboard-index.page.html')
+    return render_template('dashboard-index.page.html', coordinates=coordinates)
 
 
 @dashboard_bp.route('/change', methods=['POST'])
