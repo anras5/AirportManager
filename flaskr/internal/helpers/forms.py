@@ -154,11 +154,19 @@ class ReservationForm(FlaskForm):
 # TICKETS.CLASSES FORMS
 
 class ClassForm(FlaskForm):
-    nazwa = StringField("Podaj nazwę klasy biletów", validators=[DataRequired()])
-    obsluga = StringField("Podaj krótki opis obsługi", validators=[DataRequired()])
-    komfort = StringField("Podaj jaki komfort oferuje klasa", validators=[DataRequired()])
-    cena = DecimalField("Podaj cenę biletu w tej klasie", validators=[DataRequired(), NumberRange(min=0)])
+    nazwa = StringField("Podaj nazwę klasy biletów",
+                        validators=[DataRequired(), Length(min=1, max=25, message="Podaj od 1 do 25 znaków")])
+    obsluga = StringField("Podaj krótki opis obsługi",
+                          validators=[DataRequired(), Length(min=1, max=25, message="Podaj od 1 do 25 znaków")])
+    komfort = StringField("Podaj jaki komfort oferuje klasa",
+                          validators=[DataRequired(), Length(min=1, max=25, message="Podaj od 1 do 25 znaków")])
+    cena = DecimalField("Podaj cenę biletu w tej klasie",
+                        validators=[DataRequired(), NumberRange(min=0, max=MAX_NUMBER_6)])
     submit = SubmitField("Dodaj klasę")
+
+
+class ClassFormUpdate(ClassForm):
+    submit = SubmitField("Edytuj klasę")
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
