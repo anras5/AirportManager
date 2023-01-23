@@ -713,8 +713,29 @@ class OracleDB:
 
         return "Pomyślnie dodano nowy przylot", c.SUCCESS, None
 
-    def update_arrival(self, lot_id, linia_lotnicza_id, lotnisko_id, model_id,
-                       data_przylotu, liczba_pasazerow, pas_id) -> Tuple[str, str, str]:
+    def update_arrival(self, lot_id, linia_lotnicza_id, lotnisko_id, model_id, liczba_pasazerow) \
+            -> Tuple[str, str, str]:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+
+        lot_sql = """UPDATE LOT
+                        SET LINIALOTNICZA_ID = :1,
+                            LOTNISKO_ID = :2,
+                            MODEL_ID = :3
+                      WHERE LOT_ID = :4"""
+        cr.execute(lot_sql, (linia_lotnicza_id, lotnisko_id, model_id, lot_id))
+
+        przylot_sql = """UPDATE PRZYLOT
+                            SET LICZBAPASAZEROW = :1
+                          WHERE LOT_ID = :2"""
+        cr.execute(przylot_sql, (liczba_pasazerow, lot_id))
+
+        connection.commit()
+        cr.close()
+        return "Pomyślnie zaktualizowano przylot", c.SUCCESS, None
+
+    def update_arrival_and_reservations(self, lot_id, linia_lotnicza_id, lotnisko_id, model_id,
+                                        data_przylotu, liczba_pasazerow, pas_id) -> Tuple[str, str, str]:
         connection = self.pool.acquire()
         cr = connection.cursor()
 
