@@ -206,6 +206,8 @@ class PassengerForm(FlaskForm):
     def validate_data_urodzenia(form, field):
         if field.data < datetime(year=1900, month=1, day=1).date():
             raise ValidationError("Data urodzenia musi być większa niż 01-01-1900")
+        if field.data > datetime.now().date():
+            raise ValidationError("Data urodzenia nie może być większa od dzisiejszej")
 
 
 class PassengerFormUpdate(PassengerForm):
