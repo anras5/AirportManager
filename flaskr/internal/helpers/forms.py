@@ -1,18 +1,7 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, DateField, FloatField, SelectField, IntegerField, DecimalField
-from wtforms.validators import DataRequired, EqualTo, ValidationError, Length, NumberRange
-
-
-# Custom validators
-def user_exists(form, field):
-    # db = pool.acquire()
-    # cr = db.cursor()
-    # cr.execute("SELECT LOGIN FROM Pasazer")
-    # x = cr.fetchall()
-    # for user in x:
-    #     if user[0] == field.data:
-    #         raise ValidationError("User Already Exists")
-    pass
+from wtforms import StringField, SubmitField, DateField, SelectField, IntegerField, DecimalField
+from wtforms.validators import DataRequired, ValidationError, Length, NumberRange
+from flaskr.internal.helpers.constants import MAX_NUMBER_9, MAX_NUMBER_12_6, MAX_NUMBER_6
 
 
 def pesel_incorrect(form, field):
@@ -22,47 +11,15 @@ def pesel_incorrect(form, field):
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
-# AUTHENTICATION FORMS #
-
-class RegistrationForm(FlaskForm):
-    login = StringField("Podaj login",
-                        validators=[DataRequired(message='Login can not be empty'),
-                                    user_exists,
-                                    Length(max=25, message='Must be shorter than 25 characters')])
-    password = StringField("Podaj hasło", validators=[DataRequired(message='Password can not be empty'),
-                                                      Length(max=25,
-                                                             message='Must be shorter than 25 characters')])
-    confirm = StringField("Potwierdź hasło",
-                          validators=[DataRequired(message='Please confirm password'),
-                                      EqualTo('password', message='Passwords must match')])
-    imie = StringField("Podaj swoje imię",
-                       validators=[DataRequired(),
-                                   Length(max=25, message='Must be shorter than 25 characters')])
-    nazwisko = StringField("Podaj swoje nazwisko",
-                           validators=[DataRequired(),
-                                       Length(max=25, message='Must be shorter than 25 characters')])
-    pesel = StringField("Podaj swój numer PESEL",
-                        validators=[pesel_incorrect, Length(min=11, max=11, message='Must be 11 characters long')])
-    dataurodzenia = DateField("Podaj datę urodzin",
-                              format='%Y-%m-%d',
-                              validators=[DataRequired()])
-    submit = SubmitField("Załóż konto")
-
-
-class LoginForm(FlaskForm):
-    login = StringField("Podaj login", validators=[DataRequired()])
-    password = StringField("Podaj hasło", validators=[DataRequired()])
-    # stay_loggedin = BooleanField('stay logged-in')
-    submit = SubmitField('Zaloguj się')
-
-
-# ------------------------------------------------------------------------------------------------------------------- #
 # FLIGHTS.AIRPORTS FORMS
 
 class AirportForm(FlaskForm):
-    nazwa = StringField("Podaj nazwę lotniska", validators=[DataRequired()])
-    miasto = StringField("Podaj miasto lotniska", validators=[DataRequired()])
-    kraj = StringField("Podaj kraj lotniska", validators=[DataRequired()])
+    nazwa = StringField("Podaj nazwę lotniska", validators=[DataRequired(),
+                                                            Length(min=1, max=100, message="Podaj od 1 do 100 znaków")])
+    miasto = StringField("Podaj miasto lotniska", validators=[DataRequired(),
+                                                              Length(min=1, max=25, message="Podaj od 1 do 25 znaków")])
+    kraj = StringField("Podaj kraj lotniska", validators=[DataRequired(),
+                                                          Length(min=1, max=25, message="Podaj od 1 do 25 znaków")])
     iatacode = StringField("Podaj kod IATA",
                            validators=[DataRequired(),
                                        Length(min=3, max=3, message="Kody IATA mają 3 cyfry")])
@@ -76,48 +33,77 @@ class AirportForm(FlaskForm):
     submit = SubmitField("Dodaj lotnisko")
 
 
+class AirportFormUpdate(AirportForm):
+    submit = SubmitField("Edytuj lotnisko")
+
+
 # ------------------------------------------------------------------------------------------------------------------- #
 # FLIGHTS.AIRLINES FORMS
 
 class AirlinesForm(FlaskForm):
-    nazwa = StringField("Podaj nazwę linii lotniczych", validators=[DataRequired()])
-    kraj = StringField("Podaj kraj lotniska", validators=[DataRequired()])
+    nazwa = StringField("Podaj nazwę linii lotniczych",
+                        validators=[DataRequired(),
+                                    Length(min=1, max=100, message="Podaj od 1 do 100 znaków")])
+    kraj = StringField("Podaj kraj lotniska", validators=[DataRequired(),
+                                                          Length(min=1, max=25, message="Podaj od 1 do 25 znaków")])
     submit = SubmitField("Dodaj linię lotniczą")
+
+
+class AirlinesFormUpdate(AirlinesForm):
+    submit = SubmitField("Edytuj linię lotniczą")
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
 # FLIGHTS.MANUFACTURERS FORMS
 
 class ManufacturersForm(FlaskForm):
-    nazwa = StringField("Podaj nazwę producenta", validators=[DataRequired()])
-    kraj = StringField("Podaj kraj lotniska", validators=[DataRequired()])
+    nazwa = StringField("Podaj nazwę producenta",
+                        validators=[DataRequired(), Length(min=1, max=100, message="Podaj od 1 do 100 znaków")])
+    kraj = StringField("Podaj kraj lotniska",
+                       validators=[DataRequired(), Length(min=1, max=25, message="Podaj od 1 do 25 znaków")])
     submit = SubmitField("Dodaj producenta")
+
+
+class ManufacturersFormUpdate(ManufacturersForm):
+    submit = SubmitField("Edytuj producenta")
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
 # FLIGHTS.MODELS FORMS
 
 class ModelsForm(FlaskForm):
-    nazwa = StringField("Podaj nazwę modelu", validators=[DataRequired()])
+    nazwa = StringField("Podaj nazwę modelu",
+                        validators=[DataRequired(), Length(min=1, max=25, message="Podaj od 1 do 25 znaków")])
     liczba_miejsc = IntegerField("Podaj liczbę miejsc w samolocie",
                                  validators=[DataRequired(),
-                                             NumberRange(min=0)])
-    predkosc = DecimalField("Podaj maksymalną prędkość modelu",
-                            validators=[DataRequired(), NumberRange(min=100)])
+                                             NumberRange(min=0, max=MAX_NUMBER_9)])
+    predkosc = IntegerField("Podaj maksymalną prędkość modelu",
+                            validators=[DataRequired(),
+                                        NumberRange(min=100, max=MAX_NUMBER_6)])
     producent = SelectField("Wybierz producenta samolotu", validators=[DataRequired()])
     submit = SubmitField("Dodaj model")
+
+
+class ModelsFormUpdate(ModelsForm):
+    submit = SubmitField("Edytuj model")
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
 # RUNWAYS.RUNWAYS FORMS
 
 class RunwaysForm(FlaskForm):
-    nazwa = StringField("Podaj nazwę pasa startowego", validators=[DataRequired()])
+    nazwa = StringField("Podaj nazwę pasa startowego",
+                        validators=[DataRequired(),
+                                    Length(min=1, max=25, message="Podaj od 1 do 25 znaków")])
     dlugosc = DecimalField("Podaj długość pasa w metrach",
                            validators=[DataRequired(),
-                                       NumberRange(min=1)])
-    opis = StringField("Podaj dodatkowy opis pasa startowego")
+                                       NumberRange(min=1, max=MAX_NUMBER_6)])
+    opis = StringField("Podaj dodatkowy opis pasa startowego", validators=[Length(max=100)])
     submit = SubmitField("Dodaj pas")
+
+
+class RunwaysFormUpdate(RunwaysForm):
+    submit = SubmitField("Edytuj pas")
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
@@ -130,16 +116,16 @@ class ArrivalForm(FlaskForm):
     linia_lotnicza = SelectField("Wybierz linię lotniczą, która obsługuje połączenie", validators=[DataRequired()])
     liczba_pasazerow = IntegerField("Podaj liczbę pasażerów, którzy przylecą tym lotem",
                                     validators=[DataRequired(),
-                                                NumberRange(min=0)])
+                                                NumberRange(min=0, max=MAX_NUMBER_9)])
     submit = SubmitField("Dodaj przylot")
+
+
+class ArrivalFormUpdate(ArrivalForm):
+    submit = SubmitField("Edytuj przylot")
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
 # FLIGHTS.ARRIVALS FORMS
-
-class ClassSeatsForm(FlaskForm):
-    seats = IntegerField()
-
 
 class DepartureForm(FlaskForm):
     pas = SelectField("Wybierz spośród dostępnych pasów startowych", validators=[DataRequired()])
@@ -147,9 +133,13 @@ class DepartureForm(FlaskForm):
     model = SelectField("Wybierz model samolotu, który obsługuje połączenie", validators=[DataRequired()])
     linia_lotnicza = SelectField("Wybierz linię lotniczą, która obsługuje połączenie", validators=[DataRequired()])
     liczba_miejsc = IntegerField("Podaj liczbę dostępnych miejsc dla tego lotu",
-                                 validators=[DataRequired(), NumberRange(min=0)])
+                                 validators=[DataRequired(), NumberRange(min=0, max=MAX_NUMBER_9)])
     # pola z klasą dodawane dynamicznie #
     submit = SubmitField("Dodaj odlot")
+
+
+class DepartureFormUpdate(DepartureForm):
+    submit = SubmitField("Edytuj odlot")
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
@@ -164,28 +154,44 @@ class ReservationForm(FlaskForm):
 # TICKETS.CLASSES FORMS
 
 class ClassForm(FlaskForm):
-    nazwa = StringField("Podaj nazwę klasy biletów", validators=[DataRequired()])
-    obsluga = StringField("Podaj krótki opis obsługi", validators=[DataRequired()])
-    komfort = StringField("Podaj jaki komfort oferuje klasa", validators=[DataRequired()])
-    cena = DecimalField("Podaj cenę biletu w tej klasie", validators=[DataRequired(), NumberRange(min=0)])
+    nazwa = StringField("Podaj nazwę klasy biletów",
+                        validators=[DataRequired(), Length(min=1, max=15, message="Podaj od 1 do 15 znaków")])
+    obsluga = StringField("Podaj krótki opis obsługi",
+                          validators=[DataRequired(), Length(min=1, max=25, message="Podaj od 1 do 25 znaków")])
+    komfort = StringField("Podaj jaki komfort oferuje klasa",
+                          validators=[DataRequired(), Length(min=1, max=25, message="Podaj od 1 do 25 znaków")])
+    cena = DecimalField("Podaj cenę biletu w tej klasie",
+                        validators=[DataRequired(), NumberRange(min=0, max=MAX_NUMBER_6)])
     submit = SubmitField("Dodaj klasę")
+
+
+class ClassFormUpdate(ClassForm):
+    submit = SubmitField("Edytuj klasę")
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
 # TICKETS.PASSENGERS FORMS
 
 class PassengerForm(FlaskForm):
-    login = StringField("Podaj login", validators=[DataRequired()])
-    haslo = StringField("Podaj hasło", validators=[DataRequired()])
-    imie = StringField("Podaj imię", validators=[DataRequired()])
-    nazwisko = StringField("Podaj nazwisko", validators=[DataRequired()])
+    login = StringField("Podaj login",
+                        validators=[DataRequired(), Length(min=1, max=25, message="Podaj od 1 do 25 znaków")])
+    haslo = StringField("Podaj hasło",
+                        validators=[DataRequired(), Length(min=1, max=25, message="Podaj od 1 do 25 znaków")])
+    imie = StringField("Podaj imię",
+                       validators=[DataRequired(), Length(min=1, max=25, message="Podaj od 1 do 25 znaków")])
+    nazwisko = StringField("Podaj nazwisko",
+                           validators=[DataRequired(), Length(min=1, max=25, message="Podaj od 1 do 25 znaków")])
     pesel = StringField("Podaj pesel", validators=[DataRequired(), Length(min=11, max=11)])
     data_urodzenia = DateField("Podaj datę urodzin", format="%Y-%m-%d", validators=[DataRequired()])
     submit = SubmitField("Dodaj pasażera")
 
 
+class PassengerFormUpdate(PassengerForm):
+    submit = SubmitField("Edytuj pasażera")
+
+
 class TicketForm(FlaskForm):
     czy_oplacony = IntegerField("Czy bilet został opłacony? Tak - 1, Nie - 0",
                                 validators=[DataRequired(), NumberRange(min=0, max=1)])
-    cena = IntegerField("Cena biletu", validators=[DataRequired(), NumberRange(min=0)])
+    cena = IntegerField("Cena biletu", validators=[DataRequired(), NumberRange(min=0, max=MAX_NUMBER_6)])
     submit = SubmitField("Zatwierdź edycję")

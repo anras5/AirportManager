@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 
 from flaskr import oracle_db
-from flaskr.internal.helpers.forms import ClassForm, PassengerForm, TicketForm
+from flaskr.internal.helpers.forms import ClassForm, PassengerForm, TicketForm, ClassFormUpdate, PassengerFormUpdate
 from flaskr.internal.helpers import constants as c
 
 tickets_bp = Blueprint('tickets', __name__, url_prefix='/tickets')
@@ -49,7 +49,7 @@ def new_class():
 
 @tickets_bp.route('/classes/update/<int:class_id>', methods=['GET', 'POST'])
 def update_class(class_id: int):
-    form = ClassForm()
+    form = ClassFormUpdate()
 
     # get class from db
     class_ = oracle_db.select_class(class_id)
@@ -143,7 +143,7 @@ def new_passenger():
 
 @tickets_bp.route('/passengers/update/<int:passenger_id>', methods=['GET', 'POST'])
 def update_passenger(passenger_id: int):
-    form = PassengerForm()
+    form = PassengerFormUpdate()
 
     # get passenger from db
     passenger = oracle_db.select_passenger(passenger_id)

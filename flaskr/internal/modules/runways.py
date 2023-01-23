@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 
-from flaskr.internal.helpers.forms import RunwaysForm
+from flaskr.internal.helpers.forms import RunwaysForm, RunwaysFormUpdate
 from flaskr import oracle_db
 from flaskr.internal.helpers import constants as c
 
@@ -49,7 +49,7 @@ def new_runway():
 
 @runways_bp.route('/runways/update/<int:runway_id>', methods=['GET', 'POST'])
 def update_runway(runway_id: int):
-    form = RunwaysForm()
+    form = RunwaysFormUpdate()
 
     # get pas from db
     pas = oracle_db.select_runway(runway_id)

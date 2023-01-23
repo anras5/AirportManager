@@ -5,7 +5,8 @@ from wtforms import IntegerField
 from wtforms.validators import NumberRange, DataRequired
 
 from flaskr.internal.helpers.forms import AirportForm, AirlinesForm, ManufacturersForm, ModelsForm, ArrivalForm, \
-    ReservationForm, DepartureForm
+    ReservationForm, DepartureForm, AirportFormUpdate, AirlinesFormUpdate, ManufacturersFormUpdate, ModelsFormUpdate, \
+    ArrivalFormUpdate, DepartureFormUpdate
 from flaskr.internal.helpers.models import Lotnisko
 from flaskr import oracle_db
 from flaskr.internal.helpers import constants as c
@@ -133,7 +134,7 @@ def new_airport():
 
 @flights_bp.route('/airports/update/<int:airport_id>', methods=['GET', 'POST'])
 def update_airport(airport_id: int):
-    form = AirportForm()
+    form = AirportFormUpdate()
 
     # get lotnisko from db
     lotnisko = oracle_db.select_airport(airport_id)
@@ -237,7 +238,7 @@ def new_airline():
 
 @flights_bp.route('/airlines/update/<int:airline_id>', methods=['GET', 'POST'])
 def update_airline(airline_id: int):
-    form = AirlinesForm()
+    form = AirlinesFormUpdate()
 
     # get linia lotnicza from db
     linialotnicza = oracle_db.select_airline(airline_id)
@@ -324,7 +325,7 @@ def new_manufacturer():
 
 @flights_bp.route('/manufacturers/update/<int:manufacturer_id>', methods=['GET', 'POST'])
 def update_manufacturer(manufacturer_id: int):
-    form = ManufacturersForm()
+    form = ManufacturersFormUpdate()
 
     # get producent from db
     producent = oracle_db.select_manufacturer(manufacturer_id)
@@ -416,7 +417,7 @@ def new_model():
 
 @flights_bp.route('/models/update/<int:model_id>', methods=['GET', 'POST'])
 def update_model(model_id):
-    form = ModelsForm()
+    form = ModelsFormUpdate()
 
     # get model from db
     model = oracle_db.select_model_manufacturer(model_id)
@@ -605,7 +606,7 @@ def new_arrival():
 
 @flights_bp.route('/arrivals/update/<int:arrival_id>', methods=['GET', 'POST'])
 def update_arrival(arrival_id: int):
-    form = ArrivalForm()
+    form = ArrivalFormUpdate()
 
     # get arrival from db
     arrival = oracle_db.select_arrival(arrival_id)
@@ -729,7 +730,7 @@ def new_departure():
         setattr(DFormPools,
                 class_.nazwa,
                 IntegerField(f'Podaj liczbę biletów w klasie {class_.nazwa}',
-                             validators=[NumberRange(min=0)]))
+                             validators=[NumberRange(min=0, max=c.MAX_NUMBER_9)]))
 
     form = DFormPools()
 
@@ -808,7 +809,7 @@ def new_departure():
 
 @flights_bp.route('/departures/update/<int:departure_id>', methods=['GET', 'POST'])
 def update_departure(departure_id: int):
-    class DFormPools(DepartureForm):
+    class DFormPools(DepartureFormUpdate):
         pass
 
     # get all classes and create inputs for them
@@ -825,13 +826,13 @@ def update_departure(departure_id: int):
                     setattr(DFormPools,
                             class_.nazwa,
                             IntegerField(f'Podaj liczbę biletów w klasie {class_.nazwa}',
-                                         validators=[NumberRange(min=number_of_tickets)]))
+                                         validators=[NumberRange(min=number_of_tickets, max=c.MAX_NUMBER_9)]))
         # if pool of this class does not exist for this departure
         else:
             setattr(DFormPools,
                     class_.nazwa,
                     IntegerField(f'Podaj liczbę biletów w klasie {class_.nazwa}',
-                                 validators=[NumberRange(min=0)]))
+                                 validators=[NumberRange(min=0, max=c.MAX_NUMBER_9)]))
 
     form = DFormPools()
 
