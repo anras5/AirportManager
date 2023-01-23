@@ -2,11 +2,11 @@ import datetime
 
 from flask import Blueprint, render_template, redirect, url_for, request, flash, session
 from wtforms import IntegerField
-from wtforms.validators import NumberRange, DataRequired
+from wtforms.validators import NumberRange, InputRequired
 
 from flaskr.internal.helpers.forms import AirportForm, AirlinesForm, ManufacturersForm, ModelsForm, ArrivalForm, \
     ReservationForm, DepartureForm, AirportFormUpdate, AirlinesFormUpdate, ManufacturersFormUpdate, ModelsFormUpdate, \
-    ArrivalFormUpdate, DepartureFormUpdate
+    ArrivalFormUpdate, DepartureFormUpdate, ArrivalFormUpdateWithoutRunway, DepartureFormUpdateWithoutRunway
 from flaskr.internal.helpers.models import Lotnisko
 from flaskr import oracle_db
 from flaskr.internal.helpers import constants as c
@@ -616,10 +616,31 @@ def new_arrival():
 
 @flights_bp.route('/arrivals/update/<int:arrival_id>', methods=['GET', 'POST'])
 def update_arrival(arrival_id: int):
-    form = ArrivalFormUpdate()
+    # get available runways list from session
+    runways_ids_list = session.get('available_runways', '')
+
+    # get timestamp from session
+    timestamp = session.get('flight_timestamp', '')
+
+    if not runways_ids_list or not timestamp:
+        flash("Błąd. Do aktualizacji przylotu użyj przeznaczonego do tego przycisku!", c.WARNING)
+        return redirect(url_for('flights.arrivals'))
 
     # get arrival from db
     arrival = oracle_db.select_arrival(arrival_id)
+
+    # parse timestamp to datetime.datetime object
+    timestamp = datetime.datetime.strptime(timestamp, "%Y-%m-%d %H:%M")
+
+    # check if arrival date is changed
+    is_date_changed = arrival.data_przylotu > timestamp or arrival.data_przylotu < timestamp
+    if not is_date_changed:
+        form = ArrivalFormUpdateWithoutRunway()
+    else:
+        form = ArrivalFormUpdate()
+        # load runways from database using ids from session
+        runways = oracle_db.select_runways_by_ids(runways_ids_list)
+        form.pas.choices = [(runway.id, runway.nazwa) for runway in runways]
 
     # get all airports from database
     _, airports_list = oracle_db.select_airports(order=True)
@@ -633,31 +654,22 @@ def update_arrival(arrival_id: int):
     _, airline_list = oracle_db.select_airlines(order=True)
     form.linia_lotnicza.choices = [(airline.id, airline.nazwa) for airline in airline_list]
 
-    # get available runways list from session
-    runways_ids_list = session.get('available_runways', '')
-
-    # get timestamp from session
-    timestamp = session.get('flight_timestamp', '')
-
-    if not runways_ids_list or not timestamp:
-        flash("Błąd. Do aktualizacji przylotu użyj przeznaczonego do tego przycisku!", c.WARNING)
-        return redirect(url_for('flights.arrivals'))
-    else:
-        # load runways from database using ids from session
-        runways = oracle_db.select_runways_by_ids(runways_ids_list)
-        form.pas.choices = [(runway.id, runway.nazwa) for runway in runways]
-        # parse timestamp to datetime.datetime object
-        timestamp = datetime.datetime.strptime(timestamp, "%Y-%m-%d %H:%M")
-
     if form.validate_on_submit():
         # update arrival
-        flash_message, flash_category, flash_type = oracle_db.update_arrival(arrival_id,
-                                                                             form.linia_lotnicza.data,
-                                                                             form.lotnisko.data,
-                                                                             form.model.data,
-                                                                             timestamp,
-                                                                             form.liczba_pasazerow.data,
-                                                                             form.pas.data)
+        if is_date_changed:
+            flash_message, flash_category, flash_type = oracle_db.update_arrival_and_reservations(arrival_id,
+                                                                                                  form.linia_lotnicza.data,
+                                                                                                  form.lotnisko.data,
+                                                                                                  form.model.data,
+                                                                                                  timestamp,
+                                                                                                  form.liczba_pasazerow.data,
+                                                                                                  form.pas.data)
+        else:
+            flash_message, flash_category, flash_type = oracle_db.update_arrival(arrival_id,
+                                                                                 form.linia_lotnicza.data,
+                                                                                 form.lotnisko.data,
+                                                                                 form.model.data,
+                                                                                 form.liczba_pasazerow.data)
 
         flash(flash_message, flash_category)
         if flash_category == c.ERROR:
@@ -666,7 +678,8 @@ def update_arrival(arrival_id: int):
                                    arrival=arrival,
                                    models=models_list,
                                    timestamp_old=datetime.datetime.strftime(arrival.data_przylotu, "%Y-%m-%d %H:%M"),
-                                   timestamp_new=datetime.datetime.strftime(timestamp, "%Y-%m-%d %H:%M"))
+                                   timestamp_new=datetime.datetime.strftime(timestamp, "%Y-%m-%d %H:%M"),
+                                   is_date_changed=is_date_changed)
         else:
             # if no error in updating the data - pop values from session and display arrivals table
             session.pop('available_runways')
@@ -685,7 +698,8 @@ def update_arrival(arrival_id: int):
                            arrival=arrival,
                            models=models_list,
                            timestamp_old=datetime.datetime.strftime(arrival.data_przylotu, "%Y-%m-%d %H:%M"),
-                           timestamp_new=datetime.datetime.strftime(timestamp, "%Y-%m-%d %H:%M"))
+                           timestamp_new=datetime.datetime.strftime(timestamp, "%Y-%m-%d %H:%M"),
+                           is_date_changed=is_date_changed)
 
 
 @flights_bp.route('/arrivals/delete', methods=['POST'])
@@ -819,11 +833,32 @@ def new_departure():
 
 @flights_bp.route('/departures/update/<int:departure_id>', methods=['GET', 'POST'])
 def update_departure(departure_id: int):
-    class DFormPools(DepartureFormUpdate):
-        pass
-
     # get all classes and create inputs for them
     _, class_list = oracle_db.select_classes(order=True)
+
+    # get available runways list from session
+    runways_ids_list = session.get('available_runways', '')
+
+    # get timestamp from session
+    timestamp = session.get('flight_timestamp', '')
+
+    if not runways_ids_list or not timestamp:
+        flash("Błąd. Do aktualizacji odlotu użyj przeznaczonego do tego przycisku!", c.WARNING)
+        return redirect(url_for('flights.departures'))
+
+    # get departure from db
+    departure = oracle_db.select_departure(departure_id)
+    # parse timestamp to datetime.datetime object
+    timestamp = datetime.datetime.strptime(timestamp, "%Y-%m-%d %H:%M")
+
+    # check if departure date is changed
+    is_date_changed = departure.data_odlotu > timestamp or departure.data_odlotu < timestamp
+    if not is_date_changed:
+        class DFormPools(DepartureFormUpdateWithoutRunway):
+            pass
+    else:
+        class DFormPools(DepartureFormUpdate):
+            pass
 
     # get all ticket pools for this departure
     _, ticket_pools_list = oracle_db.select_pools_by_departure(departure_id)
@@ -836,18 +871,20 @@ def update_departure(departure_id: int):
                     setattr(DFormPools,
                             class_.nazwa,
                             IntegerField(f'Podaj liczbę biletów w klasie {class_.nazwa}',
-                                         validators=[NumberRange(min=number_of_tickets, max=c.MAX_NUMBER_9)]))
+                                         validators=[NumberRange(min=number_of_tickets, max=c.MAX_NUMBER_9),
+                                                     InputRequired()]))
         # if pool of this class does not exist for this departure
         else:
             setattr(DFormPools,
                     class_.nazwa,
                     IntegerField(f'Podaj liczbę biletów w klasie {class_.nazwa}',
-                                 validators=[NumberRange(min=0, max=c.MAX_NUMBER_9)]))
+                                 validators=[NumberRange(min=0, max=c.MAX_NUMBER_9), InputRequired()]))
 
     form = DFormPools()
-
-    # get departure from db
-    departure = oracle_db.select_departure(departure_id)
+    if is_date_changed:
+        # load runways from database using ids from session
+        runways = oracle_db.select_runways_by_ids(runways_ids_list)
+        form.pas.choices = [(runway.id, runway.nazwa) for runway in runways]
 
     # get all airports from database
     _, airports_list = oracle_db.select_airports(order=True)
@@ -860,22 +897,6 @@ def update_departure(departure_id: int):
     # get all airline
     _, airline_list = oracle_db.select_airlines(order=True)
     form.linia_lotnicza.choices = [(airline.id, airline.nazwa) for airline in airline_list]
-
-    # get available runways list from session
-    runways_ids_list = session.get('available_runways', '')
-
-    # get timestamp from session
-    timestamp = session.get('flight_timestamp', '')
-
-    if not runways_ids_list or not timestamp:
-        flash("Błąd. Do aktualizacji odlotu użyj przeznaczonego do tego przycisku!", c.WARNING)
-        return redirect(url_for('flights.departures'))
-    else:
-        # load runways from database using ids from session
-        runways = oracle_db.select_runways_by_ids(runways_ids_list)
-        form.pas.choices = [(runway.id, runway.nazwa) for runway in runways]
-        # parse timestamp to datetime.datetime object
-        timestamp = datetime.datetime.strptime(timestamp, "%Y-%m-%d %H:%M")
 
     if form.validate_on_submit():
 
@@ -894,17 +915,26 @@ def update_departure(departure_id: int):
                                    models=models_list,
                                    class_list=class_list,
                                    timestamp_old=datetime.datetime.strftime(departure.data_odlotu, "%Y-%m-%d %H:%M"),
-                                   timestamp_new=datetime.datetime.strftime(timestamp, "%Y-%m-%d %H:%M"))
+                                   timestamp_new=datetime.datetime.strftime(timestamp, "%Y-%m-%d %H:%M"),
+                                   is_date_changed=is_date_changed)
 
-        # update departure
-        flash_message, flash_category, flash_type = oracle_db.update_departure(departure_id,
-                                                                               form.linia_lotnicza.data,
-                                                                               form.lotnisko.data,
-                                                                               form.model.data,
-                                                                               timestamp,
-                                                                               form.liczba_miejsc.data,
-                                                                               form.pas.data,
-                                                                               ticket_pools)
+        if is_date_changed:
+            # update departure
+            flash_message, flash_category, flash_type = oracle_db.update_departure_and_reservations(departure_id,
+                                                                                                    form.linia_lotnicza.data,
+                                                                                                    form.lotnisko.data,
+                                                                                                    form.model.data,
+                                                                                                    timestamp,
+                                                                                                    form.liczba_miejsc.data,
+                                                                                                    form.pas.data,
+                                                                                                    ticket_pools)
+        else:
+            flash_message, flash_category, flash_type = oracle_db.update_departure(departure_id,
+                                                                                   form.linia_lotnicza.data,
+                                                                                   form.lotnisko.data,
+                                                                                   form.model.data,
+                                                                                   form.liczba_miejsc.data,
+                                                                                   ticket_pools)
 
         flash(flash_message, flash_category)
         if flash_category == c.ERROR:
@@ -914,7 +944,8 @@ def update_departure(departure_id: int):
                                    models=models_list,
                                    class_list=class_list,
                                    timestamp_old=datetime.datetime.strftime(departure.data_odlotu, "%Y-%m-%d %H:%M"),
-                                   timestamp_new=datetime.datetime.strftime(timestamp, "%Y-%m-%d %H:%M"))
+                                   timestamp_new=datetime.datetime.strftime(timestamp, "%Y-%m-%d %H:%M"),
+                                   is_date_changed=is_date_changed)
         else:
             # if no error in updating the data - pop values from session and display departures table
             session.pop('available_runways')
@@ -941,7 +972,8 @@ def update_departure(departure_id: int):
                            models=models_list,
                            class_list=class_list,
                            timestamp_old=datetime.datetime.strftime(departure.data_odlotu, "%Y-%m-%d %H:%M"),
-                           timestamp_new=datetime.datetime.strftime(timestamp, "%Y-%m-%d %H:%M"))
+                           timestamp_new=datetime.datetime.strftime(timestamp, "%Y-%m-%d %H:%M"),
+                           is_date_changed=is_date_changed)
 
 
 @flights_bp.route('/departures/delete', methods=['POST'])

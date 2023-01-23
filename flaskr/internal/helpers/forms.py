@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, DateField, SelectField, IntegerField, DecimalField
-from wtforms.validators import DataRequired, ValidationError, Length, NumberRange
+from wtforms.validators import DataRequired, ValidationError, Length, NumberRange, InputRequired
 from flaskr.internal.helpers.constants import MAX_NUMBER_9, MAX_NUMBER_12_6, MAX_NUMBER_6
 
 
@@ -124,6 +124,16 @@ class ArrivalFormUpdate(ArrivalForm):
     submit = SubmitField("Edytuj przylot")
 
 
+class ArrivalFormUpdateWithoutRunway(FlaskForm):
+    lotnisko = SelectField("Wybierz lotnisko, z którego przyleci samolot", validators=[DataRequired()])
+    model = SelectField("Wybierz model samolotu, który obsługuje połączenie", validators=[DataRequired()])
+    linia_lotnicza = SelectField("Wybierz linię lotniczą, która obsługuje połączenie", validators=[DataRequired()])
+    liczba_pasazerow = IntegerField("Podaj liczbę pasażerów, którzy przylecą tym lotem",
+                                    validators=[DataRequired(),
+                                                NumberRange(min=0, max=MAX_NUMBER_9)])
+    submit = SubmitField("Edytuj przylot")
+
+
 # ------------------------------------------------------------------------------------------------------------------- #
 # FLIGHTS.ARRIVALS FORMS
 
@@ -133,12 +143,22 @@ class DepartureForm(FlaskForm):
     model = SelectField("Wybierz model samolotu, który obsługuje połączenie", validators=[DataRequired()])
     linia_lotnicza = SelectField("Wybierz linię lotniczą, która obsługuje połączenie", validators=[DataRequired()])
     liczba_miejsc = IntegerField("Podaj liczbę dostępnych miejsc dla tego lotu",
-                                 validators=[DataRequired(), NumberRange(min=0, max=MAX_NUMBER_9)])
+                                 validators=[NumberRange(min=0, max=MAX_NUMBER_9), InputRequired()])
     # pola z klasą dodawane dynamicznie #
     submit = SubmitField("Dodaj odlot")
 
 
 class DepartureFormUpdate(DepartureForm):
+    submit = SubmitField("Edytuj odlot")
+
+
+class DepartureFormUpdateWithoutRunway(FlaskForm):
+    lotnisko = SelectField("Wybierz lotnisko docelowe", validators=[DataRequired()])
+    model = SelectField("Wybierz model samolotu, który obsługuje połączenie", validators=[DataRequired()])
+    linia_lotnicza = SelectField("Wybierz linię lotniczą, która obsługuje połączenie", validators=[DataRequired()])
+    liczba_miejsc = IntegerField("Podaj liczbę dostępnych miejsc dla tego lotu",
+                                 validators=[NumberRange(min=0, max=MAX_NUMBER_9), InputRequired()])
+    # pola z klasą dodawane dynamicznie #
     submit = SubmitField("Edytuj odlot")
 
 

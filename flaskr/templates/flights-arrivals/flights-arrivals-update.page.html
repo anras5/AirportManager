@@ -5,7 +5,9 @@
         <div class="row">
             <div class="col table-header">
                 <h3>Przyloty - aktualizacja<br>Przylot z ID: {{ arrival.id }}</h3>
-                <p>Czas przylotu zmieniony z <b>{{ timestamp_old }}</b> na <b>{{ timestamp_new }}</b></p>
+                {% if is_date_changed %}
+                    <p>Czas przylotu zmieniony z <b>{{ timestamp_old }}</b> na <b>{{ timestamp_new }}</b></p>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -20,13 +22,18 @@
 {% block content %}
 
     <div class="container form">
-        <h5>Uwaga! Edytowanie przylotu spowoduje usunięcie wszystkich rezerwacji przypisanych do niego w tym momencie.</h5>
+        {% if is_date_changed %}
+            <h5>Uwaga! Edytowanie przylotu spowoduje usunięcie wszystkich rezerwacji przypisanych do niego w tym
+                momencie.</h5>
+        {% endif %}
         <form method="post" class="row g-3">
             {{ form.hidden_tag() }}
+            {% if is_date_changed %}
             <div class="col-lg-6">
                 {{ form.pas.label(class_='form-label') }}
                 {{ form.pas(class_='form-control') }}
             </div>
+            {% endif %}
             <div class="col-lg-6">
                 {{ form.linia_lotnicza.label(class_='form-label') }}
                 {{ form.linia_lotnicza(class_='form-control') }}
