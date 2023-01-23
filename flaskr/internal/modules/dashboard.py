@@ -33,6 +33,12 @@ def dashboard():
 def change():
     value = request.form.get('value')
     type = request.form.get('type')
+
+    min_value = oracle_db.select_min_price()
+    if type == '-' and min_value - int(value) < 0:
+        flash("Błąd - nie można ustawić ceny na ujemną", c.ERROR)
+        return redirect(url_for('dashboard.dashboard'))
+
     oracle_db.call_zmianaceny(value, type)
     flash("Pomyślna aktualizacja cen", c.SUCCESS)
     return redirect(url_for('dashboard.dashboard'))

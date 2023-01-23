@@ -1699,3 +1699,11 @@ class OracleDB:
         cr.callproc('ZmianaCeny', [value, plus_minus])
         connection.commit()
         cr.close()
+
+    def select_min_price(self) -> int:
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+        cr.execute("SELECT MIN(CENA) FROM KLASA")
+        data = cr.fetchone()[0]
+        cr.close()
+        return data
