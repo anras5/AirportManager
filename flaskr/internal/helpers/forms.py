@@ -173,13 +173,21 @@ class ClassFormUpdate(ClassForm):
 # TICKETS.PASSENGERS FORMS
 
 class PassengerForm(FlaskForm):
-    login = StringField("Podaj login", validators=[DataRequired()])
-    haslo = StringField("Podaj hasło", validators=[DataRequired()])
-    imie = StringField("Podaj imię", validators=[DataRequired()])
-    nazwisko = StringField("Podaj nazwisko", validators=[DataRequired()])
+    login = StringField("Podaj login",
+                        validators=[DataRequired(), Length(min=1, max=25, message="Podaj od 1 do 25 znaków")])
+    haslo = StringField("Podaj hasło",
+                        validators=[DataRequired(), Length(min=1, max=25, message="Podaj od 1 do 25 znaków")])
+    imie = StringField("Podaj imię",
+                       validators=[DataRequired(), Length(min=1, max=25, message="Podaj od 1 do 25 znaków")])
+    nazwisko = StringField("Podaj nazwisko",
+                           validators=[DataRequired(), Length(min=1, max=25, message="Podaj od 1 do 25 znaków")])
     pesel = StringField("Podaj pesel", validators=[DataRequired(), Length(min=11, max=11)])
     data_urodzenia = DateField("Podaj datę urodzin", format="%Y-%m-%d", validators=[DataRequired()])
     submit = SubmitField("Dodaj pasażera")
+
+
+class PassengerFormUpdate(PassengerForm):
+    submit = SubmitField("Edytuj pasażera")
 
 
 class TicketForm(FlaskForm):
