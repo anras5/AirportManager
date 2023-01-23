@@ -172,7 +172,6 @@ def update_passenger(passenger_id: int):
         else:
             return redirect(url_for("tickets.passengers"))
 
-    print(form.errors)
     for field, errors in form.errors.items():
         flash(errors[0], c.WARNING)
         break
