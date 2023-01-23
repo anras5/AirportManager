@@ -193,5 +193,5 @@ class PassengerFormUpdate(PassengerForm):
 class TicketForm(FlaskForm):
     czy_oplacony = IntegerField("Czy bilet został opłacony? Tak - 1, Nie - 0",
                                 validators=[DataRequired(), NumberRange(min=0, max=1)])
-    cena = IntegerField("Cena biletu", validators=[DataRequired(), NumberRange(min=0)])
+    cena = IntegerField("Cena biletu", validators=[DataRequired(), NumberRange(min=0, max=MAX_NUMBER_6)])
     submit = SubmitField("Zatwierdź edycję")
