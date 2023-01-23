@@ -859,6 +859,59 @@ class OracleDB:
         cr.close()
         return "Pomyślnie dodano nową rezerwację", c.SUCCESS, None
 
+    def update_reservation(self, reservation_id, flight_id, start_date, end_date) -> Tuple[str, str]:
+
+        is_covering = True
+
+        connection = self.pool.acquire()
+        cr = connection.cursor()
+
+        cr.execute("""SELECT count(*) 
+                        FROM (SELECT REZERWACJA_ID
+                                FROM REZERWACJA r
+                               WHERE r.REZERWACJA_ID != :rezerwacja_id AND (
+                        SELECT 
+                        CASE 
+                            WHEN :lot_id IN (SELECT LOT_ID FROM PRZYLOT) THEN (SELECT p.DATAPRZYLOTU FROM PRZYLOT p WHERE p.LOT_ID = :lot_id)
+                            ELSE (SELECT o.DATAODLOTU FROM ODLOT o WHERE o.LOT_ID = :lot_id)
+                        END AS DATA_LOTU
+                        FROM DUAL
+                        ) BETWEEN r.POCZATEK AND r.KONIEC AND r.LOT_ID = :lot_id) 
+                    """,
+                   lot_id=flight_id,
+                   rezerwacja_id=reservation_id)
+        data = cr.fetchone()[0]
+        if data == 0:
+            # check if the new start_date / end_date will cover the departure / arrival time
+            flight_datetime = self.select_flight_date(flight_id)
+            if not start_date <= flight_datetime <= end_date:
+                is_covering = False
+
+        if not is_covering:
+            return "Błąd - po zmianach nie będzie rezerwacji w trakcie terminu lotu", c.WARNING
+        else:
+            # check if the runway is free in this time
+            cr.execute("""SELECT COUNT(*)
+                            FROM REZERWACJA r2 
+                           WHERE r2.PAS_ID = (SELECT p.PAS_ID 
+                                                FROM PAS p INNER JOIN REZERWACJA r ON p.PAS_ID = r.PAS_ID 
+                                               WHERE r.REZERWACJA_ID = :rezerwacja_id)
+                             AND r2.POCZATEK < :ed AND r2.KONIEC > :sd AND r2.REZERWACJA_ID != :rezerwacja_id""",
+                       rezerwacja_id=reservation_id, sd=start_date, ed=end_date)
+            data = cr.fetchone()[0]
+            if data > 0:
+                return "Pas jest już zajęty w tym terminie", c.WARNING
+
+            # it is possible to change the start_date and end_date
+            cr.execute("""  UPDATE REZERWACJA 
+                               SET POCZATEK = :sd,
+                                     KONIEC = :ed
+                               WHERE REZERWACJA_ID = :r""",
+                       r=reservation_id, sd=start_date, ed=end_date)
+            connection.commit()
+            cr.close()
+            return "Pomyślna aktualizacja rezerwacji", c.SUCCESS
+
     def delete_reservation(self, reservation_id, flight_id) -> Tuple[str, str]:
         connection = self.pool.acquire()
         cr = connection.cursor()
@@ -875,7 +928,7 @@ class OracleDB:
                             ELSE (SELECT o.DATAODLOTU FROM ODLOT o WHERE o.LOT_ID = :lot_id)
                         END AS DATA_LOTU
                         FROM DUAL
-                        ) BETWEEN r.POCZATEK AND r.KONIEC) 
+                        ) BETWEEN r.POCZATEK AND r.KONIEC AND r.LOT_ID = :lot_id) 
                     """,
                    lot_id=flight_id,
                    rezerwacja_id=reservation_id)

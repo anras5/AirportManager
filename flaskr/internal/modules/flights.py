@@ -1080,6 +1080,27 @@ def flight_reservations_new(flight_id: int):
                            flight_id=flight_id)
 
 
+@flights_bp.route('/flights/<int:flight_id>/reservations/<int:reservation_id>/update', methods=['POST'])
+def flight_reservations_update(flight_id, reservation_id):
+    # get dates from parameter
+    parameters = request.form
+    date_range = parameters.get('dates', '')
+    if " to " in date_range:
+        sd, ed = date_range.split(" to ")
+        start_date = datetime.datetime.strptime(sd, "%Y-%m-%d %H:%M")
+        end_date = datetime.datetime.strptime(ed, "%Y-%m-%d %H:%M")
+
+        flash_message, flash_category = oracle_db.update_reservation(reservation_id,
+                                                                     flight_id,
+                                                                     start_date,
+                                                                     end_date)
+        flash(flash_message, flash_category)
+        return redirect(url_for('flights.flight_reservations', flight_id=flight_id))
+    else:
+        flash("Niepoprawny format daty", c.ERROR)
+        return redirect(url_for('flights.flight_reservations', flight_id=flight_id))
+
+
 @flights_bp.route('/flights/reservations/delete', methods=['POST'])
 def flight_reservations_delete():
     # get ids from parameters

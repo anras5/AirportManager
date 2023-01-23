@@ -27,9 +27,7 @@
     {% for header in headers %}
         <th>{{ header }}</th>
     {% endfor %}
-    {% if data|length > 1 %}
-        <th>Opcje</th>
-    {% endif %}
+    <th>Opcje</th>
 
 {% endblock %}
 
@@ -42,13 +40,16 @@
             <td>{{ reservation.poczatek }}</td>
             <td>{{ reservation.koniec }}</td>
             <td>{{ reservation.pas.nazwa }}</td>
-            {% if data|length > 1 %}
-                <td>
+            <td>
+                <button id="update{{ reservation.id }}" class="icon-edit-table">
+                    <i class="fa-solid fa-pen"></i>
+                </button>
+                {% if data|length > 1 %}
                     <button id="delete{{ reservation.id }}" class="icon-delete-table">
                         <i class="fa-solid fa-trash"></i>
                     </button>
-                </td>
-            {% endif %}
+                {% endif %}
+            </td>
         </tr>
     {% endfor %}
 
@@ -67,6 +68,10 @@
 
         {# BUTTONS IN DATATABLE - DELETING #}
         {% for reservation in data %}
+
+            $('#example tbody').on('click', '#update{{ reservation.id }}', function () {
+                updateReservationDates("{{ url_for('flights.flight_reservations_update', flight_id=flight_id, reservation_id=reservation.id) }}")
+            })
 
             $('#example tbody').on('click', '#delete{{ reservation.id }}', function () {
                 Swal.fire({
