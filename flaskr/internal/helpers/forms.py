@@ -92,12 +92,18 @@ class ModelsFormUpdate(ModelsForm):
 # RUNWAYS.RUNWAYS FORMS
 
 class RunwaysForm(FlaskForm):
-    nazwa = StringField("Podaj nazwę pasa startowego", validators=[DataRequired()])
+    nazwa = StringField("Podaj nazwę pasa startowego",
+                        validators=[DataRequired(),
+                                    Length(min=1, max=25, message="Podaj od 1 do 25 znaków")])
     dlugosc = DecimalField("Podaj długość pasa w metrach",
                            validators=[DataRequired(),
-                                       NumberRange(min=1)])
-    opis = StringField("Podaj dodatkowy opis pasa startowego")
+                                       NumberRange(min=1, max=MAX_NUMBER_6)])
+    opis = StringField("Podaj dodatkowy opis pasa startowego", validators=[Length(max=100)])
     submit = SubmitField("Dodaj pas")
+
+
+class RunwaysFormUpdate(RunwaysForm):
+    submit = SubmitField("Edytuj pas")
 
 
 # ------------------------------------------------------------------------------------------------------------------- #
