@@ -68,7 +68,7 @@ The app is fully supported on mobile devices.
 
 ### Map
 
-A cool feature of the Airport Manager is a map that visualize current flights.
+A cool feature of the Airport Manager is a map that visualizes current flights.
 
 ![map](screenshots/map.png)
 
