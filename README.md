@@ -70,9 +70,9 @@ The app is fully supported on mobile devices.
 
 A cool feature of the Airport Manager is a map that visualize current flights.
 
-![map](map.png)
+![map](screenshots/map.png)
 
-##Run
+## Run
 
 Before running the app for the first time, you have to take some additional steps:
 
@@ -148,6 +148,6 @@ HTML additions:
 2. Font Awesome
 
 
-##Contact
+## Contact
 
 anras1filip@gmail.com
