@@ -7,11 +7,10 @@ for airport management and organization.
 
 ## Table of contents
 
-1. [Installation](#Installation)
-2. [Description](#Description)
-3. [How to run the app](#How to run the app)
-4. [Technical information](#Technical information)
-5. [Contact](#Contact)
+1. [Description](#Description)
+2. [How to run the app](#Run)
+3. [Technical information](#Technical)
+4. [Contact](#Contact)
 
 ## Description
 
@@ -73,7 +72,7 @@ A cool feature of the Airport Manager is a map that visualize current flights.
 
 ![map](map.png)
 
-## How to run the app
+##Run
 
 Before running the app for the first time, you have to take some additional steps:
 
@@ -118,7 +117,7 @@ pip install -r requirements.txt
 If you want to run the app for the second, third, ... time, you can simply just run the `run.bat` file just like in the
 8th point.
 
-## Technical information
+## Technical
 
 ### Database - Oracle
 
